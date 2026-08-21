@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+*.env
+!.env.example
+
+# Node / Frontend
+node_modules/
+dist/
+build/
+.next/
+
+# Uploads / Media
+backend/uploads/*
+!backend/uploads/.gitkeep
+backend/app/uploads/*
+!backend/app/uploads/.gitkeep
