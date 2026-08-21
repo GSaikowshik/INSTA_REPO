@@ -1,0 +1,135 @@
+import React from 'react';
+
+const SignatureTemplate = ({ data = {} }) => {
+  const personal = data.personal_info || data.basics || {};
+  const expList = data.experience || data.work_experience || data.workExperience || data.technical_experience || data.experiences || [];
+  const eduList = data.education || [];
+  const projList = data.projects || [];
+  const certList = data.certifications || [];
+  const skillList = data.skills || [];
+
+  return (
+    <div className="w-[210mm] min-h-[297mm] bg-white text-black p-8 box-border mx-auto font-sans text-[10.5px] leading-snug break-words">
+      
+      {/* HEADER - Centered */}
+      <div className="text-center mb-5">
+        <h1 className="text-3xl font-extrabold uppercase tracking-wide mb-1">
+          {personal.full_name || personal.name || 'Your Name'}
+        </h1>
+        <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-[10.5px] font-medium">
+          {personal.email && <a href={`mailto:${personal.email}`} className="text-black hover:underline">{personal.email}</a>}
+          {personal.phone && <a href={`tel:${personal.phone.replace(/[^0-9+]/g, '')}`} className="text-black hover:underline">{personal.phone}</a>}
+          {personal.location && <span>{personal.location}</span>}
+          {personal.github_url && <a href={personal.github_url.startsWith('http') ? personal.github_url : `https://${personal.github_url}`} target="_blank" rel="noreferrer" className="text-black hover:underline">GitHub</a>}
+          {personal.linkedin_url && <a href={personal.linkedin_url.startsWith('http') ? personal.linkedin_url : `https://${personal.linkedin_url}`} target="_blank" rel="noreferrer" className="text-black hover:underline">LinkedIn</a>}
+        </div>
+      </div>
+
+      {/* WORK EXPERIENCE */}
+      {expList.length > 0 && (
+        <div className="mb-4">
+          <h2 className="text-[12px] font-bold uppercase mb-2 border-b-2 border-black pb-0.5">Work Experience</h2>
+          {expList.map((exp, i) => (
+            <div key={i} className="mb-3">
+              <div className="flex justify-between font-bold w-full">
+                <span className="text-[11px]">{exp.role || exp.position}</span>
+                <span>{exp.start_date || exp.startDate} - {exp.end_date || exp.endDate || 'Present'}</span>
+              </div>
+              <div className="font-semibold italic mb-1">{exp.company || exp.organization}</div>
+              <ul className="list-disc pl-5 space-y-0.5">
+                {exp.highlights?.map((h, j) => <li key={j}>{h}</li>)}
+                {exp.description && !exp.highlights && <li>{exp.description}</li>}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* EDUCATION */}
+      {eduList.length > 0 && (
+        <div className="mb-4">
+          <h2 className="text-[12px] font-bold uppercase mb-2 border-b-2 border-black pb-0.5">Education</h2>
+          {eduList.map((edu, i) => (
+            <div key={i} className="mb-2">
+              <div className="flex justify-between font-bold w-full">
+                <span>{edu.degree || edu.area}</span>
+                <span>{edu.start_date || edu.startDate} - {edu.end_date || edu.endDate || 'Present'}</span>
+              </div>
+              <div>{edu.institution || edu.school}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* KEY PROJECTS */}
+      {projList.length > 0 && (
+        <div className="mb-4">
+          <h2 className="text-[12px] font-bold uppercase mb-2 border-b-2 border-black pb-0.5">Key Projects</h2>
+          {projList.map((proj, i) => {
+            const pLink = proj.link || proj.url || proj.githubUrl || proj.github || proj.website || proj.repo_url || proj.live_url || proj.project_url;
+            const techList = proj.techStack || proj.technologies;
+            return (
+              <div key={i} className="mb-3">
+                <div className="flex justify-between font-bold w-full mb-0.5">
+                  <span className="text-[11px]">
+                    {pLink ? (
+                      <a href={pLink.startsWith('http') ? pLink : `https://${pLink}`} target="_blank" rel="noreferrer" className="text-black hover:underline">{proj.title || proj.name}</a>
+                    ) : (proj.title || proj.name)}
+                  </span>
+                  <span>{proj.date || proj.year || ''}</span>
+                </div>
+                <div className="mb-1">{proj.description}</div>
+                {techList && Array.isArray(techList) && (
+                  <div className="flex flex-wrap gap-1 mt-1.5">
+                    {techList.map((tech, j) => (
+                      <span key={j} className="px-1.5 py-0.5 bg-gray-100 text-gray-800 rounded-md text-[9px] font-bold border border-gray-200">{tech}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* CERTIFICATIONS */}
+      {certList.length > 0 && (
+        <div className="mb-4">
+          <h2 className="text-[12px] font-bold uppercase mb-2 border-b-2 border-black pb-0.5">Certifications</h2>
+          <ul className="grid grid-cols-2 gap-y-1 gap-x-4 list-none mt-0.5">
+            {certList.map((c, i) => {
+              const cLink = c.link || c.url || c.credentialUrl || c.credential_url;
+              return (
+                <li key={i} className="flex flex-col">
+                  <span className="font-bold">
+                    {cLink ? (
+                      <a href={cLink.startsWith('http') ? cLink : `https://${cLink}`} target="_blank" rel="noreferrer" className="text-black hover:underline">{c.name || c.title}</a>
+                    ) : (c.name || c.title)}
+                  </span>
+                  <span className="text-gray-700">{c.issuer}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
+      {/* TECHNICAL SKILLS */}
+      {skillList.length > 0 && (
+        <div>
+          <h2 className="text-[12px] font-bold uppercase mb-2 border-b-2 border-black pb-0.5">Technical Skills</h2>
+          <div className="space-y-0.5">
+            {skillList.map((skill, i) => (
+              <div key={i}>
+                <span className="font-bold">{skill.category || skill.name}: </span> 
+                <span>{Array.isArray(skill.items || skill.keywords) ? (skill.items || skill.keywords).join(', ') : (skill.items || skill.keywords)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default SignatureTemplate;
