@@ -38,23 +38,16 @@ const ResumePreview = ({ data }) => {
   const [latexCode, setLatexCode] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
 
-  const personal = data?.personal_info || {};
+  const personal = data?.personal_info || data?.basics || {};
+  const summaryText = personal.summary || data?.summary || '';
   const skills = data?.skills || [];
-  const experiences = data?.experiences || data?.experience || [];
+  const experiences = data?.experiences || data?.experience || data?.work || [];
   const projects = data?.projects || [];
   const education = data?.education || [];
   const certifications = data?.certifications || [];
   const achievements = data?.achievements || [];
   const leadership = data?.leadership || [];
-  const rawAdditional = data?.additional_info || data?.additionalInfo;
-
-  const additionalInfo = Array.isArray(rawAdditional)
-    ? rawAdditional
-    : typeof rawAdditional === 'object' && rawAdditional !== null
-    ? Object.entries(rawAdditional).map(([k, v]) => `${k}: ${v}`)
-    : typeof rawAdditional === 'string' && rawAdditional
-    ? [rawAdditional]
-    : [];
+  const additionalInfo = data?.additional_info || data?.additionalInfo || [];
 
   const baseFileName = personal.full_name || 'Resume';
 
@@ -202,14 +195,14 @@ const ResumePreview = ({ data }) => {
         </div>
       </div>
 
-      {/* PAPER RESUME SHEET CONTAINER WITH STRICT 10-POINT ARCHITECTURE */}
+      {/* PAPER RESUME SHEET CONTAINER WITH STRICT 10-POINT RESUME ARCHITECTURE */}
       <div className="flex justify-center overflow-x-auto p-1 bg-slate-900/40 rounded-2xl border border-slate-800">
         <div
           ref={resumeRef}
           className="resume-a4-preview resume-a4-container bg-white text-slate-900 shadow-2xl p-6 sm:p-7 text-[11px] font-sans leading-tight border border-slate-200"
         >
-          {/* 1. Header Section */}
-          <header className="border-b border-gray-300 pb-3 mb-3 text-center sm:text-left">
+          {/* SECTION 1: HEADER */}
+          <header className="border-b border-slate-900 pb-3 mb-3 text-center sm:text-left">
             <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 uppercase">
               {personal.full_name || 'Your Full Name'}
             </h1>
@@ -219,7 +212,6 @@ const ResumePreview = ({ data }) => {
               </p>
             )}
 
-            {/* Contact Info Pills */}
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-3 gap-y-1 mt-2 text-[10.5px] text-slate-600 font-medium">
               {personal.email && (
                 <a href={`mailto:${personal.email}`} className="flex items-center gap-1 text-slate-700 hover:text-indigo-600">
@@ -275,41 +267,55 @@ const ResumePreview = ({ data }) => {
             </div>
           </header>
 
-          {/* 2. Executive Summary */}
-          {personal.summary && (
-            <section className="mb-3 border-b border-gray-300 pb-2.5">
-              <h2 className="text-[10.5px] font-bold uppercase tracking-wider text-indigo-800 pb-0.5 mb-1 flex items-center gap-1">
+          {/* SECTION 2: EXECUTIVE SUMMARY */}
+          {summaryText && (
+            <section className="mb-3 pb-2 border-b border-gray-200">
+              <h2 className="text-[10.5px] font-bold uppercase tracking-wider text-indigo-800 border-b border-slate-200 pb-0.5 mb-1 flex items-center gap-1">
                 <User className="w-3 h-3" /> Executive Summary
               </h2>
-              <p className="text-slate-700 leading-snug text-[10.5px]">{personal.summary}</p>
+              <p className="text-slate-700 leading-snug text-[10.5px]">{summaryText}</p>
             </section>
           )}
 
-          {/* 3. Technical Skills */}
+          {/* SECTION 3: TECHNICAL SKILLS */}
           {skills.length > 0 && (
-            <section className="mb-3 border-b border-gray-300 pb-2.5">
-              <h2 className="text-[10.5px] font-bold uppercase tracking-wider text-indigo-800 pb-0.5 mb-1.5 flex items-center gap-1">
+            <section className="mb-3 pb-2 border-b border-gray-200">
+              <h2 className="text-[10.5px] font-bold uppercase tracking-wider text-indigo-800 border-b border-slate-200 pb-0.5 mb-1.5 flex items-center gap-1">
                 <Wrench className="w-3 h-3" /> Technical Skills
               </h2>
-              <div className="space-y-1">
-                {skills.map((sk, idx) => (
-                  <div key={idx} className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
-                    <span className="font-semibold text-[10.5px] text-slate-900 shrink-0 w-28">
-                      {sk.category || 'Skills'}:
-                    </span>
-                    <span className="text-[10.5px] text-slate-700">
-                      {Array.isArray(sk.items) ? sk.items.filter(Boolean).join(', ') : sk.items}
-                    </span>
-                  </div>
-                ))}
+              <div className="space-y-1.5">
+                {skills.map((sk, idx) => {
+                  const categoryName = sk.category || sk.name || 'Skills';
+                  const itemsList = Array.isArray(sk.items)
+                    ? sk.items.filter(Boolean)
+                    : (typeof sk.items === 'string' ? sk.items.split(/[\n,]/).map(s => s.trim()).filter(Boolean) : []);
+
+                  return (
+                    <div key={idx} className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2 text-[10.5px]">
+                      <span className="font-bold text-slate-900 shrink-0 sm:w-32">
+                        {categoryName}:
+                      </span>
+                      <div className="flex flex-wrap gap-1 items-center">
+                        {itemsList.map((skillToken, sIdx) => (
+                          <span
+                            key={sIdx}
+                            className="px-1.5 py-0.5 bg-slate-100 border border-slate-200 text-slate-800 rounded text-[9.5px] font-medium leading-none"
+                          >
+                            {skillToken}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </section>
           )}
 
-          {/* 4. Experience Section */}
+          {/* SECTION 4: WORK EXPERIENCE */}
           {experiences.length > 0 && (
-            <section className="mb-3 border-b border-gray-300 pb-2.5">
-              <h2 className="text-[10.5px] font-bold uppercase tracking-wider text-indigo-800 pb-0.5 mb-1.5 flex items-center gap-1">
+            <section className="mb-3 pb-2 border-b border-gray-200">
+              <h2 className="text-[10.5px] font-bold uppercase tracking-wider text-indigo-800 border-b border-slate-200 pb-0.5 mb-1.5 flex items-center gap-1">
                 <Briefcase className="w-3 h-3" /> Work Experience
               </h2>
               <div className="space-y-2">
@@ -346,10 +352,10 @@ const ResumePreview = ({ data }) => {
             </section>
           )}
 
-          {/* 5. Key Projects */}
+          {/* SECTION 5: KEY PROJECTS */}
           {projects.length > 0 && (
-            <section className="mb-3 border-b border-gray-300 pb-2.5">
-              <h2 className="text-[10.5px] font-bold uppercase tracking-wider text-indigo-800 pb-0.5 mb-1.5 flex items-center gap-1">
+            <section className="mb-3 pb-2 border-b border-gray-200">
+              <h2 className="text-[10.5px] font-bold uppercase tracking-wider text-indigo-800 border-b border-slate-200 pb-0.5 mb-1.5 flex items-center gap-1">
                 <Code2 className="w-3 h-3" /> Key Projects
               </h2>
               <div className="space-y-2">
@@ -370,9 +376,23 @@ const ResumePreview = ({ data }) => {
                         )}
                       </div>
                     </div>
-                    {proj.description && (
-                      <p className="text-[10.5px] text-slate-700 leading-snug mt-0.5">{proj.description}</p>
-                    )}
+                    {(() => {
+                      const bullets = Array.isArray(proj.highlights) && proj.highlights.length > 0
+                        ? proj.highlights
+                        : (Array.isArray(proj.bullet_points) && proj.bullet_points.length > 0
+                            ? proj.bullet_points
+                            : (proj.description ? (Array.isArray(proj.description) ? proj.description : [proj.description]) : []));
+
+                      if (bullets.length === 0) return null;
+
+                      return (
+                        <ul className="list-disc list-inside text-[10.5px] text-slate-700 leading-snug space-y-0.5 mt-0.5">
+                          {bullets.filter(Boolean).map((line, bIdx) => (
+                            <li key={bIdx}>{line}</li>
+                          ))}
+                        </ul>
+                      );
+                    })()}
                     {Array.isArray(proj.technologies) && proj.technologies.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-0.5">
                         {proj.technologies.map(
@@ -391,10 +411,10 @@ const ResumePreview = ({ data }) => {
             </section>
           )}
 
-          {/* 6. Education Section */}
+          {/* SECTION 6: EDUCATION */}
           {education.length > 0 && (
-            <section className="mb-3 border-b border-gray-300 pb-2.5">
-              <h2 className="text-[10.5px] font-bold uppercase tracking-wider text-indigo-800 pb-0.5 mb-1.5 flex items-center gap-1">
+            <section className="mb-3 pb-2 border-b border-gray-200">
+              <h2 className="text-[10.5px] font-bold uppercase tracking-wider text-indigo-800 border-b border-slate-200 pb-0.5 mb-1.5 flex items-center gap-1">
                 <GraduationCap className="w-3 h-3" /> Education
               </h2>
               <div className="space-y-1.5">
@@ -415,41 +435,59 @@ const ResumePreview = ({ data }) => {
             </section>
           )}
 
-          {/* 7. Certifications (High-Density List) */}
+          {/* SECTION 7: CERTIFICATIONS */}
           {certifications.length > 0 && (
-            <section className="mb-3 border-b border-gray-300 pb-2.5">
-              <h2 className="text-[10.5px] font-bold uppercase tracking-wider text-indigo-800 pb-0.5 mb-1.5 flex items-center gap-1">
+            <section className="mb-3 pb-2 border-b border-gray-200">
+              <h2 className="text-[10.5px] font-bold uppercase tracking-wider text-indigo-800 border-b border-slate-200 pb-0.5 mb-1.5 flex items-center gap-1">
                 <Award className="w-3 h-3" /> Certifications
               </h2>
-              <ul className="list-disc list-inside space-y-0.5 text-[10.5px] text-slate-700">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5">
                 {certifications.map((cert, idx) => {
                   const issueDate = cert.issue_date || cert.date || '';
-                  const name = cert.name || cert.title || 'Certification';
-                  const issuer = cert.issuer ? ` (${cert.issuer})` : '';
-                  const dateStr = issueDate ? ` — ${issueDate}` : '';
+                  const expDate = cert.expiration_date || '';
+                  const dateDisplay =
+                    issueDate && expDate ? `${issueDate} – ${expDate}` : issueDate || expDate;
 
                   return (
-                    <li key={idx} className="leading-tight">
-                      {cert.credential_url ? (
-                        <a href={cert.credential_url} target="_blank" rel="noopener noreferrer" className="font-bold text-slate-900 hover:text-indigo-600 hover:underline">
-                          {name}
-                        </a>
-                      ) : (
-                        <span className="font-bold text-slate-900">{name}</span>
+                    <div key={idx} className="flex items-start justify-between gap-1 leading-tight">
+                      <div className="min-w-0 flex-1">
+                        {cert.credential_url ? (
+                          <a
+                            href={cert.credential_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-bold text-slate-900 hover:text-indigo-600 hover:underline inline-flex items-center gap-0.5 text-[10.5px] truncate"
+                          >
+                            <span className="truncate">{cert.name || 'Certification Name'}</span>
+                            <ExternalLink className="w-2.5 h-2.5 text-indigo-600 shrink-0" />
+                          </a>
+                        ) : (
+                          <div className="font-bold text-slate-900 text-[10.5px] truncate">
+                            {cert.name || 'Certification Name'}
+                          </div>
+                        )}
+                        {cert.issuer && (
+                          <div className="text-[10px] text-indigo-700 font-medium truncate">
+                            {cert.issuer}
+                          </div>
+                        )}
+                      </div>
+                      {dateDisplay && (
+                        <div className="text-[9.5px] text-slate-500 font-medium shrink-0 pt-0.5">
+                          {dateDisplay}
+                        </div>
                       )}
-                      <span className="text-indigo-700 font-medium">{issuer}</span>
-                      <span className="text-slate-500 font-mono text-[10px]">{dateStr}</span>
-                    </li>
+                    </div>
                   );
                 })}
-              </ul>
+              </div>
             </section>
           )}
 
-          {/* 8. Achievements (High-Density List) */}
+          {/* SECTION 8: ACHIEVEMENTS */}
           {achievements.length > 0 && (
-            <section className="mb-3 border-b border-gray-300 pb-2.5">
-              <h2 className="text-[10.5px] font-bold uppercase tracking-wider text-indigo-800 pb-0.5 mb-1.5 flex items-center gap-1">
+            <section className="mb-3 pb-2 border-b border-gray-200">
+              <h2 className="text-[10.5px] font-bold uppercase tracking-wider text-indigo-800 border-b border-slate-200 pb-0.5 mb-1.5 flex items-center gap-1">
                 <Trophy className="w-3 h-3 text-amber-500" /> Honors & Key Achievements
               </h2>
               <ul className="list-disc list-inside space-y-0.5 text-[10.5px] text-slate-700">
@@ -457,9 +495,9 @@ const ResumePreview = ({ data }) => {
                   const title = typeof ach === 'string' ? ach : (ach.title || ach.name || '');
                   const desc = typeof ach === 'object' ? ach.description : '';
                   return (
-                    <li key={idx} className="leading-tight">
+                    <li key={idx}>
                       <span className="font-bold text-slate-900">{title}</span>
-                      {desc && <span className="text-slate-700"> — {desc}</span>}
+                      {desc && <span className="text-slate-700 font-medium"> — {desc}</span>}
                     </li>
                   );
                 })}
@@ -467,42 +505,59 @@ const ResumePreview = ({ data }) => {
             </section>
           )}
 
-          {/* 9. Leadership & Activities (High-Density List) */}
+          {/* SECTION 9: LEADERSHIP & ACTIVITIES */}
           {leadership.length > 0 && (
-            <section className="mb-3 border-b border-gray-300 pb-2.5">
-              <h2 className="text-[10.5px] font-bold uppercase tracking-wider text-indigo-800 pb-0.5 mb-1.5 flex items-center gap-1">
-                <Users className="w-3 h-3 text-indigo-600" /> Leadership & Activities
+            <section className="mb-3 pb-2 border-b border-gray-200">
+              <h2 className="text-[10.5px] font-bold uppercase tracking-wider text-indigo-800 border-b border-slate-200 pb-0.5 mb-1.5 flex items-center gap-1">
+                <Users className="w-3 h-3 text-blue-600" /> Leadership & Activities
               </h2>
-              <ul className="list-disc list-inside space-y-0.5 text-[10.5px] text-slate-700">
+              <div className="space-y-1.5">
                 {leadership.map((item, idx) => {
-                  const role = typeof item === 'string' ? item : (item.role || item.title || '');
-                  const org = typeof item === 'object' && item.organization ? ` at ${item.organization}` : '';
-                  const desc = typeof item === 'object' && item.description ? ` — ${Array.isArray(item.description) ? item.description.join(', ') : item.description}` : '';
+                  const role = item.role || item.title || 'Leader';
+                  const org = item.organization || item.company || '';
+                  const desc = item.description || '';
                   return (
-                    <li key={idx} className="leading-tight">
-                      <span className="font-bold text-slate-900">{role}</span>
-                      <span className="text-indigo-700 font-medium">{org}</span>
-                      {desc && <span className="text-slate-700">{desc}</span>}
-                    </li>
+                    <div key={idx} className="leading-snug">
+                      <div className="flex justify-between font-bold text-slate-900 text-[10.5px]">
+                        <span>{role} {org ? `— ${org}` : ''}</span>
+                      </div>
+                      {desc && <p className="text-[10px] text-slate-700">{desc}</p>}
+                    </div>
                   );
                 })}
-              </ul>
+              </div>
             </section>
           )}
 
-          {/* 10. Additional Information (High-Density List) */}
-          {additionalInfo.length > 0 && (
-            <section className="mb-1">
-              <h2 className="text-[10.5px] font-bold uppercase tracking-wider text-indigo-800 pb-0.5 mb-1.5 flex items-center gap-1">
-                <Info className="w-3 h-3 text-blue-600" /> Additional Information
+          {/* SECTION 10: ADDITIONAL INFORMATION */}
+          {((Array.isArray(additionalInfo) && additionalInfo.length > 0) || (typeof additionalInfo === 'object' && Object.keys(additionalInfo).length > 0)) && (
+            <section className="mb-2">
+              <h2 className="text-[10.5px] font-bold uppercase tracking-wider text-indigo-800 border-b border-slate-200 pb-0.5 mb-1.5 flex items-center gap-1">
+                <Info className="w-3 h-3 text-emerald-600" /> Additional Information
               </h2>
-              <ul className="list-disc list-inside space-y-0.5 text-[10.5px] text-slate-700">
-                {additionalInfo.map((info, idx) => (
-                  <li key={idx} className="leading-tight">
-                    <span>{info}</span>
-                  </li>
-                ))}
-              </ul>
+              {Array.isArray(additionalInfo) ? (
+                <ul className="list-disc list-inside space-y-0.5 text-[10.5px] text-slate-700">
+                  {additionalInfo.map((infoItem, idx) => {
+                    const cat = typeof infoItem === 'object' ? infoItem.category : '';
+                    const det = typeof infoItem === 'object' ? (infoItem.details || infoItem.description) : infoItem;
+                    return (
+                      <li key={idx}>
+                        {cat && <span className="font-bold text-slate-900">{cat}: </span>}
+                        <span>{det}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <div className="space-y-0.5 text-[10.5px] text-slate-700">
+                  {Object.entries(additionalInfo).map(([key, val], idx) => (
+                    <div key={idx}>
+                      <span className="font-bold text-slate-900">{key}: </span>
+                      <span>{Array.isArray(val) ? val.join(', ') : val}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </section>
           )}
 
@@ -514,6 +569,7 @@ const ResumePreview = ({ data }) => {
         isOpen={showLatexModal}
         onClose={() => setShowLatexModal(false)}
         latexCode={latexCode}
+        resumeName={baseFileName}
       />
     </div>
   );

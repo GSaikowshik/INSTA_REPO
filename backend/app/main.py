@@ -5,12 +5,19 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api.v1.router import api_router
 from app.core.config import settings
+from app.core.database import engine, Base
+import app.models
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     description="Insta Repo API - Centralized professional identity repository parsing resumes and generating portfolios, cover letters, and GitHub profiles."
 )
+
+@app.on_event("startup")
+async def on_startup():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
 # CORS Middleware setup
 app.add_middleware(

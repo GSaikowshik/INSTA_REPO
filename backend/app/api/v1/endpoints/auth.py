@@ -9,7 +9,7 @@ from app.core.database import get_db
 from app.core.security import create_access_token, hash_password, verify_password
 from app.models.profile import Profile, default_parsed_data
 from app.models.user import User
-from app.schemas.user import Token, UserCreate, UserResponse
+from app.schemas.user import Token, UserCreate, UserResponse, UserUpdateRequest
 
 router = APIRouter()
 
@@ -76,3 +76,53 @@ async def get_me(
 ) -> Any:
     """Fetch profile info of current logged-in user."""
     return current_user
+
+@router.put("/me", response_model=UserResponse)
+async def update_me(
+    user_in: UserUpdateRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+) -> Any:
+    """Update current logged-in user email/name and sync with profile JSONB."""
+    if user_in.email and user_in.email.lower() != current_user.email:
+        result = await db.execute(select(User).where(User.email == user_in.email.lower()))
+        if result.scalar_one_or_none():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A user with this email address already exists."
+            )
+        current_user.email = user_in.email.lower()
+
+    if user_in.name is not None and hasattr(current_user, "name"):
+        setattr(current_user, "name", user_in.name)
+
+    result = await db.execute(select(Profile).where(Profile.user_id == current_user.id))
+    user_profile = result.scalar_one_or_none()
+    if user_profile:
+        parsed = dict(user_profile.parsed_data or {})
+        personal = dict(parsed.get("personal_info") or {})
+        if user_in.name is not None:
+            personal["full_name"] = user_in.name
+        if user_in.email is not None:
+            personal["email"] = user_in.email.lower()
+        if user_in.title is not None:
+            personal["title"] = user_in.title
+        if user_in.bio is not None:
+            personal["summary"] = user_in.bio
+        if user_in.github_url is not None:
+            personal["github_url"] = user_in.github_url
+        if user_in.linkedin_url is not None:
+            personal["linkedin_url"] = user_in.linkedin_url
+        if user_in.website_url is not None:
+            personal["website_url"] = user_in.website_url
+        if user_in.photo_url is not None:
+            personal["photo_url"] = user_in.photo_url
+
+        parsed["personal_info"] = personal
+        user_profile.parsed_data = parsed
+
+    db.add(current_user)
+    await db.commit()
+    await db.refresh(current_user)
+    return current_user
+

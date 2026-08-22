@@ -9,6 +9,8 @@ from app.core.database import Base
 
 if TYPE_CHECKING:
     from app.models.profile import Profile
+    from app.models.resume import Resume
+    from app.models.portfolio import PortfolioModel
 
 class User(Base):
     __tablename__ = "users"
@@ -30,4 +32,14 @@ class User(Base):
     # 1-to-1 relationship with Profile
     profile: Mapped[Optional["Profile"]] = relationship(
         "Profile", back_populates="user", uselist=False, cascade="all, delete-orphan"
+    )
+
+    # 1-to-many relationship with Resume
+    resumes: Mapped[list["Resume"]] = relationship(
+        "Resume", back_populates="user", cascade="all, delete-orphan"
+    )
+
+    # 1-to-many relationship with PortfolioModel
+    portfolios: Mapped[list["PortfolioModel"]] = relationship(
+        "PortfolioModel", back_populates="user", cascade="all, delete-orphan"
     )

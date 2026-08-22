@@ -405,10 +405,10 @@ Write the full cover letter text now.
 
     if not letter_text:
         personal = resume_data.get("personal_info", {}) if isinstance(resume_data, dict) else {}
-        name = personal.get("full_name") or "Gandikota Sai Kowshik"
-        email = personal.get("email") or "dev.user@instarepo.local"
-        phone = personal.get("phone") or "+1 (555) 019-2834"
-        location = personal.get("location") or "San Francisco, CA"
+        name = personal.get("full_name") or (current_user.email.split("@")[0] if current_user.email else "Candidate")
+        email = personal.get("email") or current_user.email or ""
+        phone = personal.get("phone") or ""
+        location = personal.get("location") or ""
 
         skills_raw = resume_data.get("skills", []) if isinstance(resume_data, dict) else []
         user_skills = []
@@ -421,9 +421,9 @@ Write the full cover letter text now.
                     elif isinstance(items, str):
                         user_skills.append(items)
         
-        top_skills = ", ".join(user_skills[:5]) if user_skills else "React, Node.js, Python, FastAPI, TypeScript"
+        top_skills = ", ".join(user_skills[:5]) if user_skills else "Software Engineering"
         experiences = resume_data.get("experiences", []) if isinstance(resume_data, dict) else []
-        recent_role = f"{experiences[0].get('role', 'Software Engineer')} at {experiences[0].get('company', 'Tech Lead')}" if experiences and isinstance(experiences[0], dict) else "Senior Full Stack Engineer"
+        recent_role = f"{experiences[0].get('role', 'Software Engineer')} at {experiences[0].get('company', 'Company')}" if experiences and isinstance(experiences[0], dict) else "Software Engineer"
 
         from datetime import datetime
         today = datetime.now().strftime("%B %d, %Y")

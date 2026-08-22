@@ -207,6 +207,18 @@ async def save_portfolio_theme(
         "saved_theme": body.theme
     }
 
+@router.get("")
+@router.get("/")
+async def get_my_portfolio(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+) -> Any:
+    """
+    OBJECTIVE 2: Queries authenticated user's saved profile data from PostgreSQL
+    and returns full structured payload.
+    """
+    return await generate_dynamic_portfolio(body=None, current_user=current_user, db=db)
+
 @router.post("/generate")
 async def generate_dynamic_portfolio(
     body: Optional[PortfolioGenerateRequest] = None,
@@ -237,108 +249,24 @@ async def generate_dynamic_portfolio(
     theme_preset = get_random_theme()
 
     personal_info = resume_data.get("personal_info") or {
-        "full_name": "Gandikota Sai Kowshik",
-        "title": "Senior Software Engineer & AI System Architect",
-        "email": "dev.user@instarepo.local",
-        "phone": "+1 (555) 019-2834",
-        "location": "San Francisco, CA",
-        "summary": "Full Stack Architect specializing in high-throughput FastAPI systems, modern React UI applications, and autonomous LLM orchestration pipelines.",
-        "photo_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
-        "github_url": "https://github.com",
-        "linkedin_url": "https://linkedin.com",
-        "website_url": "https://instarepo.local"
+        "full_name": "",
+        "title": "",
+        "email": "",
+        "phone": "",
+        "location": "",
+        "summary": "",
+        "photo_url": "",
+        "github_url": "",
+        "linkedin_url": "",
+        "website_url": ""
     }
 
-    experiences = resume_data.get("experiences") or resume_data.get("experience") or [
-        {
-            "id": "exp-1",
-            "company": "Tech Lead Systems",
-            "role": "Senior Full Stack Engineer",
-            "start_date": "2023",
-            "end_date": "Present",
-            "is_current": True,
-            "description": "Led frontend & backend engineering teams building enterprise recruitment parsing systems and high-scale API integrations.",
-            "highlights": [
-                "Spearheaded core microservice architecture reducing API response latency by 42%.",
-                "Built dynamic React client rendering engines handling complex JSON schemas."
-            ]
-        },
-        {
-            "id": "exp-2",
-            "company": "Innovate AI Labs",
-            "role": "Full Stack Developer",
-            "start_date": "2021",
-            "end_date": "2023",
-            "is_current": False,
-            "description": "Architected computer vision model pipelines and interactive data analytics dashboards.",
-            "highlights": [
-                "Implemented automated model inference workers scaling across GPU clusters."
-            ]
-        }
-    ]
-
-    education = resume_data.get("education") or [
-        {
-            "id": "edu-1",
-            "institution": "California Institute of Technology",
-            "degree": "Bachelor of Science",
-            "field_of_study": "Computer Science & Artificial Intelligence",
-            "start_date": "2017",
-            "end_date": "2021",
-            "gpa": "3.9"
-        }
-    ]
-
-    skills = resume_data.get("skills") or [
-        {"category": "Frontend", "items": ["React", "TypeScript", "Tailwind CSS", "Next.js", "Vite"]},
-        {"category": "Backend", "items": ["FastAPI", "Python", "Node.js", "PostgreSQL", "Redis", "GraphQL"]},
-        {"category": "DevOps & Cloud", "items": ["Docker", "Kubernetes", "AWS", "CI/CD", "Git"]}
-    ]
-
-    projects = resume_data.get("projects") or [
-        {
-            "id": "proj-1",
-            "title": "DayZero AI",
-            "description": "Automated recruitment repository parser using dual-pass LLM extraction pipelines.",
-            "technologies": ["FastAPI", "React", "Supabase", "Python"],
-            "case_study": "Engineered DayZero AI, an automated recruitment repository parser. Implemented dual-pass LLM extraction pipelines reducing manual candidate screening overhead."
-        },
-        {
-            "id": "proj-2",
-            "title": "WasteVision",
-            "description": "Computer vision classification model for automated waste sorting.",
-            "technologies": ["CNN", "YOLO", "Python", "OpenCV"],
-            "case_study": "Architected WasteVision, a computer vision classification model achieving 94% accuracy for automated waste sorting and material identification."
-        }
-    ]
-
-    certifications = resume_data.get("certifications") or [
-        {
-            "id": "cert-1",
-            "name": "AWS Certified Solutions Architect – Associate",
-            "issuer": "Amazon Web Services (AWS)",
-            "issue_date": "2023"
-        },
-        {
-            "id": "cert-2",
-            "name": "Deep Learning Specialization",
-            "issuer": "Coursera / DeepLearning.AI",
-            "issue_date": "2022"
-        }
-    ]
-
-    achievements = resume_data.get("achievements") or [
-        {
-            "id": "ach-1",
-            "title": "First Place Winner - National AI Hackathon 2023",
-            "description": "Architected an autonomous repository parser handling 10,000+ code files in 48 hours."
-        },
-        {
-            "id": "ach-2",
-            "title": "Published Researcher - IEEE ICASSP",
-            "description": "Co-authored paper on distributed model inference optimization across multi-cloud GPU clusters."
-        }
-    ]
+    experiences = resume_data.get("experiences") or resume_data.get("experience") or []
+    education = resume_data.get("education") or []
+    skills = resume_data.get("skills") or []
+    projects = resume_data.get("projects") or []
+    certifications = resume_data.get("certifications") or []
+    achievements = resume_data.get("achievements") or []
 
     return {
         "theme": {

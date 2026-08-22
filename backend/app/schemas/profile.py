@@ -62,9 +62,11 @@ class LeadershipItemSchema(BaseModel):
     id: Optional[str] = None
     role: Optional[str] = ""
     organization: Optional[str] = ""
-    start_date: Optional[str] = ""
-    end_date: Optional[str] = ""
-    description: Optional[Union[str, list[str]]] = None
+    description: Optional[str] = ""
+
+class AdditionalInfoSchema(BaseModel):
+    category: Optional[str] = ""
+    details: Optional[str] = ""
 
 class ParsedDataSchema(BaseModel):
     personal_info: Optional[PersonalInfoSchema] = Field(default_factory=PersonalInfoSchema)
@@ -75,7 +77,7 @@ class ParsedDataSchema(BaseModel):
     certifications: Optional[list[CertificationItemSchema]] = Field(default_factory=list)
     achievements: Optional[list[Any]] = Field(default_factory=list)
     leadership: Optional[list[Any]] = Field(default_factory=list)
-    additional_info: Optional[Union[dict[str, Any], list[Any]]] = Field(default_factory=list)
+    additional_info: Optional[Union[list[Any], dict[str, Any]]] = Field(default_factory=list)
 
 class ProfileCreate(BaseModel):
     parsed_data: Optional[ParsedDataSchema] = None

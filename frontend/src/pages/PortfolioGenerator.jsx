@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Cropper from 'react-easy-crop';
 import api from '../api';
 import { themeMatrix } from '../utils/themeMatrix';
@@ -29,113 +30,7 @@ import {
   Camera
 } from 'lucide-react';
 
-const defaultMasterPayload = {
-  theme: {
-    layout: 'bento',
-    palette: 'slate',
-    fontFamily: 'sans',
-    heroStyle: 'split-avatar'
-  },
-  data: {
-    personal_info: {
-      full_name: 'Gandikota Sai Kowshik',
-      title: 'Senior Software Engineer & AI System Architect',
-      email: 'dev.user@instarepo.local',
-      phone: '+1 (555) 019-2834',
-      location: 'San Francisco, CA',
-      summary: 'Full Stack Architect specializing in high-throughput FastAPI systems, modern React UI applications, and autonomous LLM orchestration pipelines.',
-      photo_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-      github_url: 'https://github.com',
-      linkedin_url: 'https://linkedin.com',
-      website_url: 'https://instarepo.local'
-    },
-    experiences: [
-      {
-        id: 'exp-1',
-        company: 'Tech Lead Systems',
-        role: 'Senior Full Stack Engineer',
-        start_date: '2023',
-        end_date: 'Present',
-        is_current: true,
-        description: 'Led frontend & backend engineering teams building enterprise recruitment parsing systems.',
-        highlights: [
-          'Spearheaded core microservice architecture reducing API response latency by 42%.',
-          'Built dynamic React client rendering engines handling complex JSON schemas.'
-        ]
-      },
-      {
-        id: 'exp-2',
-        company: 'Innovate AI Labs',
-        role: 'Full Stack Developer',
-        start_date: '2021',
-        end_date: '2023',
-        is_current: false,
-        description: 'Architected computer vision model pipelines and interactive data analytics dashboards.',
-        highlights: [
-          'Implemented automated model inference workers scaling across GPU clusters.'
-        ]
-      }
-    ],
-    education: [
-      {
-        id: 'edu-1',
-        institution: 'California Institute of Technology',
-        degree: 'Bachelor of Science',
-        field_of_study: 'Computer Science & Artificial Intelligence',
-        start_date: '2017',
-        end_date: '2021',
-        gpa: '3.9'
-      }
-    ],
-    skills: [
-      { category: 'Frontend', items: ['React', 'TypeScript', 'Tailwind CSS', 'Next.js', 'Vite'] },
-      { category: 'Backend', items: ['FastAPI', 'Python', 'Node.js', 'PostgreSQL', 'Redis', 'GraphQL'] },
-      { category: 'DevOps & Cloud', items: ['Docker', 'Kubernetes', 'AWS', 'CI/CD', 'Git'] }
-    ],
-    projects: [
-      {
-        id: 'proj-1',
-        title: 'DayZero AI',
-        description: 'Automated recruitment repository parser using dual-pass LLM extraction pipelines.',
-        technologies: ['FastAPI', 'React', 'Supabase', 'Python'],
-        case_study: 'Engineered DayZero AI, an automated recruitment repository parser. Implemented dual-pass LLM extraction pipelines reducing manual candidate screening overhead.'
-      },
-      {
-        id: 'proj-2',
-        title: 'WasteVision',
-        description: 'Computer vision classification model for automated waste sorting.',
-        technologies: ['CNN', 'YOLO', 'Python', 'OpenCV'],
-        case_study: 'Architected WasteVision, a computer vision classification model achieving 94% accuracy for automated waste sorting and material identification.'
-      }
-    ],
-    certifications: [
-      {
-        id: 'cert-1',
-        name: 'AWS Certified Solutions Architect – Associate',
-        issuer: 'Amazon Web Services (AWS)',
-        issue_date: '2023'
-      },
-      {
-        id: 'cert-2',
-        name: 'Deep Learning Specialization',
-        issuer: 'Coursera / DeepLearning.AI',
-        issue_date: '2022'
-      }
-    ],
-    achievements: [
-      {
-        id: 'ach-1',
-        title: 'First Place Winner - National AI Hackathon 2023',
-        description: 'Architected an autonomous repository parser handling 10,000+ code files in 48 hours.'
-      },
-      {
-        id: 'ach-2',
-        title: 'Published Researcher - IEEE ICASSP',
-        description: 'Co-authored paper on distributed model inference optimization across multi-cloud GPU clusters.'
-      }
-    ]
-  }
-};
+
 
 /* --- DYNAMIC FRONTEND URL RESOLUTION UTILITY --- */
 const getFullImageUrl = (url) => {
@@ -190,18 +85,17 @@ const getCroppedImg = async (imageSrc, pixelCrop) => {
   });
 };
 
-/* --- OBJECTIVE 1: UPSCALED AVATAR IMAGE WITH HOVER DROPZONE & ERROR FALLBACK --- */
+const getInitials = (name) => {
+  if (!name) return "U"; // Fallback to "U" for Unknown/User
+  const parts = name.trim().split(" ").filter(Boolean);
+  if (parts.length === 0) return "U";
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+};
+
+/* --- UPSCALED AVATAR IMAGE WITH HOVER DROPZONE & ERROR FALLBACK --- */
 const AvatarImage = ({ src, name, sizeClass = "w-32 h-32 md:w-40 md:h-40 border-4 border-current/20 shadow-xl", onSelectFile }) => {
   const [hasError, setHasError] = useState(false);
-
-  const getInitials = (str) => {
-    if (!str) return 'GK';
-    const parts = str.trim().split(/\s+/);
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-    }
-    return str.slice(0, 2).toUpperCase();
-  };
 
   const initials = getInitials(name);
   const resolvedUrl = getFullImageUrl(src);
@@ -283,8 +177,8 @@ const AchievementsSection = ({ data }) => {
           <div key={ach.id || idx} className="flex items-start gap-2.5 text-xs">
             <span className="text-emerald-500 font-bold mt-0.5">•</span>
             <div className="space-y-0.5">
-              <h4 className="font-bold opacity-95">{ach.title}</h4>
-              <p className="opacity-75 leading-relaxed">{ach.description}</p>
+              <h4 className="font-bold opacity-95">{ach.title || (typeof ach === 'string' ? ach : '')}</h4>
+              {ach.description && <p className="opacity-75 leading-relaxed">{ach.description}</p>}
             </div>
           </div>
         ))}
@@ -295,12 +189,34 @@ const AchievementsSection = ({ data }) => {
 
 /* --- MASTER MAIN PORTFOLIO GENERATOR --- */
 const PortfolioGenerator = () => {
-  const [masterPayload, setMasterPayload] = useState(defaultMasterPayload);
+  const [searchParams] = useSearchParams();
+  const portfolioIdParam = searchParams.get('id');
+
+  const [masterPayload, setMasterPayload] = useState({
+    theme: {
+      layout: 'editorial',
+      palette: 'slate',
+      fontFamily: 'sans',
+      heroStyle: 'split-avatar'
+    },
+    data: {
+      personal_info: {},
+      experiences: [],
+      education: [],
+      skills: [],
+      projects: [],
+      certifications: [],
+      achievements: []
+    }
+  });
   const [selectedThemeId, setSelectedThemeId] = useState('tokyo-minimal');
+  const [portfolioTitle, setPortfolioTitle] = useState("Tokyo Minimalist Suite");
+  const [currentPortfolioId, setCurrentPortfolioId] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [savingTheme, setSavingTheme] = useState(false);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [isSaved, setIsSaved] = useState(false);
 
   const [imageSrc, setImageSrc] = useState(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -311,6 +227,58 @@ const PortfolioGenerator = () => {
 
   const fileInputRef = useRef(null);
   const currentTheme = themeMatrix.find(t => t.id === selectedThemeId) || themeMatrix[0];
+
+  /* OBJECTIVE 2: Connect Portfolio Generator to Live PostgreSQL Profile Data & Saved Portfolios */
+  useEffect(() => {
+    const fetchLivePortfolioData = async () => {
+      try {
+        if (portfolioIdParam) {
+          try {
+            const portRes = await api.get(`/portfolios/${portfolioIdParam}`);
+            if (portRes.data) {
+              setCurrentPortfolioId(portRes.data.id);
+              setPortfolioTitle(portRes.data.title || "Untitled Portfolio");
+              if (portRes.data.theme_config) {
+                const savedId = portRes.data.theme_config.themeId || portRes.data.theme_config.selectedThemeId || portRes.data.theme_config.theme?.id;
+                if (savedId && themeMatrix.some(t => t.id === savedId)) {
+                  setSelectedThemeId(savedId);
+                }
+              }
+              if (portRes.data.content && Object.keys(portRes.data.content).length > 0) {
+                setMasterPayload(prev => ({
+                  ...prev,
+                  data: portRes.data.content
+                }));
+                return;
+              }
+            }
+          } catch (e) {
+            console.warn("Could not load portfolio by ID, falling back to profile:", e);
+          }
+        }
+
+        const response = await api.get('/profile');
+        if (response.data && response.data.parsed_data) {
+          const parsed = response.data.parsed_data;
+          setMasterPayload((prev) => ({
+            ...prev,
+            data: {
+              personal_info: parsed.personal_info || {},
+              experiences: parsed.experiences || parsed.experience || [],
+              education: parsed.education || [],
+              skills: parsed.skills || [],
+              projects: parsed.projects || [],
+              certifications: parsed.certifications || [],
+              achievements: parsed.achievements || [],
+            }
+          }));
+        }
+      } catch (err) {
+        console.error('Error fetching live portfolio profile data:', err);
+      }
+    };
+    fetchLivePortfolioData();
+  }, [portfolioIdParam]);
 
   const onCropComplete = (croppedArea, croppedAreaPixels) => {
     setCroppedAreaPixels(croppedAreaPixels);
@@ -372,28 +340,18 @@ const PortfolioGenerator = () => {
     }
   };
 
-  const [isSaved, setIsSaved] = useState(false);
-
-  const fetchGeneratePortfolio = async () => {
+  const fetchGeneratePortfolio = () => {
     setIsGenerating(true);
     setMessage({ type: '', text: '' });
     try {
-      const response = await api.post('/portfolio/generate');
-      
-      if (response.data && response.data.theme) {
-        setMasterPayload(response.data);
-        const randomTheme = themeMatrix[Math.floor(Math.random() * themeMatrix.length)];
-        setSelectedThemeId(randomTheme.id);
-        setMessage({ 
-          type: 'success', 
-          text: `Selected Theme: "${randomTheme.name}" (${themeMatrix.length} Total Matrix Presets Available)` 
-        });
-      }
-    } catch (err) {
-      console.error('Error generating portfolio:', err);
       const randomTheme = themeMatrix[Math.floor(Math.random() * themeMatrix.length)];
       setSelectedThemeId(randomTheme.id);
-      setMessage({ type: 'success', text: `Switched to "${randomTheme.name}" theme matrix preset.` });
+      setMessage({ 
+        type: 'success', 
+        text: `Switched Vibe to "${randomTheme.name}" theme preset (${themeMatrix.length} Themes Available)` 
+      });
+    } catch (err) {
+      console.error('Error selecting random vibe theme:', err);
     } finally {
       setIsGenerating(false);
     }
@@ -401,26 +359,42 @@ const PortfolioGenerator = () => {
 
   const handleSaveTheme = async () => {
     setSavingTheme(true);
+    setMessage({ type: '', text: '' });
     try {
-      const response = await api.post('/portfolio/save-theme', {
+      // 1. Sync theme to profile
+      await api.post('/portfolio/save-theme', {
         theme: currentTheme
+      }).catch(() => null);
+
+      // 2. Save/Update record in /portfolios DB
+      const response = await api.post('/portfolios', {
+        id: currentPortfolioId || undefined,
+        title: portfolioTitle || "Untitled Portfolio",
+        theme_config: {
+          themeId: selectedThemeId,
+          theme: currentTheme
+        },
+        content: masterPayload.data
       });
-      if (response.data) {
+
+      if (response.data && response.data.id) {
+        setCurrentPortfolioId(response.data.id);
         setIsSaved(true);
+        setMessage({ type: 'success', text: `Portfolio "${portfolioTitle || 'Untitled Portfolio'}" saved successfully!` });
         setTimeout(() => {
           setIsSaved(false);
         }, 3000);
       }
     } catch (err) {
-      console.error('Error saving favorite theme:', err);
-      setMessage({ type: 'error', text: 'Failed to save favorite theme to database.' });
+      console.error('Error saving portfolio:', err);
+      setMessage({ type: 'error', text: 'Failed to save portfolio configuration.' });
     } finally {
       setSavingTheme(false);
     }
   };
 
   const handleExport = () => {
-    const data = masterPayload.data || defaultMasterPayload.data;
+    const data = masterPayload.data || {};
     const personal = data.personal_info || {};
     const experiences = data.experiences || [];
     const projects = data.projects || [];
@@ -430,8 +404,8 @@ const PortfolioGenerator = () => {
 
     const rawPhotoUrl = personal.photo_url || personal.photoUrl || '';
     const photoUrl = getFullImageUrl(rawPhotoUrl);
-    const name = personal.full_name || 'Gandikota Sai Kowshik';
-    const initials = name.trim().split(/\s+/).map(p => p[0]).join('').slice(0, 2).toUpperCase() || 'GK';
+    const name = personal.full_name || 'Developer';
+    const initials = name.trim().split(/\s+/).filter(Boolean).map(p => p[0]).join('').slice(0, 2).toUpperCase() || 'D';
 
     const avatarHtml = photoUrl ? `
       <img src="${photoUrl}" alt="${name}" class="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-current/20 shadow-xl shrink-0" onError="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
@@ -454,9 +428,9 @@ const PortfolioGenerator = () => {
     <!-- Hero Section -->
     <div class="py-12 sm:py-16 border-b border-current/15 flex flex-col sm:flex-row items-start justify-between gap-8">
       <div class="space-y-3 flex-1">
-        <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight">${name}</h1>
-        <p class="text-sm font-semibold uppercase tracking-widest opacity-80 mt-1">${personal.title || 'Senior Software Engineer'}</p>
-        <p class="text-xs opacity-85 leading-relaxed pt-3 max-w-2xl">${personal.summary || ''}</p>
+        ${name !== 'Developer' ? `<h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight">${name}</h1>` : ''}
+        ${personal.title ? `<p class="text-sm font-semibold uppercase tracking-widest opacity-80 mt-1">${personal.title}</p>` : ''}
+        ${personal.summary ? `<p class="text-xs opacity-85 leading-relaxed pt-3 max-w-2xl">${personal.summary}</p>` : ''}
         <div class="flex items-center gap-4 text-xs opacity-75 pt-2">
           ${personal.email ? `<span>${personal.email}</span>` : ''}
           ${personal.location ? `<span>• ${personal.location}</span>` : ''}
@@ -466,33 +440,38 @@ const PortfolioGenerator = () => {
     </div>
 
     <!-- Skills Matrix -->
+    ${skills && skills.length > 0 && skills.flatMap(s => (Array.isArray(s.items) ? s.items : (typeof s === 'string' ? [s] : []))).length > 0 ? `
     <div class="pb-8 border-b border-current/15 space-y-4">
       <h3 class="text-xs font-bold uppercase tracking-widest opacity-70">Core Technical Skills</h3>
       <div class="flex gap-2 flex-wrap">
-        ${skills.flatMap(s => (Array.isArray(s.items) ? s.items : [])).map(skill => `<span class="${currentTheme.accentChip}">${skill}</span>`).join('')}
+        ${skills.flatMap(s => (Array.isArray(s.items) ? s.items : (typeof s === 'string' ? [s] : []))).map(skill => `<span class="${currentTheme.accentChip}">${skill}</span>`).join('')}
       </div>
     </div>
+    ` : ''}
 
     <!-- Experience Timeline -->
-    ${experiences.length > 0 ? `
+    ${experiences && experiences.length > 0 ? `
     <div class="pb-8 border-b border-current/15 space-y-6">
       <h3 class="text-xs font-bold uppercase tracking-widest opacity-70">Professional Experience</h3>
       <div class="space-y-6">
-        ${experiences.map(exp => `
+        ${experiences.map(exp => {
+          const descStr = Array.isArray(exp.description) ? exp.description.join(' ') : (exp.description || '');
+          return `
           <div class="space-y-1.5 border-l-2 border-current/20 pl-4 ml-1">
             <div class="flex justify-between items-center text-xs font-bold">
               <span>${exp.role} — <span class="opacity-75">${exp.company}</span></span>
               <span class="text-[10px] opacity-60 font-mono">${exp.start_date} - ${exp.end_date || 'Present'}</span>
             </div>
-            <p class="text-xs opacity-80 leading-relaxed">${exp.description || ''}</p>
+            <p class="text-xs opacity-80 leading-relaxed">${descStr}</p>
           </div>
-        `).join('')}
+        `}).join('')}
       </div>
     </div>
     ` : ''}
 
     <!-- Projects Grid -->
-    <div class="space-y-6">
+    ${projects && projects.length > 0 ? `
+    <div class="space-y-6 pb-8 border-b border-current/15">
       <h3 class="text-xs font-bold uppercase tracking-widest opacity-70">Selected Engineering Case Studies</h3>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         ${projects.map(proj => `
@@ -508,9 +487,10 @@ const PortfolioGenerator = () => {
         `).join('')}
       </div>
     </div>
+    ` : ''}
 
     <!-- Certifications Section -->
-    ${certifications.length > 0 ? `
+    ${certifications && certifications.length > 0 ? `
     <div class="pb-8 border-b border-current/15 space-y-4">
       <h3 class="text-xs font-bold uppercase tracking-widest opacity-70">Certifications & Industry Credentials</h3>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -528,7 +508,7 @@ const PortfolioGenerator = () => {
     ` : ''}
 
     <!-- Achievements Section -->
-    ${achievements.length > 0 ? `
+    ${achievements && achievements.length > 0 ? `
     <div class="pb-8 border-b border-current/15 space-y-4">
       <h3 class="text-xs font-bold uppercase tracking-widest opacity-70">Key Honors & Notable Achievements</h3>
       <div class="space-y-3">
@@ -536,8 +516,8 @@ const PortfolioGenerator = () => {
           <div class="flex items-start gap-2.5 text-xs">
             <span class="text-emerald-500 font-bold font-mono mt-0.5">•</span>
             <div class="space-y-0.5">
-              <h4 class="font-bold opacity-95">${ach.title}</h4>
-              <p class="opacity-75 leading-relaxed">${ach.description || ''}</p>
+              <h4 class="font-bold opacity-95">${ach.title || (typeof ach === 'string' ? ach : '')}</h4>
+              ${ach.description ? `<p class="opacity-75 leading-relaxed">${ach.description}</p>` : ''}
             </div>
           </div>
         `).join('')}
@@ -562,7 +542,7 @@ const PortfolioGenerator = () => {
     setMessage({ type: 'success', text: `Exported My_Portfolio.html (${currentTheme.name}) successfully!` });
   };
 
-  const data = masterPayload.data || defaultMasterPayload.data;
+  const data = masterPayload.data || {};
   const personal = data.personal_info || {};
   const experiences = data.experiences || [];
   const projects = data.projects || [];
@@ -584,28 +564,65 @@ const PortfolioGenerator = () => {
         </button>
       )}
 
-      {/* Control Toolbar */}
+      {/* Control Panel (2-Row Flexbox Layout) */}
       {!isPreviewMode && (
-        <div className="bg-white border border-gray-200 rounded-md p-5 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <AvatarImage 
-              src={personal.photo_url} 
-              name={personal.full_name} 
-              sizeClass="w-12 h-12" 
-              onSelectFile={handleSelectFileToCrop}
-            />
-
-            <div>
-              <h2 className="text-slate-900 font-bold text-base flex items-center gap-2">
-                <span>Tailwind Theme Matrix</span>
-                <span className="bg-slate-100 text-slate-700 text-xs px-2 py-0.5 rounded border font-mono">
-                  {currentTheme.name} ({themeMatrix.length} Themes)
-                </span>
-              </h2>
-              <p className="text-slate-500 text-xs mt-0.5">
-                Click avatar or use crop modal to upload custom profile photo
-              </p>
+        <div className="flex flex-col gap-4 p-4 border border-zinc-200 bg-white rounded-lg shadow-sm">
+          
+          {/* Top Row (Identity & Naming) */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            
+            {/* Left side: Avatar + Title/Subtitle */}
+            <div className="flex items-center gap-3">
+              <AvatarImage 
+                src={personal.photo_url} 
+                name={personal.full_name} 
+                sizeClass="w-12 h-12" 
+                onSelectFile={handleSelectFileToCrop}
+              />
+              <div>
+                <h2 className="text-zinc-900 font-bold text-sm sm:text-base flex items-center gap-2">
+                  <span>Tailwind Theme Matrix</span>
+                  <span className="bg-zinc-100 text-zinc-700 text-xs px-2 py-0.5 rounded border border-zinc-200 font-mono font-medium">
+                    {currentTheme.name} ({themeMatrix.length} Themes)
+                  </span>
+                </h2>
+                <p className="text-zinc-500 text-xs mt-0.5">
+                  Click avatar or upload custom profile photo
+                </p>
+              </div>
             </div>
+
+            {/* Right side: Portfolio Title Input + Primary "Save Portfolio" Button */}
+            <div className="flex items-center gap-2 w-full md:w-auto">
+              <input
+                type="text"
+                value={portfolioTitle}
+                onChange={(e) => setPortfolioTitle(e.target.value)}
+                placeholder="e.g. Dark Mode Vercel Clone"
+                className="bg-zinc-50 border border-zinc-200 focus:bg-white focus:border-zinc-900 rounded-md px-3 h-10 text-xs font-semibold text-zinc-900 outline-none transition-colors flex-1 md:w-64"
+              />
+              <button
+                type="button"
+                onClick={handleSaveTheme}
+                disabled={savingTheme || isSaved}
+                className={`h-10 px-4 rounded-md text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors shrink-0 ${
+                  isSaved 
+                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-300' 
+                    : 'bg-zinc-900 hover:bg-zinc-800 text-white border border-zinc-900 disabled:opacity-50 shadow-sm'
+                }`}
+                title="Save portfolio configuration to database"
+              >
+                {savingTheme ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : isSaved ? (
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                ) : (
+                  <Bookmark className="w-3.5 h-3.5 text-zinc-300" />
+                )}
+                <span>{!isSaved ? "Save Portfolio" : "✓ Saved"}</span>
+              </button>
+            </div>
+
           </div>
 
           <input 
@@ -616,23 +633,16 @@ const PortfolioGenerator = () => {
             className="hidden" 
           />
 
-          <div className="flex items-center gap-2 flex-wrap">
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="bg-white hover:bg-slate-50 text-slate-700 border border-gray-200 px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
-            >
-              <Upload className="w-3.5 h-3.5 text-slate-500" />
-              <span>Avatar</span>
-            </button>
-
-            {/* 200+ Theme Matrix Selector Dropdown */}
+          {/* Bottom Row (Toolbar & Actions in Strict Order) */}
+          <div className="flex flex-wrap items-center gap-3 p-2 bg-zinc-50 rounded-md border border-zinc-200">
+            
+            {/* 1. Theme Dropdown (Select) */}
             <div className="flex items-center gap-1.5">
-              <Palette className="w-3.5 h-3.5 text-blue-700" />
+              <Palette className="w-4 h-4 text-zinc-600" />
               <select
                 value={selectedThemeId}
                 onChange={(e) => setSelectedThemeId(e.target.value)}
-                className="bg-white text-slate-900 text-xs rounded border border-gray-300 py-1.5 px-2.5 outline-none font-semibold cursor-pointer max-w-[200px]"
+                className="bg-white text-zinc-900 text-xs rounded-md border border-zinc-200 h-9 px-2.5 outline-none font-semibold cursor-pointer max-w-[200px]"
               >
                 {themeMatrix.map((t) => (
                   <option key={t.id} value={t.id}>🎨 {t.name}</option>
@@ -640,55 +650,49 @@ const PortfolioGenerator = () => {
               </select>
             </div>
 
-            <button
-              type="button"
-              onClick={handleSaveTheme}
-              disabled={savingTheme || isSaved}
-              className={`px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors duration-200 ${
-                isSaved 
-                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-300' 
-                  : 'bg-white hover:bg-slate-50 text-slate-900 border border-gray-300 disabled:opacity-50'
-              }`}
-              title="Save selected theme to PostgreSQL"
-            >
-              {savingTheme ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : isSaved ? (
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
-              ) : (
-                <Bookmark className="w-3.5 h-3.5 text-indigo-600" />
-              )}
-              <span>{!isSaved ? "Save Theme" : "✓ Saved"}</span>
-            </button>
-
+            {/* 2. "Random Vibe" button */}
             <button
               type="button"
               onClick={fetchGeneratePortfolio}
               disabled={isGenerating}
-              className="bg-white hover:bg-slate-50 text-slate-900 border border-gray-300 px-3.5 py-1.5 rounded text-xs font-semibold flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              className="bg-white hover:bg-zinc-100 text-zinc-900 border border-zinc-200 h-9 px-3.5 rounded-md text-xs font-medium flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition-colors"
             >
               {isGenerating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 text-amber-500" />}
               <span>Random Vibe</span>
             </button>
 
+            {/* 3. "Avatar" (Upload) button */}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="bg-white hover:bg-zinc-100 text-zinc-700 border border-zinc-200 h-9 px-3 rounded-md text-xs font-medium flex items-center gap-1.5 cursor-pointer transition-colors"
+            >
+              <Upload className="w-3.5 h-3.5 text-zinc-500" />
+              <span>Avatar</span>
+            </button>
+
+            {/* 4. "Preview" button */}
             <button
               type="button"
               onClick={() => setIsPreviewMode(true)}
-              className="bg-white hover:bg-slate-50 text-slate-900 border border-gray-300 px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+              className="bg-white hover:bg-zinc-100 text-zinc-900 border border-zinc-200 h-9 px-3.5 rounded-md text-xs font-medium flex items-center gap-1.5 cursor-pointer transition-colors"
             >
-              <Eye className="w-3.5 h-3.5 text-slate-600" />
+              <Eye className="w-3.5 h-3.5 text-zinc-600" />
               <span>Preview</span>
             </button>
 
+            {/* 5. "Export HTML" button (Distinct bg-zinc-900) */}
             <button
               type="button"
               onClick={handleExport}
-              className="bg-slate-900 hover:bg-slate-800 text-white border border-slate-900 px-3.5 py-1.5 rounded text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-sm"
+              className="bg-zinc-900 hover:bg-zinc-800 text-white border border-slate-900 h-9 px-3.5 rounded-md text-xs font-medium flex items-center gap-1.5 cursor-pointer shadow-sm ml-auto transition-colors"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Export HTML</span>
             </button>
+
           </div>
+
         </div>
       )}
 
@@ -783,12 +787,12 @@ const PortfolioGenerator = () => {
       <div className={`p-6 sm:p-12 transition-all duration-300 rounded-md min-h-[600px] ${currentTheme.appBackground} ${currentTheme.typography}`}>
         <div className="max-w-5xl mx-auto space-y-12">
           
-          {/* 1. Hero Section (OBJECTIVE 1: Upscaled Avatar & OBJECTIVE 2: Purged Debug Label) */}
+          {/* 1. Hero Section */}
           <div className="py-12 sm:py-16 border-b border-current/15 flex flex-col sm:flex-row items-start justify-between gap-8">
             <div className="space-y-3 flex-1">
-              <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight">{personal.full_name || 'Gandikota Sai Kowshik'}</h1>
-              <p className="text-sm font-semibold uppercase tracking-widest opacity-80 mt-1">{personal.title || 'Senior Software Engineer'}</p>
-              <p className="text-xs opacity-85 leading-relaxed pt-3 max-w-2xl">{personal.summary}</p>
+              {personal.full_name && <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight">{personal.full_name}</h1>}
+              {personal.title && <p className="text-sm font-semibold uppercase tracking-widest opacity-80 mt-1">{personal.title}</p>}
+              {personal.summary && <p className="text-xs opacity-85 leading-relaxed pt-3 max-w-2xl">{personal.summary}</p>}
               <div className="flex items-center gap-4 text-xs opacity-75 pt-2">
                 {personal.email && <span>{personal.email}</span>}
                 {personal.location && <span>• {personal.location}</span>}
@@ -803,22 +807,24 @@ const PortfolioGenerator = () => {
           </div>
 
           {/* 2. Skills Matrix */}
-          <div className="pb-8 border-b border-current/15 space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-widest opacity-70 flex items-center gap-1.5">
-              <Wrench className="w-3.5 h-3.5" />
-              <span>Core Skills & Technical Competencies</span>
-            </h3>
-            <div className="flex gap-2 flex-wrap">
-              {skills.flatMap((s) => (Array.isArray(s.items) ? s.items : [])).map((skill, i) => (
-                <span key={i} className={currentTheme.accentChip}>
-                  {skill}
-                </span>
-              ))}
+          {skills && skills.length > 0 && skills.flatMap((s) => (Array.isArray(s.items) ? s.items : (typeof s === 'string' ? [s] : []))).length > 0 && (
+            <div className="pb-8 border-b border-current/15 space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-widest opacity-70 flex items-center gap-1.5">
+                <Wrench className="w-3.5 h-3.5" />
+                <span>Core Skills & Technical Competencies</span>
+              </h3>
+              <div className="flex gap-2 flex-wrap">
+                {skills.flatMap((s) => (Array.isArray(s.items) ? s.items : (typeof s === 'string' ? [s] : []))).map((skill, i) => (
+                  <span key={i} className={currentTheme.accentChip}>
+                    {skill}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* 3. Work Experience */}
-          {experiences.length > 0 && (
+          {experiences && experiences.length > 0 && (
             <div className="pb-8 border-b border-current/15 space-y-6">
               <h3 className="text-xs font-bold uppercase tracking-widest opacity-70 flex items-center gap-1.5">
                 <Briefcase className="w-3.5 h-3.5" />
@@ -831,7 +837,9 @@ const PortfolioGenerator = () => {
                       <span>{exp.role} — <span className="opacity-75">{exp.company}</span></span>
                       <span className="text-[10px] opacity-60 font-mono">{exp.start_date} - {exp.end_date || 'Present'}</span>
                     </div>
-                    <p className="text-xs opacity-80 leading-relaxed">{exp.description}</p>
+                    <p className="text-xs opacity-80 leading-relaxed">
+                      {Array.isArray(exp.description) ? exp.description.join(' ') : exp.description}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -839,39 +847,41 @@ const PortfolioGenerator = () => {
           )}
 
           {/* 4. Projects Section */}
-          <div className="pb-8 border-b border-current/15 space-y-6">
-            <h3 className="text-xs font-bold uppercase tracking-widest opacity-70 flex items-center gap-1.5">
-              <Code className="w-3.5 h-3.5" />
-              <span>Selected Engineering Case Studies</span>
-            </h3>
+          {projects && projects.length > 0 && (
+            <div className="pb-8 border-b border-current/15 space-y-6">
+              <h3 className="text-xs font-bold uppercase tracking-widest opacity-70 flex items-center gap-1.5">
+                <Code className="w-3.5 h-3.5" />
+                <span>Selected Engineering Case Studies</span>
+              </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {projects.map((proj, idx) => (
-                <div key={idx} className={`${currentTheme.cardStyle} space-y-3 flex flex-col justify-between`}>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-bold text-sm">{proj.title}</h4>
-                      <ExternalLink className="w-3.5 h-3.5 opacity-50" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {projects.map((proj, idx) => (
+                  <div key={idx} className={`${currentTheme.cardStyle} space-y-3 flex flex-col justify-between`}>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-bold text-sm">{proj.title}</h4>
+                        <ExternalLink className="w-3.5 h-3.5 opacity-50" />
+                      </div>
+                      <div className="flex gap-1.5 flex-wrap">
+                        {(proj.technologies || proj.tech_stack || []).map((t, i) => (
+                          <span key={i} className={currentTheme.accentChip}>{t}</span>
+                        ))}
+                      </div>
+                      <p className="text-xs opacity-85 leading-relaxed">{proj.case_study || proj.description}</p>
                     </div>
-                    <div className="flex gap-1.5 flex-wrap">
-                      {(proj.technologies || proj.tech_stack || []).map((t, i) => (
-                        <span key={i} className={currentTheme.accentChip}>{t}</span>
-                      ))}
-                    </div>
-                    <p className="text-xs opacity-85 leading-relaxed">{proj.case_study || proj.description}</p>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* 5. Certifications Section */}
-          {certifications.length > 0 && (
+          {certifications && certifications.length > 0 && (
             <CertificationsSection data={certifications} />
           )}
 
           {/* 6. Achievements Section */}
-          {achievements.length > 0 && (
+          {achievements && achievements.length > 0 && (
             <AchievementsSection data={achievements} />
           )}
 

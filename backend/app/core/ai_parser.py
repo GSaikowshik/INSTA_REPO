@@ -30,12 +30,14 @@ def get_api_keys() -> list[str]:
 PROMPT_TEXT = """
 Parse this resume into a strict JSON object with the following keys:
 - 'personal_info' (dict with fields: full_name, title, email, phone, location, summary, github_url, linkedin_url, website_url)
-- 'experience' (array of dicts with unique string 'id' for each item, plus fields: company, role, start_date, end_date, is_current, description, highlights)
+- 'experience' (array of dicts with unique string 'id' for each item, plus fields: company, role, start_date, end_date, is_current, description (List[str]), highlights (List[str])))
 - 'education' (array of dicts with unique string 'id' for each item, plus fields: institution, degree, field_of_study, start_date, end_date, gpa)
-- 'skills' (array of strings, or array of category dicts like {"category": "Programming", "items": ["Python", "JavaScript"]})
-- 'projects' (array of dicts with unique string 'id' for each item, plus fields: title, description, technologies, repo_url, live_url)
+- 'skills' (array of category dicts like {"category": "Programming", "items": ["Python", "JavaScript"]})
+- 'projects' (array of dicts with unique string 'id' for each item, plus fields: title, description, highlights (List[str]), technologies, repo_url, live_url)
 - 'certifications' (array of dicts with unique string 'id' for each item, plus fields: name, issuer, issue_date, expiration_date, credential_url). IMPORTANT: Aggressively extract any professional credentials, training completions, or virtual internships even if they are under different headers. Explicitly look for and include items like Deep Learning competencies, Cloud certifications, and academy programs (e.g., SmartBridge, Hack2skill) in this array.
 - 'achievements' (array of strings representing awards, honors, or publications)
+
+IMPORTANT: For 'experience' and 'projects', strictly return bullet points as a List[str] of explicit strings in 'highlights'.
 
 Return ONLY raw JSON matching this structure.
 """
