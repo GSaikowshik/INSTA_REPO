@@ -21,16 +21,20 @@ async def startup_event():
         await conn.run_sync(Base.metadata.create_all)
 
 # CORS Middleware setup
-origins = [
+frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+
+raw_origins = [
+    frontend_url,
+    "https://instarepo.me",
+    "https://www.instarepo.me",
     "http://localhost:3000",
     "http://localhost:5173",
-    os.getenv("FRONTEND_URL", "") # Vercel production URL
 ]
-origins = [origin for origin in origins if origin]
+origins = list(set([o.rstrip("/") for o in raw_origins if o and o.strip()]))
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins if origins else ["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
