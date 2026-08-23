@@ -435,10 +435,10 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* 2-Column Split Screen Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start min-w-0">
-        {/* LEFT COLUMN: Upload Area & Modular Editor */}
-        <div className="space-y-5 min-w-0">
+      {/* 2-Column Split Screen Layout (Live Preview above Editor on Mobile) */}
+      <div className="flex flex-col lg:flex-row gap-6 items-start min-w-0">
+        {/* LEFT COLUMN: Upload Area & Modular Editor (Order 2 on mobile, Order 1 on LG) */}
+        <div className="space-y-5 min-w-0 w-full lg:w-1/2 order-2 lg:order-1">
           {/* Resume Upload Area */}
           <section className="bg-white rounded p-4 border border-gray-200 shadow-sm relative">
             <div className="flex flex-col gap-3">
@@ -463,11 +463,13 @@ const Dashboard = () => {
                   />
                   <label
                     htmlFor="resume-file-input"
-                    className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 border border-gray-200 hover:bg-gray-100 rounded cursor-pointer text-xs text-gray-700 transition-colors truncate"
+                    className="w-full flex items-center justify-between bg-gray-50 border border-gray-200 hover:border-gray-300 rounded px-3 py-1.5 text-xs text-gray-700 cursor-pointer transition-colors"
                   >
-                    <FileText className="w-3.5 h-3.5 text-gray-500 shrink-0" />
-                    <span className="truncate">
-                      {selectedFile ? selectedFile.name : 'Select PDF, Image or TXT...'}
+                    <span className="truncate max-w-[200px]">
+                      {selectedFile ? selectedFile.name : 'Choose PDF, JPEG, PNG, or TXT file...'}
+                    </span>
+                    <span className="bg-white border border-gray-200 rounded px-2 py-0.5 text-[10px] font-medium text-gray-600 shrink-0">
+                      Browse
                     </span>
                   </label>
                 </div>
@@ -475,7 +477,7 @@ const Dashboard = () => {
                 <button
                   type="submit"
                   disabled={uploading || !selectedFile}
-                  className="px-3.5 py-1.5 bg-gray-900 hover:bg-gray-800 text-white rounded text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm transition-colors cursor-pointer disabled:opacity-50"
+                  className="bg-blue-600 hover:bg-blue-700 text-white rounded px-4 py-1.5 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 cursor-pointer shadow-2xs shrink-0"
                 >
                   {uploading ? (
                     <>
@@ -495,7 +497,10 @@ const Dashboard = () => {
             {uploading && (
               <div className="mt-3 p-2 rounded bg-blue-50 border border-blue-200 flex items-center gap-2 animate-pulse">
                 <Loader2 className="w-4 h-4 text-blue-700 animate-spin shrink-0" />
-                <p className="text-[11px] font-medium text-blue-800">Gemini AI is parsing your resume...</p>
+                <p className="text-[11px] font-medium text-blue-800">
+                  <span className="hidden sm:inline">Gemini AI is parsing your resume...</span>
+                  <span className="sm:hidden">Parsing document...</span>
+                </p>
               </div>
             )}
           </section>
@@ -1254,8 +1259,8 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Real-Time Live Resume Preview */}
-        <div className="lg:sticky lg:top-16 space-y-2.5 min-w-0 min-h-0 w-full">
+        {/* RIGHT COLUMN: Real-Time Live Resume Preview (Order 1 on Mobile, Order 2 on LG) */}
+        <div className="lg:sticky lg:top-16 space-y-2.5 min-w-0 min-h-0 w-full lg:w-1/2 order-1 lg:order-2">
           <div className="flex items-center justify-between pb-2 border-b border-gray-200">
             <div className="flex items-center gap-2">
               <Eye className="w-4 h-4 text-blue-700" />
