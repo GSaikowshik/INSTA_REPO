@@ -580,18 +580,18 @@ const PortfolioGenerator = () => {
         <div className="flex flex-col gap-4 p-4 border border-zinc-200 bg-white rounded-lg shadow-sm">
           
           {/* Top Row (Identity & Naming) */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full max-w-full overflow-hidden">
             
             {/* Left side: Avatar + Title/Subtitle */}
             <div className="flex items-center gap-3">
               <AvatarImage 
                 src={personal.photo_url} 
                 name={personal.full_name} 
-                sizeClass="w-12 h-12" 
+                sizeClass="w-12 h-12 shrink-0" 
                 onSelectFile={handleSelectFileToCrop}
               />
-              <div>
-                <h2 className="text-zinc-900 font-bold text-sm sm:text-base flex items-center gap-2">
+              <div className="min-w-0">
+                <h2 className="text-zinc-900 font-bold text-sm sm:text-base flex flex-wrap items-center gap-2">
                   <span>Tailwind Theme Matrix</span>
                   <span className="bg-zinc-100 text-zinc-700 text-xs px-2 py-0.5 rounded border border-zinc-200 font-mono font-medium">
                     {currentTheme.name} ({themeMatrix.length} Themes)
@@ -604,19 +604,19 @@ const PortfolioGenerator = () => {
             </div>
 
             {/* Right side: Portfolio Title Input + Primary "Save Portfolio" Button */}
-            <div className="flex items-center gap-2 w-full md:w-auto">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full md:w-auto">
               <input
                 type="text"
                 value={portfolioTitle}
                 onChange={(e) => setPortfolioTitle(e.target.value)}
                 placeholder="e.g. Dark Mode Vercel Clone"
-                className="bg-zinc-50 border border-zinc-200 focus:bg-white focus:border-zinc-900 rounded-md px-3 h-10 text-xs font-semibold text-zinc-900 outline-none transition-colors flex-1 md:w-64"
+                className="bg-zinc-50 border border-zinc-200 focus:bg-white focus:border-zinc-900 rounded-md px-3 h-10 text-xs font-semibold text-zinc-900 outline-none transition-colors w-full md:w-64"
               />
               <button
                 type="button"
                 onClick={handleSaveTheme}
                 disabled={savingTheme || isSaved}
-                className={`h-10 px-4 rounded-md text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors shrink-0 ${
+                className={`h-10 px-4 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-colors w-full sm:w-auto shrink-0 ${
                   isSaved 
                     ? 'bg-emerald-50 text-emerald-800 border border-emerald-300' 
                     : 'bg-zinc-900 hover:bg-zinc-800 text-white border border-zinc-900 disabled:opacity-50 shadow-sm'
@@ -645,15 +645,15 @@ const PortfolioGenerator = () => {
           />
 
           {/* Bottom Row (Toolbar & Actions in Strict Order) */}
-          <div className="flex flex-wrap items-center gap-3 p-2 bg-zinc-50 rounded-md border border-zinc-200">
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 p-2.5 bg-zinc-50 rounded-md border border-zinc-200 w-full max-w-full overflow-hidden">
             
             {/* 1. Theme Dropdown (Select) */}
-            <div className="flex items-center gap-1.5">
-              <Palette className="w-4 h-4 text-zinc-600" />
+            <div className="flex items-center gap-1.5 w-full sm:w-auto">
+              <Palette className="w-4 h-4 text-zinc-600 shrink-0" />
               <select
                 value={selectedThemeId}
                 onChange={(e) => setSelectedThemeId(e.target.value)}
-                className="bg-white text-zinc-900 text-xs rounded-md border border-zinc-200 h-9 px-2.5 outline-none font-semibold cursor-pointer max-w-[200px]"
+                className="bg-white text-zinc-900 text-xs rounded-md border border-zinc-200 h-9 px-2.5 outline-none font-semibold cursor-pointer w-full sm:max-w-[200px]"
               >
                 {themeMatrix.map((t) => (
                   <option key={t.id} value={t.id}>🎨 {t.name}</option>
@@ -666,7 +666,7 @@ const PortfolioGenerator = () => {
               type="button"
               onClick={fetchGeneratePortfolio}
               disabled={isGenerating}
-              className="bg-white hover:bg-zinc-100 text-zinc-900 border border-zinc-200 h-9 px-3.5 rounded-md text-xs font-medium flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition-colors"
+              className="bg-white hover:bg-zinc-100 text-zinc-900 border border-zinc-200 h-9 px-3.5 rounded-md text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 transition-colors flex-1 sm:flex-initial"
             >
               {isGenerating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 text-amber-500" />}
               <span>Random Vibe</span>
@@ -676,7 +676,7 @@ const PortfolioGenerator = () => {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="bg-white hover:bg-zinc-100 text-zinc-700 border border-zinc-200 h-9 px-3 rounded-md text-xs font-medium flex items-center gap-1.5 cursor-pointer transition-colors"
+              className="bg-white hover:bg-zinc-100 text-zinc-700 border border-zinc-200 h-9 px-3 rounded-md text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors flex-1 sm:flex-initial"
             >
               <Upload className="w-3.5 h-3.5 text-zinc-500" />
               <span>Avatar</span>
@@ -686,7 +686,7 @@ const PortfolioGenerator = () => {
             <button
               type="button"
               onClick={() => setIsPreviewMode(true)}
-              className="bg-white hover:bg-zinc-100 text-zinc-900 border border-zinc-200 h-9 px-3.5 rounded-md text-xs font-medium flex items-center gap-1.5 cursor-pointer transition-colors"
+              className="bg-white hover:bg-zinc-100 text-zinc-900 border border-zinc-200 h-9 px-3.5 rounded-md text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors flex-1 sm:flex-initial"
             >
               <Eye className="w-3.5 h-3.5 text-zinc-600" />
               <span>Preview</span>
@@ -696,7 +696,7 @@ const PortfolioGenerator = () => {
             <button
               type="button"
               onClick={handleExport}
-              className="bg-zinc-900 hover:bg-zinc-800 text-white border border-slate-900 h-9 px-3.5 rounded-md text-xs font-medium flex items-center gap-1.5 cursor-pointer shadow-sm ml-auto transition-colors"
+              className="bg-zinc-900 hover:bg-zinc-800 text-white border border-slate-900 h-9 px-3.5 rounded-md text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer shadow-sm w-full sm:w-auto sm:ml-auto transition-colors"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Export HTML</span>
@@ -795,7 +795,7 @@ const PortfolioGenerator = () => {
       )}
 
       {/* DYNAMIC TAILWIND MATRIX RENDER SHELL */}
-      <div className="w-full max-w-full overflow-hidden border border-slate-200 rounded-lg relative min-h-0 min-w-0 shadow-sm bg-white">
+      <div className="w-full max-w-full overflow-hidden border border-slate-200 rounded-lg relative min-h-0 min-w-0 shadow-sm bg-white mt-6">
         <div className="w-full max-h-[60vh] lg:max-h-none overflow-y-auto overflow-x-auto p-1 sm:p-2">
           <div className={`p-4 sm:p-12 transition-all duration-300 rounded-md min-h-[500px] w-full max-w-full ${currentTheme.appBackground} ${currentTheme.typography}`}>
             <div className="max-w-5xl mx-auto space-y-12">
