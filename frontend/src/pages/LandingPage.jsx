@@ -327,12 +327,14 @@ const LandingPage = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-slate-200 py-6 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-xs sm:text-sm text-slate-500">
+      <footer className="w-full py-6 px-4 md:px-8 border-t border-slate-200 bg-white mt-auto">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs sm:text-sm text-slate-500">
+          
+          {/* Left/Top Section: Brand & Copyright */}
+          <div className="flex flex-col md:flex-row items-center gap-1 md:gap-2 text-center md:text-left">
             <span className="font-bold text-slate-900">InstaRepo</span>
-            <span className="hidden sm:inline text-slate-300">•</span>
-            <span>
+            <span className="hidden md:inline text-slate-300">•</span>
+            <span className="max-w-[280px] md:max-w-none text-balance">
               &copy; 2026 Developed by{" "}
               <a 
                 href="https://www.linkedin.com/in/gandikotasaikowshik/" 
@@ -346,11 +348,13 @@ const LandingPage = () => {
             </span>
           </div>
 
-          <div className="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm font-medium text-slate-500">
+          {/* Right/Bottom Section: Links */}
+          <div className="flex flex-wrap justify-center gap-4 md:gap-6 mt-2 md:mt-0 font-medium">
             <Link className="hover:text-slate-900 transition-colors" to="/privacy">Privacy Policy</Link>
             <Link className="hover:text-slate-900 transition-colors" to="/terms">Terms of Service</Link>
             <Link className="hover:text-slate-900 transition-colors" to="/dashboard/support">Support</Link>
           </div>
+
         </div>
       </footer>
 

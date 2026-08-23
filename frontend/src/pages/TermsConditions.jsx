@@ -94,24 +94,33 @@ const TermsConditions = () => {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-zinc-200 bg-white px-4 sm:px-8 py-5 text-xs text-zinc-500 font-normal">
-        <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <span>
-            &copy; 2026 Developed by{" "}
-            <a 
-              href="https://www.linkedin.com/in/gandikotasaikowshik/" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="text-blue-500 hover:text-blue-600 hover:underline font-medium transition-colors"
-            >
-              Gandikota Sai Kowshik
-            </a>
-            . All rights reserved.
-          </span>
-          <div className="flex items-center gap-5 text-zinc-500 font-medium">
-            <Link to="/privacy" className="hover:text-zinc-900 transition-colors">Privacy Policy</Link>
-            <Link to="/dashboard/support" className="hover:text-zinc-900 transition-colors">Support</Link>
+      <footer className="w-full py-6 px-4 md:px-8 border-t border-slate-200 bg-white mt-auto">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs sm:text-sm text-slate-500">
+          
+          {/* Left/Top Section: Brand & Copyright */}
+          <div className="flex flex-col md:flex-row items-center gap-1 md:gap-2 text-center md:text-left">
+            <span className="font-bold text-slate-900">InstaRepo</span>
+            <span className="hidden md:inline text-slate-300">•</span>
+            <span className="max-w-[280px] md:max-w-none text-balance">
+              &copy; 2026 Developed by{" "}
+              <a 
+                href="https://www.linkedin.com/in/gandikotasaikowshik/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-blue-500 hover:text-blue-600 hover:underline font-medium transition-colors"
+              >
+                Gandikota Sai Kowshik
+              </a>
+              . All rights reserved.
+            </span>
           </div>
+
+          {/* Right/Bottom Section: Links */}
+          <div className="flex flex-wrap justify-center gap-4 md:gap-6 mt-2 md:mt-0 font-medium">
+            <Link to="/privacy" className="hover:text-slate-900 transition-colors">Privacy Policy</Link>
+            <Link to="/dashboard/support" className="hover:text-slate-900 transition-colors">Support</Link>
+          </div>
+
         </div>
       </footer>
 
