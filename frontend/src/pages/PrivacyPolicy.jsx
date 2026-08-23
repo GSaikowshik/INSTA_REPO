@@ -101,7 +101,18 @@ const PrivacyPolicy = () => {
       {/* Footer */}
       <footer className="border-t border-zinc-200 bg-white px-4 sm:px-8 py-5 text-xs text-zinc-500 font-normal">
         <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <span>&copy; {new Date().getFullYear()} InstaRepo Inc. All rights reserved.</span>
+          <span>
+            &copy; 2026 Developed by{" "}
+            <a 
+              href="https://www.linkedin.com/in/gandikotasaikowshik/" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-blue-500 hover:text-blue-600 hover:underline font-medium transition-colors"
+            >
+              Gandikota Sai Kowshik
+            </a>
+            . All rights reserved.
+          </span>
           <div className="flex items-center gap-5 text-zinc-500 font-medium">
             <Link to="/terms" className="hover:text-zinc-900 transition-colors">Terms of Service</Link>
             <Link to="/dashboard/support" className="hover:text-zinc-900 transition-colors">Support</Link>

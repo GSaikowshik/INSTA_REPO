@@ -332,7 +332,18 @@ const LandingPage = () => {
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-xs sm:text-sm text-slate-500">
             <span className="font-bold text-slate-900">InstaRepo</span>
             <span className="hidden sm:inline text-slate-300">•</span>
-            <span>&copy; {new Date().getFullYear()} InstaRepo Inc. All rights reserved.</span>
+            <span>
+              &copy; 2026 Developed by{" "}
+              <a 
+                href="https://www.linkedin.com/in/gandikotasaikowshik/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-blue-500 hover:text-blue-600 hover:underline font-medium transition-colors"
+              >
+                Gandikota Sai Kowshik
+              </a>
+              . All rights reserved.
+            </span>
           </div>
 
           <div className="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm font-medium text-slate-500">
