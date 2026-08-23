@@ -27,8 +27,17 @@ class Settings(BaseSettings):
     @field_validator("DATABASE_URL", mode="before")
     @classmethod
     def assemble_db_connection(cls, v: Optional[str], info: ValidationInfo) -> str:
-        if isinstance(v, str) and v:
-            return v
+        env_db_url = os.getenv("DATABASE_URL")
+        db_url = (v if isinstance(v, str) and v.strip() else env_db_url)
+        
+        if isinstance(db_url, str) and db_url.strip():
+            url_str = db_url.strip()
+            if url_str.startswith("postgres://"):
+                url_str = url_str.replace("postgres://", "postgresql+asyncpg://", 1)
+            elif url_str.startswith("postgresql://"):
+                url_str = url_str.replace("postgresql://", "postgresql+asyncpg://", 1)
+            return url_str
+            
         data = info.data
         user = data.get("POSTGRES_USER", "postgres")
         password = data.get("POSTGRES_PASSWORD", "postgres")
