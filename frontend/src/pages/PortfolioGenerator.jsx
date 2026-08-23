@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useAuth } from '@clerk/clerk-react';
 import Cropper from 'react-easy-crop';
-import api from '../api';
+import api, { getAuthHeaders } from '../api';
+
 import { themeMatrix } from '../utils/themeMatrix';
 import { 
   Sparkles, 
@@ -35,12 +37,15 @@ import {
 /* --- DYNAMIC FRONTEND URL RESOLUTION UTILITY --- */
 const getFullImageUrl = (url) => {
   if (!url) return null;
-  // Bypass absolute URLs AND Base64 data strings
+  // Bypass absolute URLs AND Base64 data strings AND frontend public assets
   if (url.startsWith('http') || url.startsWith('data:image')) {
     return url;
   }
-  const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-  return `${backendUrl}${url.startsWith('/') ? url : '/' + url}`;
+  if (url.startsWith('/uploads') || url.startsWith('uploads')) {
+    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    return `${backendUrl}${url.startsWith('/') ? url : '/' + url}`;
+  }
+  return url;
 };
 
 /* --- CANVAS CROPPER EXTRACTION HELPER --- */
@@ -189,6 +194,7 @@ const AchievementsSection = ({ data }) => {
 
 /* --- MASTER MAIN PORTFOLIO GENERATOR --- */
 const PortfolioGenerator = () => {
+  const { getToken } = useAuth();
   const [searchParams] = useSearchParams();
   const portfolioIdParam = searchParams.get('id');
 
@@ -232,9 +238,11 @@ const PortfolioGenerator = () => {
   useEffect(() => {
     const fetchLivePortfolioData = async () => {
       try {
+        const headers = await getAuthHeaders(getToken);
+
         if (portfolioIdParam) {
           try {
-            const portRes = await api.get(`/portfolios/${portfolioIdParam}`);
+            const portRes = await api.get(`/portfolios/${portfolioIdParam}`, headers);
             if (portRes.data) {
               setCurrentPortfolioId(portRes.data.id);
               setPortfolioTitle(portRes.data.title || "Untitled Portfolio");
@@ -257,7 +265,7 @@ const PortfolioGenerator = () => {
           }
         }
 
-        const response = await api.get('/profile');
+        const response = await api.get('/profile', headers);
         if (response.data && response.data.parsed_data) {
           const parsed = response.data.parsed_data;
           setMasterPayload((prev) => ({
@@ -278,7 +286,7 @@ const PortfolioGenerator = () => {
       }
     };
     fetchLivePortfolioData();
-  }, [portfolioIdParam]);
+  }, [portfolioIdParam, getToken]);
 
   const onCropComplete = (croppedArea, croppedAreaPixels) => {
     setCroppedAreaPixels(croppedAreaPixels);
@@ -309,9 +317,11 @@ const PortfolioGenerator = () => {
       const formData = new FormData();
       formData.append('file', croppedBlob, 'avatar_cropped.jpg');
 
+      const authHeaders = await getAuthHeaders(getToken);
       const response = await api.post('/portfolio/upload-photo', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          ...(authHeaders.headers || {}),
         },
       });
 
@@ -361,10 +371,11 @@ const PortfolioGenerator = () => {
     setSavingTheme(true);
     setMessage({ type: '', text: '' });
     try {
+      const headers = await getAuthHeaders(getToken);
       // 1. Sync theme to profile
       await api.post('/portfolio/save-theme', {
         theme: currentTheme
-      }).catch(() => null);
+      }, headers).catch(() => null);
 
       // 2. Save/Update record in /portfolios DB
       const response = await api.post('/portfolios', {
@@ -375,7 +386,7 @@ const PortfolioGenerator = () => {
           theme: currentTheme
         },
         content: masterPayload.data
-      });
+      }, headers);
 
       if (response.data && response.data.id) {
         setCurrentPortfolioId(response.data.id);

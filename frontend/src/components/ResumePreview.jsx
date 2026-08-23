@@ -107,7 +107,70 @@ const ResumePreview = ({ data }) => {
     }
   };
 
+  const isEmptyData = !data || (
+    !personal.full_name &&
+    !personal.email &&
+    !experiences.length &&
+    !skills.length &&
+    !education.length &&
+    !projects.length
+  );
+
+  if (isEmptyData) {
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between bg-slate-900 border border-slate-800 p-2.5 rounded-2xl animate-pulse">
+          <div className="h-4 w-32 bg-slate-800 rounded"></div>
+          <div className="h-7 w-36 bg-slate-800 rounded-xl"></div>
+        </div>
+
+        <div className="flex justify-center overflow-x-auto p-1 bg-slate-900/40 rounded-2xl border border-slate-800">
+          <div className="resume-a4-preview resume-a4-container bg-white text-slate-900 shadow-2xl p-6 sm:p-7 border border-slate-200 w-full max-w-[794px] min-h-[900px] animate-pulse space-y-6">
+            <div className="border-b border-slate-200 pb-4 space-y-2">
+              <div className="h-7 bg-slate-200 rounded w-1/2"></div>
+              <div className="h-4 bg-indigo-100 rounded w-1/3"></div>
+              <div className="flex gap-4 pt-1">
+                <div className="h-3 bg-slate-200 rounded w-24"></div>
+                <div className="h-3 bg-slate-200 rounded w-28"></div>
+                <div className="h-3 bg-slate-200 rounded w-20"></div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="h-4 bg-slate-300 rounded w-1/4"></div>
+              <div className="h-3 bg-slate-100 rounded w-full"></div>
+              <div className="h-3 bg-slate-100 rounded w-5/6"></div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="h-4 bg-slate-300 rounded w-1/3"></div>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <div className="h-3.5 bg-slate-200 rounded w-1/3"></div>
+                  <div className="h-3 bg-slate-200 rounded w-20"></div>
+                </div>
+                <div className="h-3 bg-slate-100 rounded w-full"></div>
+                <div className="h-3 bg-slate-100 rounded w-4/5"></div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="h-4 bg-slate-300 rounded w-1/4"></div>
+              <div className="flex flex-wrap gap-2 pt-1">
+                <div className="h-6 w-16 bg-slate-200 rounded-full"></div>
+                <div className="h-6 w-20 bg-slate-200 rounded-full"></div>
+                <div className="h-6 w-24 bg-slate-200 rounded-full"></div>
+                <div className="h-6 w-14 bg-slate-200 rounded-full"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
+
     <div className="space-y-3">
       {/* EXPORT ACTION TOOLBAR */}
       <div className="flex items-center justify-between bg-slate-900 border border-slate-800 p-2.5 rounded-2xl relative z-20">

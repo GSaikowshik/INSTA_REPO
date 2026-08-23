@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: Optional[str] = None
     GEMINI_API_KEY_BACKUP: Optional[str] = None
     GROQ_API_KEY: Optional[str] = None
+    CLERK_WEBHOOK_SIGNING_SECRET: Optional[str] = None
+    CLERK_JWKS_URL: Optional[str] = "https://api.clerk.com/v1/jwks"
+
 
     @field_validator("DATABASE_URL", mode="before")
     @classmethod

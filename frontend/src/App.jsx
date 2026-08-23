@@ -26,17 +26,10 @@ function App() {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsConditions />} />
 
-        {/* Public Authentication Route */}
-        <Route 
-          path="/auth" 
-          element={
-            localStorage.getItem('token') ? (
-              <Navigate to="/dashboard" replace />
-            ) : (
-              <Auth />
-            )
-          } 
-        />
+        {/* Public Authentication Routes */}
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/login" element={<Auth />} />
+        <Route path="/signup" element={<Auth />} />
         
         {/* Protected Dashboard Workspace Layout */}
         <Route
@@ -61,6 +54,8 @@ function App() {
         <Route path="/profile" element={<Navigate to="/dashboard/profile" replace />} />
         <Route path="/settings" element={<Navigate to="/dashboard/settings" replace />} />
         <Route path="/support" element={<Navigate to="/dashboard/support" replace />} />
+        <Route path="/portfolio-generator" element={<Navigate to="/dashboard/portfolio" replace />} />
+        <Route path="/resume-builder" element={<Navigate to="/dashboard/resume" replace />} />
 
         {/* Catch-all fallback to Public Landing Page */}
         <Route path="*" element={<Navigate to="/" replace />} />

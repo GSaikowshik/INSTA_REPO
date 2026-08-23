@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import api from '../api';
+import { useAuth } from '@clerk/clerk-react';
+import api, { getAuthHeaders } from '../api';
 import { Sparkles, Copy, Download, Check, Loader2, FileText } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
 
 const CoverLetterWriter = () => {
+  const { getToken } = useAuth();
   const [profile, setProfile] = useState(null);
   const [companyName, setCompanyName] = useState('Acme Corporation');
   const [jobTitle, setJobTitle] = useState('Senior Full Stack Engineer');
@@ -19,7 +21,8 @@ const CoverLetterWriter = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await api.get('/profile');
+        const headers = await getAuthHeaders(getToken);
+        const response = await api.get('/profile', headers);
         if (response.data && response.data.parsed_data) {
           setProfile(response.data.parsed_data);
           generateLetterText(response.data.parsed_data, companyName, jobTitle, jobDescription);
@@ -32,7 +35,7 @@ const CoverLetterWriter = () => {
       }
     };
     fetchProfile();
-  }, []);
+  }, [getToken]);
 
   const generateLetterText = (profData, company, title, desc) => {
     const personal = profData?.personal_info || {};

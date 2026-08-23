@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
 import api from '../api';
 
 const getInitials = (name) => {
@@ -19,7 +20,8 @@ const sidebarItems = [
 
 const InstaRepoDashboardLayout = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const { user } = useUser();
+  const [dbUser, setDbUser] = useState(null);
   const [personalInfo, setPersonalInfo] = useState(null);
 
   useEffect(() => {
@@ -31,7 +33,7 @@ const InstaRepoDashboardLayout = () => {
         ]);
 
         if (meRes?.data) {
-          setUser(meRes.data);
+          setDbUser(meRes.data);
         }
         if (profileRes?.data?.parsed_data) {
           setPersonalInfo(profileRes.data.parsed_data.personal_info || {});
@@ -48,9 +50,9 @@ const InstaRepoDashboardLayout = () => {
     navigate('/');
   };
 
-  const displayName = personalInfo?.full_name || user?.name || user?.email?.split('@')[0] || "User";
+  const displayName = user?.fullName || personalInfo?.full_name || dbUser?.name || dbUser?.email?.split('@')[0] || "User";
   const userInitials = getInitials(displayName);
-  const userEmail = user?.email || personalInfo?.email || 'user@example.com';
+  const userEmail = user?.primaryEmailAddress?.emailAddress || dbUser?.email || personalInfo?.email || 'No Email';
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
@@ -154,8 +156,8 @@ const InstaRepoDashboardLayout = () => {
             >
               Support
             </NavLink>
-            <div className="px-3 pt-2 pb-1 text-xs font-medium text-slate-500 truncate w-full block font-mono" title={userEmail}>
-              {userEmail}
+            <div className="px-3 pt-2 pb-1 text-xs font-medium text-slate-500 truncate w-full block font-mono" title={user?.primaryEmailAddress?.emailAddress || 'No Email'}>
+              {user?.primaryEmailAddress?.emailAddress || 'No Email'}
             </div>
           </div>
         </aside>

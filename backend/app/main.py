@@ -20,9 +20,16 @@ async def on_startup():
         await conn.run_sync(Base.metadata.create_all)
 
 # CORS Middleware setup
+origins = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    os.getenv("FRONTEND_URL", "") # Vercel production URL
+]
+origins = [origin for origin in origins if origin]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust for production frontend origins
+    allow_origins=origins if origins else ["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import api from '../api';
+import { useAuth } from '@clerk/clerk-react';
+import api, { getAuthHeaders } from '../api';
 import ResumePreview from '../components/ResumePreview';
+
 import TemplateVision from '../components/TemplateVision';
 import {
   Upload,
@@ -49,6 +51,7 @@ const defaultParsedData = {
 };
 
 const Dashboard = () => {
+  const { getToken } = useAuth();
   const [profileData, setProfileData] = useState(defaultParsedData);
   const [resumeTitle, setResumeTitle] = useState("Software Engineer Resume 2026");
   const [currentResumeId, setCurrentResumeId] = useState(null);
@@ -66,9 +69,11 @@ const Dashboard = () => {
   const fetchProfile = async () => {
     setLoading(true);
     try {
+      const headers = await getAuthHeaders(getToken);
+
       if (resumeIdParam) {
         try {
-          const res = await api.get(`/resumes/${resumeIdParam}`);
+          const res = await api.get(`/resumes/${resumeIdParam}`, headers);
           if (res.data) {
             setCurrentResumeId(res.data.id);
             setResumeTitle(res.data.title || "Untitled Resume");
@@ -93,7 +98,7 @@ const Dashboard = () => {
         }
       }
 
-      const response = await api.get('/profile');
+      const response = await api.get('/profile', headers);
       if (response.data && response.data.parsed_data) {
         setProfileData({
           personal_info: response.data.parsed_data.personal_info || defaultParsedData.personal_info,
@@ -120,7 +125,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchProfile();
-  }, [resumeIdParam]);
+  }, [resumeIdParam, getToken]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -142,9 +147,11 @@ const Dashboard = () => {
     formData.append('file', selectedFile);
 
     try {
+      const authHeaders = await getAuthHeaders(getToken);
       const response = await api.post('/profile/upload-resume', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          ...(authHeaders.headers || {}),
         },
       });
 
@@ -200,18 +207,19 @@ const Dashboard = () => {
 
     try {
       const payloadData = cleanNullPayload(profileData);
+      const headers = await getAuthHeaders(getToken);
       
       // 1. Sync to central user profile
       await api.put('/profile', {
         parsed_data: payloadData,
-      }).catch(() => null);
+      }, headers).catch(() => null);
 
       // 2. Save/Update record in /resumes DB
       const resumeRes = await api.post('/resumes', {
         id: currentResumeId || undefined,
         title: resumeTitle || "Untitled Resume",
         content: payloadData,
-      });
+      }, headers);
 
       if (resumeRes.data && resumeRes.data.id) {
         setCurrentResumeId(resumeRes.data.id);

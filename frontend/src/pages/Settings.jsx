@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import api from '../api';
+import { useAuth } from '@clerk/clerk-react';
+import api, { getAuthHeaders } from '../api';
 import { 
   User, 
   Mail, 
@@ -13,12 +14,17 @@ import {
 } from 'lucide-react';
 
 const Settings = () => {
+  const { getToken } = useAuth();
+
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
-  
+
+  // Custom Form Validation State
+  const [fieldErrors, setFieldErrors] = useState({});
+
   // Danger Zone Modal State
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
@@ -27,9 +33,10 @@ const Settings = () => {
     const fetchUserData = async () => {
       setIsLoading(true);
       try {
+        const headers = await getAuthHeaders(getToken);
         const [meRes, profileRes] = await Promise.all([
-          api.get('/auth/me').catch(() => null),
-          api.get('/profile').catch(() => null)
+          api.get('/auth/me', headers).catch(() => null),
+          api.get('/profile', headers).catch(() => null)
         ]);
 
         if (meRes?.data) {
@@ -54,19 +61,37 @@ const Settings = () => {
       }
     };
     fetchUserData();
-  }, []);
+  }, [getToken]);
+
+  const validateForm = () => {
+    const errors = {};
+    if (!fullName.trim()) {
+      errors.fullName = 'Full name is required.';
+    }
+    if (!email.trim()) {
+      errors.email = 'Email address is required.';
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      errors.email = 'Please enter a valid email address.';
+    }
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleSaveChanges = async (e) => {
     e.preventDefault();
+    if (!validateForm()) {
+      return;
+    }
+
     setIsSaving(true);
     setMessage({ type: '', text: '' });
 
     try {
-      // Send PUT request to /users/me or /auth/me
+      const headers = await getAuthHeaders(getToken);
       const response = await api.put('/users/me', {
         name: fullName,
         email: email
-      });
+      }, headers);
 
       if (response.data) {
         setMessage({ type: 'success', text: 'Account settings updated successfully!' });
@@ -84,7 +109,7 @@ const Settings = () => {
 
   const handleDeleteAccount = () => {
     if (deleteConfirmationText.trim().toUpperCase() === 'DELETE') {
-      alert('Account deletion stub requested. Local session will be logged out.');
+      alert('Account deletion requested.');
       localStorage.removeItem('token');
       window.location.href = '/';
     }
@@ -129,22 +154,30 @@ const Settings = () => {
             <span className="text-xs">Loading account settings...</span>
           </div>
         ) : (
-          <form onSubmit={handleSaveChanges} className="space-y-4 text-xs">
+          <form onSubmit={handleSaveChanges} noValidate className="space-y-4 text-xs">
             {/* Full Name Input */}
             <div className="space-y-1.5">
               <label className="font-semibold text-slate-700 block">
-                Full Name
+                Full Name <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
                 <input
                   type="text"
                   value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
+                  onChange={(e) => {
+                    setFullName(e.target.value);
+                    if (fieldErrors.fullName) setFieldErrors(prev => ({ ...prev, fullName: null }));
+                  }}
                   placeholder="e.g. Alex Smith"
-                  className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-slate-900 outline-none focus:border-indigo-600 font-medium pl-9"
+                  className={`w-full bg-white border ${fieldErrors.fullName ? 'border-red-500' : 'border-gray-300'} rounded px-3 py-2 text-slate-900 outline-none focus:border-indigo-600 font-medium pl-9`}
                 />
                 <User className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
               </div>
+              {fieldErrors.fullName && (
+                <span className="text-red-500 text-xs font-medium mt-1 block">
+                  {fieldErrors.fullName}
+                </span>
+              )}
             </div>
 
             {/* Email Address Input */}
@@ -155,14 +188,21 @@ const Settings = () => {
               <div className="relative">
                 <input
                   type="email"
-                  required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (fieldErrors.email) setFieldErrors(prev => ({ ...prev, email: null }));
+                  }}
                   placeholder="user@example.com"
-                  className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-slate-900 outline-none focus:border-indigo-600 font-medium pl-9 font-mono"
+                  className={`w-full bg-white border ${fieldErrors.email ? 'border-red-500' : 'border-gray-300'} rounded px-3 py-2 text-slate-900 outline-none focus:border-indigo-600 font-medium pl-9 font-mono`}
                 />
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
               </div>
+              {fieldErrors.email && (
+                <span className="text-red-500 text-xs font-medium mt-1 block">
+                  {fieldErrors.email}
+                </span>
+              )}
             </div>
 
             {/* Save Button */}

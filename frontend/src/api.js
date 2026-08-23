@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_BASE_URL = BASE_URL.endsWith('/api/v1') ? BASE_URL : `${BASE_URL.replace(/\/+$/, '')}/api/v1`;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -9,30 +10,58 @@ const api = axios.create({
   },
 });
 
-// Request interceptor: Attach JWT token from localStorage if present
+/**
+ * Helper to construct request options including Clerk JWT Authorization header.
+ * @param {Function} getToken - Clerk's getToken function from useAuth()
+ * @returns {Promise<Object>} config object containing headers
+ */
+export const getAuthHeaders = async (getToken) => {
+  try {
+    if (typeof getToken === 'function') {
+      const token = await getToken();
+      if (token) {
+        return {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('Error retrieving Clerk auth token:', err);
+  }
+  
+  const localToken = localStorage.getItem('token');
+  if (localToken) {
+    return {
+      headers: {
+        Authorization: `Bearer ${localToken}`,
+      },
+    };
+  }
+  return {};
+};
+
+// Request interceptor: Fallback to localStorage token if Authorization header isn't explicitly set
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (!config.headers.Authorization) {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response interceptor: Handle global 401 Unauthorized errors
+// Response interceptor: Handle global 401 Unauthorized errors without forcing redirect
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('token');
-      // Redirect to login if unauthenticated on a protected endpoint
-      if (window.location.pathname !== '/') {
-        window.location.href = '/';
-      }
     }
     return Promise.reject(error);
   }

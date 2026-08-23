@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../api';
+import { useAuth } from '@clerk/clerk-react';
+import api, { getAuthHeaders } from '../api';
 import { BarChart3, Loader2, Check, X, ShieldAlert, Terminal, ArrowRight } from 'lucide-react';
+
 
 const getScoreStatus = (score) => {
   if (score === 0) {
@@ -84,6 +86,7 @@ const techDictionary = [
 ];
 
 const AtsScoreEvaluator = () => {
+  const { getToken } = useAuth();
   const [profile, setProfile] = useState(null);
   const [jobDescription, setJobDescription] = useState('');
   const [auditData, setAuditData] = useState(initialAuditData);
@@ -92,7 +95,8 @@ const AtsScoreEvaluator = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await api.get('/profile');
+        const headers = await getAuthHeaders(getToken);
+        const response = await api.get('/profile', headers);
         if (response.data && response.data.parsed_data) {
           setProfile(response.data.parsed_data);
         }
@@ -101,7 +105,7 @@ const AtsScoreEvaluator = () => {
       }
     };
     fetchProfile();
-  }, []);
+  }, [getToken]);
 
   const runAudit = (profData, jdText) => {
     // 1. Prevent running if text is empty

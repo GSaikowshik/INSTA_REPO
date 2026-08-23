@@ -3,9 +3,10 @@ import { Navigate } from 'react-router-dom';
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token');
+  const clerkToken = document.cookie.includes('__session') || Boolean(window.Clerk?.user);
 
-  if (!token) {
-    return <Navigate to="/" replace />;
+  if (!token && !clerkToken) {
+    return <Navigate to="/auth" replace />;
   }
 
   return children;

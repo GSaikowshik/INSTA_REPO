@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import api from '../api';
+import { useAuth, useUser } from '@clerk/clerk-react';
+import api, { getAuthHeaders } from '../api';
 import { 
   FileText, 
   Code2, 
@@ -22,8 +23,10 @@ import {
 
 const DashboardOverview = () => {
   const navigate = useNavigate();
+  const { getToken } = useAuth();
+  const { user } = useUser();
   const [profile, setProfile] = useState(null);
-  const [user, setUser] = useState(null);
+  const [dbUser, setDbUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [savedResumes, setSavedResumes] = useState([]);
   const [isLoadingResumes, setIsLoadingResumes] = useState(true);
@@ -36,15 +39,16 @@ const DashboardOverview = () => {
     setIsLoadingResumes(true);
     setIsLoadingPortfolios(true);
     try {
+      const headers = await getAuthHeaders(getToken);
       const [meRes, profileRes, resumesRes, portfoliosRes] = await Promise.all([
-        api.get('/auth/me').catch(() => null),
-        api.get('/profile').catch(() => null),
-        api.get('/resumes').catch(() => null),
-        api.get('/portfolios').catch(() => null),
+        api.get('/auth/me', headers).catch(() => null),
+        api.get('/profile', headers).catch(() => null),
+        api.get('/resumes', headers).catch(() => null),
+        api.get('/portfolios', headers).catch(() => null),
       ]);
 
       if (meRes?.data) {
-        setUser(meRes.data);
+        setDbUser(meRes.data);
       }
       if (profileRes?.data?.parsed_data) {
         setProfile(profileRes.data.parsed_data);
@@ -66,11 +70,12 @@ const DashboardOverview = () => {
 
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [getToken]);
 
   const handleDeleteResume = async (id) => {
     try {
-      await api.delete(`/resumes/${id}`);
+      const headers = await getAuthHeaders(getToken);
+      await api.delete(`/resumes/${id}`, headers);
       setSavedResumes((prev) => prev.filter((r) => r.id !== id));
     } catch (err) {
       console.error('Error deleting resume:', err);
@@ -80,7 +85,8 @@ const DashboardOverview = () => {
 
   const handleDeletePortfolio = async (id) => {
     try {
-      await api.delete(`/portfolios/${id}`);
+      const headers = await getAuthHeaders(getToken);
+      await api.delete(`/portfolios/${id}`, headers);
       setSavedPortfolios((prev) => prev.filter((p) => p.id !== id));
     } catch (err) {
       console.error('Error deleting portfolio:', err);
@@ -89,7 +95,7 @@ const DashboardOverview = () => {
   };
 
   const personal = profile?.personal_info || {};
-  const userName = user?.name || personal.full_name || 'Developer';
+  const userName = user?.firstName || dbUser?.name || personal.full_name || 'Developer';
 
   const expCount = profile?.experiences?.length || 0;
   const projCount = profile?.projects?.length || 0;
@@ -122,7 +128,7 @@ const DashboardOverview = () => {
       <div className="bg-white border border-slate-200 p-6 rounded-lg shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-            Welcome back, {userName}
+            Welcome back, {user?.firstName || 'Developer'}
           </h1>
           <p className="text-xs text-slate-600 mt-1 font-normal">
             Manage your career assets, AI resume profile, and developer tools from your central command center.

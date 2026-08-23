@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import api from '../api';
+import { useAuth, useUser } from '@clerk/clerk-react';
+import api, { getAuthHeaders } from '../api';
 import { 
   User as UserIcon, 
   Mail, 
@@ -22,6 +23,9 @@ const getInitials = (name) => {
 };
 
 const Profile = () => {
+  const { getToken } = useAuth();
+  const { user } = useUser();
+
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [title, setTitle] = useState('');
@@ -30,36 +34,52 @@ const Profile = () => {
   const [linkedinUrl, setLinkedinUrl] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [photoUrl, setPhotoUrl] = useState('');
+  const [imgError, setImgError] = useState(false);
   
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [fieldErrors, setFieldErrors] = useState({});
 
   useEffect(() => {
     const fetchProfileData = async () => {
       setIsLoading(true);
       try {
+        const headers = await getAuthHeaders(getToken);
         const [meRes, profileRes] = await Promise.all([
-          api.get('/auth/me').catch(() => null),
-          api.get('/profile').catch(() => null)
+          api.get('/auth/me', headers).catch(() => null),
+          api.get('/profile', headers).catch(() => null)
         ]);
 
+        let dbName = '';
+        let dbEmail = '';
+        let dbPhoto = '';
+
         if (meRes?.data) {
-          if (meRes.data.email) setEmail(meRes.data.email);
-          if (meRes.data.name) setFullName(meRes.data.name);
+          if (meRes.data.email) dbEmail = meRes.data.email;
+          if (meRes.data.name) dbName = meRes.data.name;
         }
 
         if (profileRes?.data?.parsed_data?.personal_info) {
           const personal = profileRes.data.parsed_data.personal_info;
-          if (personal.full_name && !fullName) setFullName(personal.full_name);
-          if (personal.email && !email) setEmail(personal.email);
+          if (personal.full_name) dbName = personal.full_name;
+          if (personal.email) dbEmail = personal.email;
           if (personal.title) setTitle(personal.title);
           if (personal.summary) setBio(personal.summary);
           if (personal.github_url) setGithubUrl(personal.github_url);
           if (personal.linkedin_url) setLinkedinUrl(personal.linkedin_url);
           if (personal.website_url) setWebsiteUrl(personal.website_url);
-          if (personal.photo_url) setPhotoUrl(personal.photo_url);
+          if (personal.photo_url) dbPhoto = personal.photo_url;
         }
+
+        // Set default values using Clerk data if the database profile doesn't exist yet
+        const defaultName = dbName || user?.fullName || (user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : '');
+        const defaultEmail = dbEmail || user?.primaryEmailAddress?.emailAddress || '';
+        const defaultPhoto = dbPhoto || user?.imageUrl || '';
+
+        setFullName(defaultName);
+        setEmail(defaultEmail);
+        setPhotoUrl(defaultPhoto);
       } catch (err) {
         console.error('Error fetching profile management data:', err);
       } finally {
@@ -67,7 +87,16 @@ const Profile = () => {
       }
     };
     fetchProfileData();
-  }, []);
+  }, [getToken, user]);
+
+  const validateForm = () => {
+    const errors = {};
+    if (!fullName.trim()) {
+      errors.fullName = 'Full name is required.';
+    }
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handlePhotoUpload = (e) => {
     const file = e.target.files?.[0];
@@ -78,6 +107,7 @@ const Profile = () => {
       }
       const reader = new FileReader();
       reader.onloadend = () => {
+        setImgError(false);
         setPhotoUrl(reader.result);
       };
       reader.readAsDataURL(file);
@@ -85,11 +115,15 @@ const Profile = () => {
   };
 
   const handleSaveProfile = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    if (!validateForm()) return;
+
     setIsSaving(true);
     setMessage({ type: '', text: '' });
 
     try {
+      const headers = await getAuthHeaders(getToken);
+
       // 1. Send PUT to /users/me
       await api.put('/users/me', {
         name: fullName,
@@ -100,10 +134,10 @@ const Profile = () => {
         linkedin_url: linkedinUrl,
         website_url: websiteUrl,
         photo_url: photoUrl
-      });
+      }, headers);
 
       // 2. Also fetch existing profile structure & sync to /profile
-      const profileRes = await api.get('/profile').catch(() => null);
+      const profileRes = await api.get('/profile', headers).catch(() => null);
       if (profileRes?.data?.parsed_data) {
         const existingData = profileRes.data.parsed_data;
         const updatedParsedData = {
@@ -121,7 +155,7 @@ const Profile = () => {
           }
         };
 
-        await api.put('/profile', { parsed_data: updatedParsedData });
+        await api.put('/profile', { parsed_data: updatedParsedData }, headers);
       }
 
       setMessage({ type: 'success', text: 'Profile database updated successfully!' });
@@ -189,15 +223,16 @@ const Profile = () => {
           <span className="text-xs font-medium">Loading profile management hub...</span>
         </div>
       ) : (
-        <form onSubmit={handleSaveProfile} className="space-y-6 text-xs">
+        <form onSubmit={handleSaveProfile} noValidate className="space-y-6 text-xs">
           
           {/* Avatar Section */}
           <div className="bg-white border border-zinc-200 rounded-lg p-6 shadow-sm flex flex-col sm:flex-row items-center gap-6">
             <div className="relative group shrink-0">
-              {photoUrl ? (
+              {(photoUrl || user?.imageUrl) && !imgError ? (
                 <img 
-                  src={photoUrl} 
-                  alt={fullName || 'Avatar'} 
+                  src={photoUrl || user?.imageUrl} 
+                  alt={fullName || user?.fullName || 'Avatar'} 
+                  onError={() => setImgError(true)}
                   className="w-20 h-20 rounded-full object-cover border-2 border-zinc-200 shadow-sm"
                 />
               ) : (
@@ -262,12 +297,19 @@ const Profile = () => {
                 </label>
                 <input
                   type="text"
-                  required
                   value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
+                  onChange={(e) => {
+                    setFullName(e.target.value);
+                    if (fieldErrors.fullName) setFieldErrors(prev => ({ ...prev, fullName: null }));
+                  }}
                   placeholder="e.g. Alex Smith"
-                  className="w-full bg-white border border-zinc-300 rounded-md px-3 py-2 text-zinc-900 outline-none focus:border-zinc-900 font-medium text-xs"
+                  className={`w-full bg-white border ${fieldErrors.fullName ? 'border-red-500' : 'border-zinc-300'} rounded-md px-3 py-2 text-zinc-900 outline-none focus:border-zinc-900 font-medium text-xs`}
                 />
+                {fieldErrors.fullName && (
+                  <span className="text-red-500 text-xs font-medium mt-1 block">
+                    {fieldErrors.fullName}
+                  </span>
+                )}
               </div>
 
               {/* Professional Title */}

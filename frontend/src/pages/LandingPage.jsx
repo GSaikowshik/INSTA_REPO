@@ -1,26 +1,21 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { FileText, Globe, CheckCircle2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from '@clerk/clerk-react';
+import { FileText, Globe, CheckCircle2, Code2, Terminal } from 'lucide-react';
+
+const supportedStacks = [
+  "React 18",
+  "Next.js",
+  "Tailwind CSS",
+  "HTML5 / CSS3",
+  "TypeScript",
+  "FastAPI",
+  "Vercel Deployment",
+  "Vector ATS PDFs",
+  "JSON Resume Schema"
+];
 
 const LandingPage = () => {
-  const navigate = useNavigate();
-  const isAuthenticated = Boolean(localStorage.getItem('token'));
-
-  const handleGetStarted = () => {
-    if (isAuthenticated) {
-      navigate('/dashboard');
-    } else {
-      navigate('/auth');
-    }
-  };
-
-  const handleScrollToFeatures = () => {
-    const section = document.getElementById('features');
-    if (section) {
-      section.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   return (
     <div className="bg-white text-slate-900 min-h-screen flex flex-col font-sans">
       
@@ -32,37 +27,38 @@ const LandingPage = () => {
               <span className="font-bold text-xl text-slate-900">InstaRepo</span>
             </div>
             <div>
-              {isAuthenticated ? (
-                <Link 
-                  to="/dashboard"
-                  className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors inline-block"
-                >
-                  Go to Dashboard
-                </Link>
-              ) : (
+              <SignedIn>
                 <div className="flex items-center gap-3">
-                  <Link
-                    to="/auth"
-                    className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors px-3 py-2"
+                  <Link 
+                    to="/dashboard"
+                    className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors inline-block"
                   >
-                    Sign In
+                    Go to Dashboard
                   </Link>
-                  <button
-                    type="button"
-                    onClick={handleGetStarted}
-                    className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer"
-                  >
-                    Get Started
-                  </button>
+                  <UserButton afterSignOutUrl="/" />
                 </div>
-              )}
+              </SignedIn>
+              <SignedOut>
+                <div className="flex items-center gap-3">
+                  <SignInButton mode="modal">
+                    <button className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors px-3 py-2 cursor-pointer">
+                      Sign In
+                    </button>
+                  </SignInButton>
+                  <SignUpButton mode="modal">
+                    <button className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer">
+                      Get Started
+                    </button>
+                  </SignUpButton>
+                </div>
+              </SignedOut>
             </div>
           </div>
         </div>
       </nav>
 
       {/* Main Content */}
-      <main className="flex-grow pt-32 pb-16">
+      <main className="flex-grow pt-32">
         
         {/* Hero Section */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -75,32 +71,38 @@ const LandingPage = () => {
 
           {/* Product Video Showcase Container */}
           <div className="max-w-4xl mx-auto mt-12 mb-10 border border-slate-200 rounded-xl overflow-hidden bg-slate-100 aspect-video relative flex items-center justify-center shadow-sm">
-            <video
-              autoPlay
-              loop
-              muted
+            <video 
+              src="/demo.mp4" 
+              autoPlay 
+              loop 
+              muted 
               playsInline
               className="w-full h-full object-cover"
-              src="https://cdn.pixabay.com/video/2020/05/25/40131-424917410_tiny.mp4"
-            >
-              Your browser does not support the video tag.
-            </video>
+            />
           </div>
 
-          {/* Repositioned Primary CTA */}
+          {/* Primary CTA */}
           <div className="flex justify-center mt-8 mb-20">
-            <button 
-              type="button"
-              onClick={handleGetStarted}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded-md text-lg font-medium transition-colors cursor-pointer shadow-xs"
-            >
-              Get Started Free
-            </button>
+            <SignedIn>
+              <Link 
+                to="/dashboard"
+                className="bg-slate-900 hover:bg-slate-800 text-white px-8 py-3.5 rounded-md text-lg font-medium transition-colors cursor-pointer shadow-xs inline-block"
+              >
+                Go to Dashboard
+              </Link>
+            </SignedIn>
+            <SignedOut>
+              <SignUpButton mode="modal">
+                <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded-md text-lg font-medium transition-colors cursor-pointer shadow-xs">
+                  Get Started Free
+                </button>
+              </SignUpButton>
+            </SignedOut>
           </div>
         </div>
 
         {/* Features Grid */}
-        <div id="features" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div id="features" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-24">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             
             {/* Feature 1 */}
@@ -138,6 +140,110 @@ const LandingPage = () => {
 
           </div>
         </div>
+
+        {/* Section 1: How It Works */}
+        <section className="bg-white border-y border-slate-200 py-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl font-bold text-slate-900 text-center mb-12">
+              How It Works
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              
+              {/* Step 1: Ingest */}
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-8 space-y-4">
+                <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center font-bold">
+                  <FileText className="w-6 h-6" />
+                </div>
+                <div className="space-y-1">
+                  <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">Step 1</span>
+                  <h3 className="text-xl font-bold text-slate-900">Ingest</h3>
+                </div>
+                <p className="text-slate-600 text-sm leading-relaxed">
+                  Drop in your outdated PDF or Word resume. Our AI extracts and structures your entire career history into a centralized JSON profile.
+                </p>
+              </div>
+
+              {/* Step 2: Compose */}
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-8 space-y-4">
+                <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center font-bold">
+                  <Code2 className="w-6 h-6" />
+                </div>
+                <div className="space-y-1">
+                  <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Step 2</span>
+                  <h3 className="text-xl font-bold text-slate-900">Compose</h3>
+                </div>
+                <p className="text-slate-600 text-sm leading-relaxed">
+                  Select from over 200 combinatorial portfolio themes or ATS-optimized resume templates. Tweak configurations instantly.
+                </p>
+              </div>
+
+              {/* Step 3: Deploy */}
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-8 space-y-4">
+                <div className="w-12 h-12 bg-slate-100 text-slate-700 rounded-lg flex items-center justify-center font-bold">
+                  <Terminal className="w-6 h-6" />
+                </div>
+                <div className="space-y-1">
+                  <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Step 3</span>
+                  <h3 className="text-xl font-bold text-slate-900">Deploy</h3>
+                </div>
+                <p className="text-slate-600 text-sm leading-relaxed">
+                  Export standard PDFs to bypass ATS scanners, or download fully responsive, self-contained HTML portfolios ready for Vercel.
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* Section 2: The Developer Workspace */}
+        <section className="bg-slate-50 pt-24 pb-12 border-b border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">
+              The Developer Workspace
+            </h2>
+            <p className="text-slate-600 max-w-2xl mx-auto mb-10 text-base leading-relaxed">
+              InstaRepo isn't just a static template site—it's a dynamic data hub. Manage your underlying engineering profile once, and compile targeted resume exports, tailored cover letters, and live web apps effortlessly.
+            </p>
+
+            {/* Supported Stacks/Outputs Pills Grid */}
+            <div className="flex flex-wrap justify-center gap-3 max-w-3xl mx-auto">
+              {supportedStacks.map((stack, idx) => (
+                <span
+                  key={idx}
+                  className="border border-slate-200 rounded-full px-4 py-2 text-sm text-slate-600 bg-white font-medium shadow-2xs hover:border-slate-300 transition-colors"
+                >
+                  {stack}
+                </span>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Section 3: Final Bottom CTA */}
+        <section className="px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto bg-slate-900 rounded-2xl p-12 text-center mt-12 mb-24 shadow-lg">
+            <h2 className="text-white text-3xl font-bold mb-6 tracking-tight">
+              Stop updating five different career docs. Build your single source of truth today.
+            </h2>
+            <div className="flex justify-center">
+              <SignedIn>
+                <Link
+                  to="/dashboard"
+                  className="bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-semibold py-3 px-8 rounded-md transition-colors cursor-pointer inline-block text-base"
+                >
+                  Go to Dashboard
+                </Link>
+              </SignedIn>
+              <SignedOut>
+                <SignUpButton mode="modal">
+                  <button className="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-8 rounded-md transition-colors cursor-pointer inline-block text-base">
+                    Get Started Free
+                  </button>
+                </SignUpButton>
+              </SignedOut>
+            </div>
+          </div>
+        </section>
 
       </main>
 

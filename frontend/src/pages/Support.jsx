@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import api from '../api';
+import { useUser, useAuth } from '@clerk/clerk-react';
+import api, { getAuthHeaders } from '../api';
 import { 
   HelpCircle, 
   Mail, 
   ChevronDown, 
   ChevronUp, 
   MessageSquare, 
-  ExternalLink,
-  User,
-  Send,
-  Check,
-  Sparkles
+  ExternalLink, 
+  Send, 
+  Check 
 } from 'lucide-react';
 
 const faqs = [
@@ -33,6 +32,9 @@ const faqs = [
 ];
 
 const Support = () => {
+  const { user } = useUser();
+  const { getToken } = useAuth();
+
   const [userEmail, setUserEmail] = useState('');
   const [userName, setUserName] = useState('');
   const [messageText, setMessageText] = useState('');
@@ -40,12 +42,17 @@ const Support = () => {
   const [openFaqIndex, setOpenFaqIndex] = useState(0);
   const [sentNotice, setSentNotice] = useState(false);
 
+  // Extract primary email from Clerk user object
+  const clerkEmail = user?.primaryEmailAddress?.emailAddress;
+  const clerkName = user?.fullName || user?.firstName;
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        const headers = await getAuthHeaders(getToken);
         const [meRes, profileRes] = await Promise.all([
-          api.get('/auth/me').catch(() => null),
-          api.get('/profile').catch(() => null)
+          api.get('/auth/me', headers).catch(() => null),
+          api.get('/profile', headers).catch(() => null)
         ]);
 
         if (meRes?.data) {
@@ -62,14 +69,15 @@ const Support = () => {
       }
     };
     fetchUserData();
-  }, []);
+  }, [getToken]);
 
   const toggleFaq = (index) => {
     setOpenFaqIndex(openFaqIndex === index ? null : index);
   };
 
-  const senderEmail = userEmail || 'authenticated.user@instarepo.local';
-  const senderName = userName || 'Authenticated User';
+  // Prioritize primary Clerk email address, then DB email
+  const senderEmail = clerkEmail || userEmail || 'user@instarepo.dev';
+  const senderName = clerkName || userName || 'Authenticated User';
 
   const fullSubject = `${subjectText} [From: ${senderEmail}]`;
   const fullBody = `Sender Email: ${senderEmail}\nSender Name: ${senderName}\n\nSupport Message:\n${messageText || 'Hello Support Team,\n\nI need assistance with my InstaRepo account.'}`;
