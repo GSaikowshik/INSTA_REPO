@@ -795,8 +795,9 @@ const PortfolioGenerator = () => {
       )}
 
       {/* DYNAMIC TAILWIND MATRIX RENDER SHELL */}
-      <div className={`p-6 sm:p-12 transition-all duration-300 rounded-md min-h-[600px] ${currentTheme.appBackground} ${currentTheme.typography}`}>
-        <div className="max-w-5xl mx-auto space-y-12">
+      <div className="w-full max-w-full overflow-x-auto overflow-y-auto max-h-[60vh] lg:max-h-none border border-slate-200 rounded-md min-h-0 min-w-0 shadow-sm">
+        <div className={`p-4 sm:p-12 transition-all duration-300 rounded-md min-h-[500px] w-full max-w-full ${currentTheme.appBackground} ${currentTheme.typography}`}>
+          <div className="max-w-5xl mx-auto space-y-12">
           
           {/* 1. Hero Section */}
           <div className="py-12 sm:py-16 border-b border-current/15 flex flex-col sm:flex-row items-start justify-between gap-8">
@@ -898,6 +899,7 @@ const PortfolioGenerator = () => {
 
         </div>
       </div>
+    </div>
     </div>
   );
 };

@@ -259,10 +259,10 @@ const ResumePreview = ({ data }) => {
       </div>
 
       {/* PAPER RESUME SHEET CONTAINER WITH STRICT 10-POINT RESUME ARCHITECTURE */}
-      <div className="flex justify-center overflow-x-auto p-1 bg-slate-900/40 rounded-2xl border border-slate-800">
+      <div className="w-full max-w-full max-h-[60vh] lg:max-h-[calc(100vh-140px)] overflow-y-auto overflow-x-auto p-1 sm:p-3 bg-slate-900/40 rounded-2xl border border-slate-800 flex justify-center min-h-0 min-w-0">
         <div
           ref={resumeRef}
-          className="resume-a4-preview resume-a4-container bg-white text-slate-900 shadow-2xl p-6 sm:p-7 text-[11px] font-sans leading-tight border border-slate-200"
+          className="resume-a4-preview resume-a4-container bg-white text-slate-900 shadow-2xl p-4 sm:p-7 text-[11px] font-sans leading-tight border border-slate-200 w-full max-w-full"
         >
           {/* SECTION 1: HEADER */}
           <header className="border-b border-slate-900 pb-3 mb-3 text-center sm:text-left">

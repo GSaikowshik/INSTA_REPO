@@ -189,9 +189,9 @@ ${name}`;
       </div>
 
       {/* Right Column (Preview - 60% width) */}
-      <div className="w-full lg:w-[60%] bg-white border border-gray-200 shadow-sm rounded-md p-6 sm:p-8 flex flex-col gap-4 overflow-y-auto">
+      <div className="w-full lg:w-[60%] bg-white border border-gray-200 shadow-sm rounded-md p-4 sm:p-8 flex flex-col gap-4 overflow-y-auto min-h-0 min-w-0">
         {/* Top Action Bar */}
-        <div className="flex items-center justify-between border-b border-gray-200 pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 pb-3 gap-2">
           <div>
             <h3 className="text-slate-900 font-semibold text-sm">Cover Letter Document</h3>
             <p className="text-xs text-slate-500">Real-time preview formatted for export</p>
@@ -219,10 +219,10 @@ ${name}`;
         </div>
 
         {/* Paper Document Preview Area */}
-        <div className="bg-slate-50 border border-gray-200 rounded p-4 sm:p-6 flex justify-center overflow-y-auto">
+        <div className="bg-slate-50 border border-gray-200 rounded p-2 sm:p-6 flex justify-center overflow-y-auto overflow-x-auto max-h-[60vh] lg:max-h-[calc(100vh-200px)] min-h-0 min-w-0 w-full">
           <div
             ref={documentRef}
-            className="w-full max-w-[210mm] min-h-[297mm] bg-white border border-gray-200 shadow-sm p-8 sm:p-12 text-[12px] text-slate-800 leading-relaxed font-sans whitespace-pre-wrap"
+            className="w-full max-w-full lg:max-w-[210mm] bg-white border border-gray-200 shadow-sm p-4 sm:p-12 text-[12px] text-slate-800 leading-relaxed font-sans whitespace-pre-wrap overflow-x-auto"
           >
             {coverLetterText}
           </div>

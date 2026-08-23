@@ -436,9 +436,9 @@ const Dashboard = () => {
       )}
 
       {/* 2-Column Split Screen Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start min-w-0">
         {/* LEFT COLUMN: Upload Area & Modular Editor */}
-        <div className="space-y-5">
+        <div className="space-y-5 min-w-0">
           {/* Resume Upload Area */}
           <section className="bg-white rounded p-4 border border-gray-200 shadow-sm relative">
             <div className="flex flex-col gap-3">
@@ -1255,7 +1255,7 @@ const Dashboard = () => {
         </div>
 
         {/* RIGHT COLUMN: Real-Time Live Resume Preview */}
-        <div className="lg:sticky lg:top-16 space-y-2.5">
+        <div className="lg:sticky lg:top-16 space-y-2.5 min-w-0 min-h-0 w-full">
           <div className="flex items-center justify-between pb-2 border-b border-gray-200">
             <div className="flex items-center gap-2">
               <Eye className="w-4 h-4 text-blue-700" />
@@ -1264,7 +1264,7 @@ const Dashboard = () => {
           </div>
 
           {/* Template Container View */}
-          <div className="rounded p-1 bg-gray-50 border border-gray-200 shadow-sm">
+          <div className="rounded p-1 bg-gray-50 border border-gray-200 shadow-sm min-w-0 min-h-0 w-full overflow-hidden">
             <TemplateVision parsedData={profileData} />
           </div>
         </div>
