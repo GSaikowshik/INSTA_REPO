@@ -123,9 +123,9 @@ ${name}`;
   });
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 h-full p-6 bg-slate-50 min-h-[calc(100vh-80px)]">
+    <div className="flex flex-col lg:flex-row gap-6 h-full p-4 sm:p-6 bg-slate-50 min-h-[calc(100vh-80px)]">
       {/* Left Column (Input - 40% width) */}
-      <div className="lg:w-[40%] bg-white border border-gray-200 shadow-sm rounded-md p-5 flex flex-col gap-4">
+      <div className="w-full lg:w-[40%] bg-white border border-gray-200 shadow-sm rounded-md p-5 flex flex-col gap-4">
         <div className="flex items-center gap-2 border-b border-gray-200 pb-3">
           <FileText className="w-4 h-4 text-blue-700" />
           <h2 className="text-slate-900 font-semibold text-sm">Target Role Details</h2>
@@ -189,7 +189,7 @@ ${name}`;
       </div>
 
       {/* Right Column (Preview - 60% width) */}
-      <div className="lg:w-[60%] bg-white border border-gray-200 shadow-sm rounded-md p-6 sm:p-8 flex flex-col gap-4 overflow-y-auto">
+      <div className="w-full lg:w-[60%] bg-white border border-gray-200 shadow-sm rounded-md p-6 sm:p-8 flex flex-col gap-4 overflow-y-auto">
         {/* Top Action Bar */}
         <div className="flex items-center justify-between border-b border-gray-200 pb-3">
           <div>

@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from '@clerk/clerk-react';
-import { FileText, Globe, CheckCircle2, Code2, Terminal } from 'lucide-react';
+import { FileText, Globe, CheckCircle2, Code2, Terminal, Menu, X } from 'lucide-react';
 
 const supportedStacks = [
   "React 18",
@@ -16,19 +16,29 @@ const supportedStacks = [
 ];
 
 const LandingPage = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   return (
     <div className="bg-white text-slate-900 min-h-screen flex flex-col font-sans">
       
       {/* Navigation */}
-      <nav className="bg-white border-b border-slate-200 fixed w-full z-10 top-0">
+      <nav className="bg-white border-b border-slate-200 fixed w-full z-30 top-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex-shrink-0 flex items-center">
-              <span className="font-bold text-xl text-slate-900">InstaRepo</span>
+              <span className="font-bold text-xl text-slate-900 tracking-tight">InstaRepo</span>
             </div>
-            <div>
+
+            {/* Desktop Navigation Links */}
+            <div className="hidden md:flex items-center gap-4">
+              <a href="#features" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors px-3 py-2">
+                Features
+              </a>
+              <a href="#how-it-works" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors px-3 py-2">
+                How It Works
+              </a>
               <SignedIn>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 ml-2">
                   <Link 
                     to="/dashboard"
                     className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors inline-block"
@@ -39,7 +49,7 @@ const LandingPage = () => {
                 </div>
               </SignedIn>
               <SignedOut>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 ml-2">
                   <SignInButton mode="modal">
                     <button className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors px-3 py-2 cursor-pointer">
                       Sign In
@@ -53,24 +63,93 @@ const LandingPage = () => {
                 </div>
               </SignedOut>
             </div>
+
+            {/* Mobile Hamburger Toggle Button */}
+            <div className="flex md:hidden items-center gap-2">
+              <SignedIn>
+                <UserButton afterSignOutUrl="/" />
+              </SignedIn>
+              <button
+                type="button"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="p-2 text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors"
+                aria-label="Toggle Navigation Menu"
+              >
+                {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Mobile Dropdown Menu Drawer */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-b border-slate-200 bg-white px-4 pt-2 pb-6 space-y-3 shadow-md">
+            <div className="flex flex-col space-y-2 pt-2 border-b border-slate-100 pb-3">
+              <a 
+                href="#features" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-md transition-colors"
+              >
+                Features
+              </a>
+              <a 
+                href="#how-it-works" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-md transition-colors"
+              >
+                How It Works
+              </a>
+            </div>
+
+            <div className="pt-1">
+              <SignedIn>
+                <Link
+                  to="/dashboard"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full text-center bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-md text-sm font-medium transition-colors block"
+                >
+                  Go to Dashboard
+                </Link>
+              </SignedIn>
+              <SignedOut>
+                <div className="flex flex-col gap-2">
+                  <SignInButton mode="modal">
+                    <button 
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="w-full text-center text-sm font-medium text-slate-700 border border-slate-300 hover:bg-slate-50 py-2.5 rounded-md transition-colors cursor-pointer"
+                    >
+                      Sign In
+                    </button>
+                  </SignInButton>
+                  <SignUpButton mode="modal">
+                    <button 
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="w-full text-center bg-slate-900 hover:bg-slate-800 text-white py-2.5 rounded-md text-sm font-medium transition-colors cursor-pointer"
+                    >
+                      Get Started Free
+                    </button>
+                  </SignUpButton>
+                </div>
+              </SignedOut>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Main Content */}
-      <main className="flex-grow pt-32">
+      <main className="flex-grow pt-24 sm:pt-32">
         
         {/* Hero Section */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-slate-900 tracking-tight mb-6">
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight mb-4 sm:mb-6 leading-tight">
             Engineer Your Career Infrastructure.
           </h1>
-          <p className="mt-4 text-xl text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="mt-2 sm:mt-4 text-base sm:text-xl text-slate-600 max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed px-2">
             Parse your resume once. Instantly generate ATS-optimized PDFs, custom cover letters, and 200+ distinct web portfolios.
           </p>
 
           {/* Product Video Showcase Container */}
-          <div className="max-w-4xl mx-auto mt-12 mb-10 border border-slate-200 rounded-xl overflow-hidden bg-slate-100 aspect-video relative flex items-center justify-center shadow-sm">
+          <div className="w-full max-w-4xl mx-auto mt-6 sm:mt-12 mb-8 sm:mb-10 border border-slate-200 rounded-xl overflow-hidden bg-slate-100 aspect-video relative flex items-center justify-center shadow-sm">
             <video 
               src="/demo.mp4" 
               autoPlay 
@@ -82,18 +161,18 @@ const LandingPage = () => {
           </div>
 
           {/* Primary CTA */}
-          <div className="flex justify-center mt-8 mb-20">
+          <div className="flex justify-center mt-6 sm:mt-8 mb-16 sm:mb-20 px-4">
             <SignedIn>
               <Link 
                 to="/dashboard"
-                className="bg-slate-900 hover:bg-slate-800 text-white px-8 py-3.5 rounded-md text-lg font-medium transition-colors cursor-pointer shadow-xs inline-block"
+                className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white px-8 py-3.5 rounded-md text-base sm:text-lg font-medium transition-colors cursor-pointer shadow-xs inline-block text-center"
               >
                 Go to Dashboard
               </Link>
             </SignedIn>
             <SignedOut>
               <SignUpButton mode="modal">
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded-md text-lg font-medium transition-colors cursor-pointer shadow-xs">
+                <button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded-md text-base sm:text-lg font-medium transition-colors cursor-pointer shadow-xs">
                   Get Started Free
                 </button>
               </SignUpButton>
@@ -102,8 +181,8 @@ const LandingPage = () => {
         </div>
 
         {/* Features Grid */}
-        <div id="features" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-24">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div id="features" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 sm:mb-24">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             
             {/* Feature 1 */}
             <div className="bg-white border border-slate-200 rounded-lg p-6">
@@ -128,7 +207,7 @@ const LandingPage = () => {
             </div>
 
             {/* Feature 3 */}
-            <div className="bg-white border border-slate-200 rounded-lg p-6">
+            <div className="bg-white border border-slate-200 rounded-lg p-6 sm:col-span-2 lg:col-span-1">
               <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center mb-4 text-amber-600">
                 <CheckCircle2 className="w-6 h-6" />
               </div>
@@ -142,15 +221,15 @@ const LandingPage = () => {
         </div>
 
         {/* Section 1: How It Works */}
-        <section className="bg-white border-y border-slate-200 py-20">
+        <section id="how-it-works" className="bg-white border-y border-slate-200 py-16 sm:py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl font-bold text-slate-900 text-center mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 text-center mb-8 sm:mb-12">
               How It Works
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
               
               {/* Step 1: Ingest */}
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-8 space-y-4">
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 sm:p-8 space-y-4">
                 <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center font-bold">
                   <FileText className="w-6 h-6" />
                 </div>
@@ -164,7 +243,7 @@ const LandingPage = () => {
               </div>
 
               {/* Step 2: Compose */}
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-8 space-y-4">
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 sm:p-8 space-y-4">
                 <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center font-bold">
                   <Code2 className="w-6 h-6" />
                 </div>
@@ -178,7 +257,7 @@ const LandingPage = () => {
               </div>
 
               {/* Step 3: Deploy */}
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-8 space-y-4">
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 sm:p-8 space-y-4 sm:col-span-2 lg:col-span-1">
                 <div className="w-12 h-12 bg-slate-100 text-slate-700 rounded-lg flex items-center justify-center font-bold">
                   <Terminal className="w-6 h-6" />
                 </div>
@@ -196,21 +275,21 @@ const LandingPage = () => {
         </section>
 
         {/* Section 2: The Developer Workspace */}
-        <section className="bg-slate-50 pt-24 pb-12 border-b border-slate-200">
+        <section className="bg-slate-50 pt-16 sm:pt-24 pb-12 border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-4">
               The Developer Workspace
             </h2>
-            <p className="text-slate-600 max-w-2xl mx-auto mb-10 text-base leading-relaxed">
+            <p className="text-slate-600 max-w-2xl mx-auto mb-8 sm:mb-10 text-sm sm:text-base leading-relaxed px-2">
               InstaRepo isn't just a static template site—it's a dynamic data hub. Manage your underlying engineering profile once, and compile targeted resume exports, tailored cover letters, and live web apps effortlessly.
             </p>
 
             {/* Supported Stacks/Outputs Pills Grid */}
-            <div className="flex flex-wrap justify-center gap-3 max-w-3xl mx-auto">
+            <div className="flex flex-wrap justify-center gap-2.5 sm:gap-3 max-w-3xl mx-auto">
               {supportedStacks.map((stack, idx) => (
                 <span
                   key={idx}
-                  className="border border-slate-200 rounded-full px-4 py-2 text-sm text-slate-600 bg-white font-medium shadow-2xs hover:border-slate-300 transition-colors"
+                  className="border border-slate-200 rounded-full px-3.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-slate-600 bg-white font-medium shadow-2xs hover:border-slate-300 transition-colors"
                 >
                   {stack}
                 </span>
@@ -221,22 +300,22 @@ const LandingPage = () => {
 
         {/* Section 3: Final Bottom CTA */}
         <section className="px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto bg-slate-900 rounded-2xl p-12 text-center mt-12 mb-24 shadow-lg">
-            <h2 className="text-white text-3xl font-bold mb-6 tracking-tight">
+          <div className="max-w-4xl mx-auto bg-slate-900 rounded-2xl p-8 sm:p-12 text-center mt-12 mb-16 sm:mb-24 shadow-lg">
+            <h2 className="text-white text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 tracking-tight leading-snug">
               Stop updating five different career docs. Build your single source of truth today.
             </h2>
             <div className="flex justify-center">
               <SignedIn>
                 <Link
                   to="/dashboard"
-                  className="bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-semibold py-3 px-8 rounded-md transition-colors cursor-pointer inline-block text-base"
+                  className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-semibold py-3 px-8 rounded-md transition-colors cursor-pointer inline-block text-base text-center"
                 >
                   Go to Dashboard
                 </Link>
               </SignedIn>
               <SignedOut>
                 <SignUpButton mode="modal">
-                  <button className="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-8 rounded-md transition-colors cursor-pointer inline-block text-base">
+                  <button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-8 rounded-md transition-colors cursor-pointer inline-block text-base">
                     Get Started Free
                   </button>
                 </SignUpButton>
@@ -250,13 +329,13 @@ const LandingPage = () => {
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200 py-6 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-xs sm:text-sm text-slate-500">
             <span className="font-bold text-slate-900">InstaRepo</span>
             <span className="hidden sm:inline text-slate-300">•</span>
             <span>&copy; {new Date().getFullYear()} InstaRepo Inc. All rights reserved.</span>
           </div>
 
-          <div className="flex items-center gap-6 text-sm font-medium text-slate-500">
+          <div className="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm font-medium text-slate-500">
             <Link className="hover:text-slate-900 transition-colors" to="/privacy">Privacy Policy</Link>
             <Link className="hover:text-slate-900 transition-colors" to="/terms">Terms of Service</Link>
             <Link className="hover:text-slate-900 transition-colors" to="/dashboard/support">Support</Link>

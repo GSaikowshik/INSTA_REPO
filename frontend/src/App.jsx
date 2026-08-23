@@ -17,8 +17,9 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
+    <div className="overflow-x-hidden min-h-screen bg-slate-50 text-slate-900 font-sans">
+      <BrowserRouter>
+        <Routes>
         {/* Public Landing Page */}
         <Route path="/" element={<LandingPage />} />
 
@@ -60,7 +61,8 @@ function App() {
         {/* Catch-all fallback to Public Landing Page */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </BrowserRouter>
+      </BrowserRouter>
+    </div>
   );
 }
 
