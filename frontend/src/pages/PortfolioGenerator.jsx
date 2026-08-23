@@ -438,7 +438,7 @@ const PortfolioGenerator = () => {
     
     <!-- Hero Section -->
     <div class="py-12 sm:py-16 border-b border-current/15 flex flex-col sm:flex-row items-start justify-between gap-8">
-      <div class="space-y-3 flex-1">
+      <div class="space-y-3 flex-1 order-2 sm:order-1">
         ${name !== 'Developer' ? `<h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight">${name}</h1>` : ''}
         ${personal.title ? `<p class="text-sm font-semibold uppercase tracking-widest opacity-80 mt-1">${personal.title}</p>` : ''}
         ${personal.summary ? `<p class="text-xs opacity-85 leading-relaxed pt-3 max-w-2xl">${personal.summary}</p>` : ''}
@@ -447,7 +447,9 @@ const PortfolioGenerator = () => {
           ${personal.location ? `<span>• ${personal.location}</span>` : ''}
         </div>
       </div>
-      ${avatarHtml}
+      <div class="order-1 sm:order-2 self-center sm:self-start mb-6 sm:mb-0">
+        ${avatarHtml}
+      </div>
     </div>
 
     <!-- Skills Matrix -->
@@ -802,7 +804,7 @@ const PortfolioGenerator = () => {
           
           {/* 1. Hero Section */}
           <div className="py-12 sm:py-16 border-b border-current/15 flex flex-col sm:flex-row items-start justify-between gap-8">
-            <div className="space-y-3 flex-1">
+            <div className="space-y-3 flex-1 order-2 sm:order-1">
               {personal.full_name && <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight">{personal.full_name}</h1>}
               {personal.title && <p className="text-sm font-semibold uppercase tracking-widest opacity-80 mt-1">{personal.title}</p>}
               {personal.summary && <p className="text-xs opacity-85 leading-relaxed pt-3 max-w-2xl">{personal.summary}</p>}
@@ -811,12 +813,14 @@ const PortfolioGenerator = () => {
                 {personal.location && <span>• {personal.location}</span>}
               </div>
             </div>
-            <AvatarImage 
-              src={personal.photo_url} 
-              name={personal.full_name} 
-              sizeClass="w-32 h-32 md:w-40 md:h-40 border-4 border-current/20 shadow-xl" 
-              onSelectFile={handleSelectFileToCrop}
-            />
+            <div className="order-1 sm:order-2 self-center sm:self-start mb-6 sm:mb-0">
+              <AvatarImage 
+                src={personal.photo_url} 
+                name={personal.full_name} 
+                sizeClass="w-32 h-32 md:w-40 md:h-40 border-4 border-current/20 shadow-xl" 
+                onSelectFile={handleSelectFileToCrop}
+              />
+            </div>
           </div>
 
           {/* 2. Skills Matrix */}
