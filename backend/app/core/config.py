@@ -34,7 +34,7 @@ class Settings(BaseSettings):
             url_str = db_url.strip()
             if url_str.startswith("postgres://"):
                 url_str = url_str.replace("postgres://", "postgresql+asyncpg://", 1)
-            elif url_str.startswith("postgresql://"):
+            elif url_str.startswith("postgresql://") and "asyncpg" not in url_str:
                 url_str = url_str.replace("postgresql://", "postgresql+asyncpg://", 1)
             return url_str
             

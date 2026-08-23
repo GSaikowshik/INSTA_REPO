@@ -8,15 +8,15 @@ from app.core.config import settings
 # Fetch the URL from the environment with fallback
 DATABASE_URL = os.getenv("DATABASE_URL", getattr(settings, "DATABASE_URL", None) or "postgresql+asyncpg://postgres:postgres@localhost:5432/insta_repo")
 
-# Render sometimes provides 'postgres://' instead of 'postgresql://'.
-# SQLAlchemy 2.0 requires 'postgresql'. Let's ensure the async driver is used.
+# Render/Supabase sometimes provides 'postgres://' or 'postgresql://' without driver.
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
-elif DATABASE_URL.startswith("postgresql://"):
+elif DATABASE_URL.startswith("postgresql://") and "asyncpg" not in DATABASE_URL:
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
 engine = create_async_engine(
     DATABASE_URL,
+    connect_args={"statement_cache_size": 0},
     echo=False,
     future=True,
 )
