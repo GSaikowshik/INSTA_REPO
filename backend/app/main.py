@@ -49,7 +49,8 @@ app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
+@app.get("/api/health", tags=["Health"])
 @app.get("/health", tags=["Health"])
-async def health_check():
-    """Health check endpoint to verify backend status."""
-    return {"status": "ok", "project": settings.PROJECT_NAME}
+def health_check():
+    """Lightweight public health check endpoint for uptime ping services."""
+    return {"status": "alive", "message": "InstaRepo backend is running.", "project": settings.PROJECT_NAME}
