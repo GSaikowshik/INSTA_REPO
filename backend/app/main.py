@@ -14,6 +14,14 @@ app = FastAPI(
     description="Insta Repo API - Centralized professional identity repository parsing resumes and generating portfolios, cover letters, and GitHub profiles."
 )
 
+@app.get("/")
+async def root():
+    return {
+        "status": "online",
+        "service": "InstaRepo API",
+        "message": "Welcome to the InstaRepo Backend."
+    }
+
 @app.on_event("startup")
 async def startup_event():
     async with engine.begin() as conn:

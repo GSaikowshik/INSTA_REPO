@@ -3,9 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import api, { getAuthHeaders } from '../api';
 import ResumePreview from '../components/ResumePreview';
-import ResumeLivePreview from '../components/ResumeLivePreview';
-
-import TemplateVision from '../components/TemplateVision';
+import ResumeLivePreview, { templateOptions } from '../components/ResumeLivePreview';
 import {
   Upload,
   FileText,
@@ -60,7 +58,7 @@ const Dashboard = () => {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [selectedTemplate, setSelectedTemplate] = useState('minimal');
+  const [selectedTemplate, setSelectedTemplate] = useState('template1');
   const [message, setMessage] = useState({ type: '', text: '' });
   const [previewMode, setPreviewMode] = useState('default'); // 'default' | 'vision'
   const navigate = useNavigate();
@@ -1303,9 +1301,11 @@ const Dashboard = () => {
                 onChange={(e) => setSelectedTemplate(e.target.value)}
                 className="bg-white border border-gray-200 text-xs font-semibold text-gray-800 rounded px-2 py-1 outline-none focus:border-blue-700 cursor-pointer shadow-2xs"
               >
-                <option value="minimal">Minimalist Classic</option>
-                <option value="modern-split">Modern Two-Column Split</option>
-                <option value="executive">Executive Serif</option>
+                {templateOptions.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
               </select>
             </div>
           </div>

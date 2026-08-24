@@ -8,6 +8,9 @@ import LatexModal from './LatexModal';
 import TemplateMinimal from './templates/TemplateMinimal';
 import TemplateModern from './templates/TemplateModern';
 import TemplateExecutive from './templates/TemplateExecutive';
+import SignatureTemplate from './templates/SignatureTemplate';
+import AtsTemplateLibrary from './templates/AtsTemplateLibrary';
+
 import {
   Download,
   Printer,
@@ -16,16 +19,26 @@ import {
   FileCode,
   Loader2,
   ChevronDown,
-  Layout,
 } from 'lucide-react';
 
-const templateOptions = [
+export const templateOptions = [
+  { id: 'template1', name: 'Classic Professional' },
+  { id: 'template2', name: 'Modern Minimalist' },
+  { id: 'template3', name: 'Tech Executive' },
+  { id: 'template4', name: 'Creative Portfolio' },
+  { id: 'template5', name: 'Startup Hustler' },
+  { id: 'template6', name: 'Data Scientist' },
+  { id: 'template7', name: 'Academic Scholar' },
+  { id: 'template8', name: 'Entry Level / Grad' },
+  { id: 'template9', name: 'Project Manager' },
+  { id: 'template10', name: 'The Innovator' },
+  { id: 'template11', name: 'The Signature' },
   { id: 'minimal', name: 'Minimalist Classic' },
   { id: 'modern-split', name: 'Modern Split-Column' },
   { id: 'executive', name: 'Executive Serif' },
 ];
 
-const ResumeLivePreview = ({ resumeData = {}, selectedTemplate = 'minimal', onSelectTemplate }) => {
+const ResumeLivePreview = ({ resumeData = {}, selectedTemplate = 'template1', onSelectTemplate }) => {
   const resumeRef = useRef(null);
   const [exporting, setExporting] = useState(false);
   const [exportType, setExportType] = useState('');
@@ -96,42 +109,31 @@ const ResumeLivePreview = ({ resumeData = {}, selectedTemplate = 'minimal', onSe
   // Render Template Router
   const renderTemplateComponent = () => {
     switch (selectedTemplate) {
+      case 'template11':
+        return <SignatureTemplate data={data} />;
+      case 'minimal':
+        return <TemplateMinimal data={data} />;
       case 'modern-split':
       case 'modern':
         return <TemplateModern data={data} />;
       case 'executive':
         return <TemplateExecutive data={data} />;
-      case 'minimal':
       default:
-        return <TemplateMinimal data={data} />;
+        return <AtsTemplateLibrary data={data} templateId={selectedTemplate || 'template1'} />;
     }
   };
 
+  const activeTemplateObj = templateOptions.find(t => t.id === selectedTemplate) || templateOptions[0];
+
   return (
     <div className="space-y-3">
-      {/* EXPORT & TEMPLATE ROUTER TOOLBAR */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 bg-slate-900 border border-slate-800 p-2.5 rounded-xl z-20">
-        {/* Template Selector Dropdown */}
+      {/* EXPORT TOOLBAR (Clean single bar with active template badge and download options) */}
+      <div className="flex items-center justify-between gap-2.5 bg-slate-900 border border-slate-800 p-2.5 rounded-xl z-20">
         <div className="flex items-center gap-2">
-          <Layout className="w-4 h-4 text-indigo-400 shrink-0" />
-          <span className="text-xs font-semibold text-slate-300 hidden sm:inline">Template:</span>
-          {onSelectTemplate ? (
-            <select
-              value={selectedTemplate}
-              onChange={(e) => onSelectTemplate(e.target.value)}
-              className="bg-slate-800 text-white text-xs font-medium rounded-lg border border-slate-700 focus:border-indigo-500 py-1.5 px-2.5 cursor-pointer outline-none transition-colors"
-            >
-              {templateOptions.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <span className="text-xs font-bold text-white capitalize bg-slate-800 px-2 py-1 rounded">
-              {selectedTemplate}
-            </span>
-          )}
+          <span className="text-xs font-semibold text-slate-400">Active Style:</span>
+          <span className="text-xs font-bold text-white bg-slate-800 px-2.5 py-1 rounded-md border border-slate-700">
+            {activeTemplateObj.name}
+          </span>
         </div>
 
         {/* Dropdown Export Action Button */}

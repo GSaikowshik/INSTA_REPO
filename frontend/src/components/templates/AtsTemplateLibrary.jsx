@@ -122,20 +122,33 @@ const AtsTemplateLibrary = ({ data = {}, templateId = 'template1' }) => {
           {projList.map((proj, i) => {
             return (
               <div key={i} className="mb-3">
-                <div className="flex justify-between font-bold w-full mb-0.5">
-                  <span className="text-[11px]">
+                <div className="flex justify-between items-baseline font-bold w-full mb-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-bold text-gray-900">
+                      {proj.title || proj.name}
+                    </span>
                     {(() => {
-                      const pLink = proj.link || proj.url || proj.githubUrl || proj.github || proj.website || proj.repo_url || proj.live_url || proj.project_url;
-                      return pLink ? (
-                        <a href={pLink.startsWith('http') ? pLink : `https://${pLink}`} target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:underline">
-                          {proj.title || proj.name}
-                        </a>
-                      ) : (
-                        <span>{proj.title || proj.name}</span>
+                      const ghUrl = proj.githubUrl || proj.repo_url || proj.github || proj.url;
+                      const demoUrl = proj.liveUrl || proj.live_url || proj.link || proj.demo_url || proj.website;
+                      if (!ghUrl && !demoUrl) return null;
+                      return (
+                        <div className="flex items-center gap-1.5 text-[9.5px] font-normal">
+                          {ghUrl && (
+                            <a href={ghUrl.startsWith('http') ? ghUrl : `https://${ghUrl}`} target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:underline">
+                              GitHub
+                            </a>
+                          )}
+                          {ghUrl && demoUrl && <span className="text-gray-400">|</span>}
+                          {demoUrl && (
+                            <a href={demoUrl.startsWith('http') ? demoUrl : `https://${demoUrl}`} target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:underline">
+                              Live Demo
+                            </a>
+                          )}
+                        </div>
                       );
                     })()}
-                  </span>
-                  <span>{proj.date || proj.year || ''}</span>
+                  </div>
+                  <span className="text-[9.5px] text-gray-500 font-medium">{proj.date || proj.year || ''}</span>
                 </div>
                 <div className="mb-1">{proj.description}</div>
                 {(proj.techStack || proj.technologies) && (
