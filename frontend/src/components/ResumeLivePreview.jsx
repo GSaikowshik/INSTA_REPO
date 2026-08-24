@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { toJpeg } from 'html-to-image';
 import { saveAs } from 'file-saver';
