@@ -87,12 +87,18 @@ const AtsTemplateLibrary = ({ data = {}, templateId = 'template1' }) => {
               </div>
               <div className="font-semibold italic mb-1">{exp.company || exp.organization}</div>
               <ul className="list-disc pl-5 space-y-0.5">
-                {Array.isArray(exp.description) ? (
-                  exp.description.filter(Boolean).map((line, dIdx) => <li key={dIdx}>{line}</li>)
-                ) : exp.description ? (
-                  <li>{exp.description}</li>
-                ) : null}
-                {exp.highlights?.map((h, j) => <li key={`h-${j}`}>{h}</li>)}
+                {(() => {
+                  const bullets = (Array.isArray(exp.bulletPoints) && exp.bulletPoints.length > 0)
+                    ? exp.bulletPoints
+                    : (Array.isArray(exp.highlights) && exp.highlights.length > 0)
+                      ? exp.highlights
+                      : (Array.isArray(exp.description)
+                          ? exp.description
+                          : (exp.description ? [exp.description] : []));
+                  return bullets.filter(Boolean).map((line, dIdx) => (
+                    <li key={dIdx}>{line}</li>
+                  ));
+                })()}
               </ul>
             </div>
           ))}

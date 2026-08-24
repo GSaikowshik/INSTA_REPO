@@ -24,6 +24,8 @@ class ExperienceItemSchema(BaseModel):
     is_current: Optional[bool] = False
     description: Optional[Union[str, list[str]]] = None
     highlights: Optional[list[str]] = Field(default_factory=list)
+    bulletPoints: Optional[list[str]] = Field(default_factory=list)
+    bullet_points: Optional[list[str]] = Field(default_factory=list)
 
 class EducationItemSchema(BaseModel):
     id: Optional[str] = None
@@ -41,8 +43,11 @@ class SkillCategorySchema(BaseModel):
 class ProjectItemSchema(BaseModel):
     id: Optional[str] = None
     title: Optional[str] = ""
-    description: Optional[str] = ""
+    description: Optional[Union[str, list[str]]] = ""
     technologies: Optional[list[str]] = Field(default_factory=list)
+    highlights: Optional[list[str]] = Field(default_factory=list)
+    bulletPoints: Optional[list[str]] = Field(default_factory=list)
+    bullet_points: Optional[list[str]] = Field(default_factory=list)
     repo_url: Optional[str] = None
     live_url: Optional[str] = None
 
@@ -71,6 +76,7 @@ class AdditionalInfoSchema(BaseModel):
 class ParsedDataSchema(BaseModel):
     personal_info: Optional[PersonalInfoSchema] = Field(default_factory=PersonalInfoSchema)
     experiences: Optional[list[ExperienceItemSchema]] = Field(default_factory=list)
+    experience: Optional[list[ExperienceItemSchema]] = Field(default_factory=list)
     education: Optional[list[EducationItemSchema]] = Field(default_factory=list)
     skills: Optional[list[SkillCategorySchema]] = Field(default_factory=list)
     projects: Optional[list[ProjectItemSchema]] = Field(default_factory=list)

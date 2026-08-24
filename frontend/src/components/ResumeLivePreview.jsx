@@ -153,8 +153,8 @@ const ResumeLivePreview = ({ resumeData = {}, selectedTemplate = 'template1', on
   return (
     <div className="space-y-3">
       {/* EXPORT TOOLBAR (Clean single bar with active template badge and download options) */}
-      <div className="flex items-center justify-between gap-2.5 bg-slate-900 border border-slate-800 p-2.5 rounded-xl z-20">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4 bg-slate-900 border border-slate-800 p-2.5 rounded-xl z-20">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs font-semibold text-slate-400">Active Style:</span>
           <span className="text-xs font-bold text-white bg-slate-800 px-2.5 py-1 rounded-md border border-slate-700">
             {activeTemplateObj.name}
@@ -165,7 +165,7 @@ const ResumeLivePreview = ({ resumeData = {}, selectedTemplate = 'template1', on
         </div>
 
         {/* Dropdown Export Action Button */}
-        <div className="relative shrink-0">
+        <div className="relative shrink-0 w-full sm:w-auto mt-2 sm:mt-0 flex justify-center sm:justify-end">
           <button
             onClick={() => setShowDropdown(!showDropdown)}
             disabled={exporting}

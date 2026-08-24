@@ -112,24 +112,22 @@ const TemplateMinimal = ({ data = {} }) => {
                   </span>
                 </div>
                 <div className="text-[10.5px] font-semibold text-indigo-700 mb-0.5">{exp.company || exp.organization}</div>
-                {exp.description && (
-                  Array.isArray(exp.description) ? (
+                {(() => {
+                  const bullets = (Array.isArray(exp.bulletPoints) && exp.bulletPoints.length > 0)
+                    ? exp.bulletPoints
+                    : (Array.isArray(exp.highlights) && exp.highlights.length > 0)
+                      ? exp.highlights
+                      : (Array.isArray(exp.description)
+                          ? exp.description
+                          : (exp.description ? [exp.description] : []));
+                  return bullets.length > 0 ? (
                     <ul className="list-disc list-inside text-[10.5px] text-slate-700 leading-snug space-y-0.5 pl-1">
-                      {exp.description.filter(Boolean).map((line, dIdx) => (
+                      {bullets.filter(Boolean).map((line, dIdx) => (
                         <li key={dIdx}>{line}</li>
                       ))}
                     </ul>
-                  ) : (
-                    <p className="text-[10.5px] text-slate-700 leading-snug">{exp.description}</p>
-                  )
-                )}
-                {Array.isArray(exp.highlights) && exp.highlights.length > 0 && (
-                  <ul className="list-disc list-inside text-[10px] text-slate-700 mt-0.5 space-y-0.5 pl-1">
-                    {exp.highlights.map((item, hIdx) => (
-                      <li key={hIdx}>{item}</li>
-                    ))}
-                  </ul>
-                )}
+                  ) : null;
+                })()}
               </div>
             ))}
           </div>

@@ -74,12 +74,18 @@ const ClassicAtsTemplate = ({ data = {} }) => {
               </div>
               <div className="text-indigo-700 font-medium mb-1.5 text-[10.5px]">{exp.company || exp.organization}</div>
               <ul className="list-disc pl-4 space-y-0.5 text-gray-700">
-                {Array.isArray(exp.description) ? (
-                  exp.description.filter(Boolean).map((line, j) => <li key={j} className="pl-1">{line}</li>)
-                ) : exp.description ? (
-                  <li className="pl-1">{exp.description}</li>
-                ) : null}
-                {exp.highlights?.map((h, j) => <li key={`h-${j}`} className="pl-1">{h}</li>)}
+                {(() => {
+                  const bullets = (Array.isArray(exp.bulletPoints) && exp.bulletPoints.length > 0)
+                    ? exp.bulletPoints
+                    : (Array.isArray(exp.highlights) && exp.highlights.length > 0)
+                      ? exp.highlights
+                      : (Array.isArray(exp.description)
+                          ? exp.description
+                          : (exp.description ? [exp.description] : []));
+                  return bullets.filter(Boolean).map((line, j) => (
+                    <li key={`h-${j}`} className="pl-1">{line}</li>
+                  ));
+                })()}
               </ul>
             </div>
           ))}

@@ -80,8 +80,16 @@ const DefaultAtsTemplate = ({ data = {} }) => {
                 <span>{exp.start_date || exp.startDate} - {exp.end_date || exp.endDate || 'Present'}</span>
               </div>
               <ul className="list-disc pl-5 mt-0.5 space-y-0.5">
-                {exp.highlights?.map((h, j) => <li key={j}>{h}</li>)}
-                {exp.description && !exp.highlights && <li>{exp.description}</li>}
+                {(() => {
+                  const bullets = (Array.isArray(exp.bulletPoints) && exp.bulletPoints.length > 0)
+                    ? exp.bulletPoints
+                    : (Array.isArray(exp.highlights) && exp.highlights.length > 0)
+                      ? exp.highlights
+                      : (Array.isArray(exp.description)
+                          ? exp.description
+                          : (exp.description ? [exp.description] : []));
+                  return bullets.filter(Boolean).map((h, j) => <li key={j}>{h}</li>);
+                })()}
               </ul>
             </div>
           ))}

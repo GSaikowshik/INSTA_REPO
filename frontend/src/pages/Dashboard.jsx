@@ -78,16 +78,38 @@ const Dashboard = () => {
             setCurrentResumeId(res.data.id);
             setResumeTitle(res.data.title || "Untitled Resume");
             if (res.data.content) {
+              const content = res.data.content;
+              const mappedExperience = (content.experience || content.experiences || []).map(exp => {
+                const rawBullets = exp.bulletPoints || exp.highlights || (Array.isArray(exp.description) ? exp.description : (exp.description ? exp.description.split('\n') : [])) || [];
+                const bullets = Array.isArray(rawBullets) ? rawBullets : [rawBullets];
+                return {
+                  ...exp,
+                  bulletPoints: bullets,
+                  highlights: bullets,
+                  description: bullets,
+                };
+              });
+
               setProfileData({
-                personal_info: res.data.content.personal_info || defaultParsedData.personal_info,
-                experiences: res.data.content.experiences || res.data.content.experience || [],
-                education: res.data.content.education || [],
-                skills: res.data.content.skills || [],
-                projects: res.data.content.projects || [],
-                certifications: res.data.content.certifications || [],
-                achievements: res.data.content.achievements || [],
-                leadership: res.data.content.leadership || [],
-                additional_info: res.data.content.additional_info || res.data.content.additionalInfo || [],
+                personal_info: content.personal_info || defaultParsedData.personal_info,
+                experience: mappedExperience,
+                experiences: mappedExperience,
+                education: content.education || [],
+                skills: content.skills || [],
+                projects: (content.projects || []).map(proj => {
+                  const rawBullets = proj.bulletPoints || proj.highlights || proj.bullet_points || (Array.isArray(proj.description) ? proj.description : (proj.description ? proj.description.split('\n') : [])) || [];
+                  const bullets = Array.isArray(rawBullets) ? rawBullets : [rawBullets];
+                  return {
+                    ...proj,
+                    bulletPoints: bullets,
+                    highlights: bullets,
+                    description: bullets,
+                  };
+                }),
+                certifications: content.certifications || [],
+                achievements: content.achievements || [],
+                leadership: content.leadership || [],
+                additional_info: content.additional_info || content.additionalInfo || [],
               });
               setLoading(false);
               return;
@@ -100,16 +122,38 @@ const Dashboard = () => {
 
       const response = await api.get('/profile', headers);
       if (response.data && response.data.parsed_data) {
+        const parsedData = response.data.parsed_data;
+        const mappedExperience = (parsedData.experience || parsedData.experiences || []).map(exp => {
+          const rawBullets = exp.bulletPoints || exp.highlights || (Array.isArray(exp.description) ? exp.description : (exp.description ? exp.description.split('\n') : [])) || [];
+          const bullets = Array.isArray(rawBullets) ? rawBullets : [rawBullets];
+          return {
+            ...exp,
+            bulletPoints: bullets,
+            highlights: bullets,
+            description: bullets,
+          };
+        });
+
         setProfileData({
-          personal_info: response.data.parsed_data.personal_info || defaultParsedData.personal_info,
-          experiences: response.data.parsed_data.experiences || response.data.parsed_data.experience || [],
-          education: response.data.parsed_data.education || [],
-          skills: response.data.parsed_data.skills || [],
-          projects: response.data.parsed_data.projects || [],
-          certifications: response.data.parsed_data.certifications || [],
-          achievements: response.data.parsed_data.achievements || [],
-          leadership: response.data.parsed_data.leadership || [],
-          additional_info: response.data.parsed_data.additional_info || response.data.parsed_data.additionalInfo || [],
+          personal_info: parsedData.personal_info || defaultParsedData.personal_info,
+          experience: mappedExperience,
+          experiences: mappedExperience,
+          education: parsedData.education || [],
+          skills: parsedData.skills || [],
+          projects: (parsedData.projects || []).map(proj => {
+            const rawBullets = proj.bulletPoints || proj.highlights || proj.bullet_points || (Array.isArray(proj.description) ? proj.description : (proj.description ? proj.description.split('\n') : [])) || [];
+            const bullets = Array.isArray(rawBullets) ? rawBullets : [rawBullets];
+            return {
+              ...proj,
+              bulletPoints: bullets,
+              highlights: bullets,
+              description: bullets,
+            };
+          }),
+          certifications: parsedData.certifications || [],
+          achievements: parsedData.achievements || [],
+          leadership: parsedData.leadership || [],
+          additional_info: parsedData.additional_info || parsedData.additionalInfo || [],
         });
       }
     } catch (err) {
@@ -156,16 +200,38 @@ const Dashboard = () => {
       });
 
       if (response.data && response.data.parsed_data) {
+        const parsedData = response.data.parsed_data;
+        const mappedExperience = (parsedData.experience || parsedData.experiences || []).map(exp => {
+          const rawBullets = exp.bulletPoints || exp.highlights || (Array.isArray(exp.description) ? exp.description : (exp.description ? exp.description.split('\n') : [])) || [];
+          const bullets = Array.isArray(rawBullets) ? rawBullets : [rawBullets];
+          return {
+            ...exp,
+            bulletPoints: bullets,
+            highlights: bullets,
+            description: bullets,
+          };
+        });
+
         setProfileData({
-          personal_info: response.data.parsed_data.personal_info || defaultParsedData.personal_info,
-          experiences: response.data.parsed_data.experiences || response.data.parsed_data.experience || [],
-          education: response.data.parsed_data.education || [],
-          skills: response.data.parsed_data.skills || [],
-          projects: response.data.parsed_data.projects || [],
-          certifications: response.data.parsed_data.certifications || [],
-          achievements: response.data.parsed_data.achievements || [],
-          leadership: response.data.parsed_data.leadership || [],
-          additional_info: response.data.parsed_data.additional_info || response.data.parsed_data.additionalInfo || [],
+          personal_info: parsedData.personal_info || defaultParsedData.personal_info,
+          experience: mappedExperience,
+          experiences: mappedExperience,
+          education: parsedData.education || [],
+          skills: parsedData.skills || [],
+          projects: (parsedData.projects || []).map(proj => {
+            const rawBullets = proj.bulletPoints || proj.highlights || proj.bullet_points || (Array.isArray(proj.description) ? proj.description : (proj.description ? proj.description.split('\n') : [])) || [];
+            const bullets = Array.isArray(rawBullets) ? rawBullets : [rawBullets];
+            return {
+              ...proj,
+              bulletPoints: bullets,
+              highlights: bullets,
+              description: bullets,
+            };
+          }),
+          certifications: parsedData.certifications || [],
+          achievements: parsedData.achievements || [],
+          leadership: parsedData.leadership || [],
+          additional_info: parsedData.additional_info || parsedData.additionalInfo || [],
         });
         setMessage({
           type: 'success',
@@ -283,46 +349,55 @@ const Dashboard = () => {
   /* OBJECTIVE 2 & 3: Immutable Experience & Project Bullet Points CRUD Handlers */
   const addExperienceBullet = (expIndex) => {
     setProfileData((prev) => {
-      const list = [...(prev.experiences || [])];
+      const list = [...(prev.experiences || prev.experience || [])];
       const exp = { ...list[expIndex] };
-      const rawBullets = Array.isArray(exp.highlights) && exp.highlights.length > 0
-        ? exp.highlights
-        : (Array.isArray(exp.description) ? exp.description : (exp.description ? exp.description.split('\n') : []));
+      const rawBullets = (Array.isArray(exp.bulletPoints) && exp.bulletPoints.length > 0)
+        ? exp.bulletPoints
+        : (Array.isArray(exp.highlights) && exp.highlights.length > 0
+            ? exp.highlights
+            : (Array.isArray(exp.description) ? exp.description : (exp.description ? exp.description.split('\n') : [])));
       const bullets = [...rawBullets, ''];
+      exp.bulletPoints = bullets;
       exp.highlights = bullets;
       exp.description = bullets;
       list[expIndex] = exp;
-      return { ...prev, experiences: list };
+      return { ...prev, experiences: list, experience: list };
     });
   };
 
   const updateExperienceBullet = (expIndex, bulletIndex, value) => {
     setProfileData((prev) => {
-      const list = [...(prev.experiences || [])];
+      const list = [...(prev.experiences || prev.experience || [])];
       const exp = { ...list[expIndex] };
-      const rawBullets = Array.isArray(exp.highlights) && exp.highlights.length > 0
-        ? exp.highlights
-        : (Array.isArray(exp.description) ? exp.description : (exp.description ? exp.description.split('\n') : []));
+      const rawBullets = (Array.isArray(exp.bulletPoints) && exp.bulletPoints.length > 0)
+        ? exp.bulletPoints
+        : (Array.isArray(exp.highlights) && exp.highlights.length > 0
+            ? exp.highlights
+            : (Array.isArray(exp.description) ? exp.description : (exp.description ? exp.description.split('\n') : [])));
       const bullets = rawBullets.map((item, idx) => (idx === bulletIndex ? value : item));
+      exp.bulletPoints = bullets;
       exp.highlights = bullets;
       exp.description = bullets;
       list[expIndex] = exp;
-      return { ...prev, experiences: list };
+      return { ...prev, experiences: list, experience: list };
     });
   };
 
   const removeExperienceBullet = (expIndex, bulletIndex) => {
     setProfileData((prev) => {
-      const list = [...(prev.experiences || [])];
+      const list = [...(prev.experiences || prev.experience || [])];
       const exp = { ...list[expIndex] };
-      const rawBullets = Array.isArray(exp.highlights) && exp.highlights.length > 0
-        ? exp.highlights
-        : (Array.isArray(exp.description) ? exp.description : (exp.description ? exp.description.split('\n') : []));
+      const rawBullets = (Array.isArray(exp.bulletPoints) && exp.bulletPoints.length > 0)
+        ? exp.bulletPoints
+        : (Array.isArray(exp.highlights) && exp.highlights.length > 0
+            ? exp.highlights
+            : (Array.isArray(exp.description) ? exp.description : (exp.description ? exp.description.split('\n') : [])));
       const bullets = rawBullets.filter((_, idx) => idx !== bulletIndex);
+      exp.bulletPoints = bullets;
       exp.highlights = bullets;
       exp.description = bullets;
       list[expIndex] = exp;
-      return { ...prev, experiences: list };
+      return { ...prev, experiences: list, experience: list };
     });
   };
 
@@ -391,7 +466,7 @@ const Dashboard = () => {
   return (
     <div className="space-y-5">
       {/* Action Header & Global Notification */}
-      <div className="flex items-center justify-between pb-3 border-b border-gray-200">
+      <div className="flex flex-wrap items-start justify-between gap-3 pb-3 border-b border-gray-200">
         <div>
           <h1 className="text-lg font-bold text-gray-900">AI Resume Builder</h1>
           <p className="text-xs text-gray-500">Edit your parsed resume profile or upload a new file.</p>
@@ -401,7 +476,7 @@ const Dashboard = () => {
           type="button"
           onClick={handleSaveProfile}
           disabled={saving}
-          className="px-3.5 py-1.5 bg-gray-900 hover:bg-gray-800 text-white rounded text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer disabled:opacity-50"
+          className="px-3.5 py-1.5 bg-gray-900 hover:bg-gray-800 text-white rounded text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer disabled:opacity-50 shrink-0"
         >
           {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
           {saving ? 'Saving...' : 'Save Changes'}
@@ -498,8 +573,7 @@ const Dashboard = () => {
               <div className="mt-3 p-2 rounded bg-blue-50 border border-blue-200 flex items-center gap-2 animate-pulse">
                 <Loader2 className="w-4 h-4 text-blue-700 animate-spin shrink-0" />
                 <p className="text-[11px] font-medium text-blue-800">
-                  <span className="hidden sm:inline">Gemini AI is parsing your resume...</span>
-                  <span className="sm:hidden">Parsing document...</span>
+                  Extracting profile data...
                 </p>
               </div>
             )}
@@ -778,9 +852,13 @@ const Dashboard = () => {
                     </div>
 
                     {(() => {
-                      const bullets = Array.isArray(exp.description)
-                        ? exp.description
-                        : (exp.description ? exp.description.split('\n') : []);
+                      const bullets = (Array.isArray(exp.bulletPoints) && exp.bulletPoints.length > 0)
+                        ? exp.bulletPoints
+                        : (Array.isArray(exp.highlights) && exp.highlights.length > 0
+                            ? exp.highlights
+                            : (Array.isArray(exp.description)
+                                ? exp.description
+                                : (exp.description ? exp.description.split('\n') : [])));
 
                       if (bullets.length === 0) {
                         return (

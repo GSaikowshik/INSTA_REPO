@@ -30,14 +30,18 @@ def get_api_keys() -> list[str]:
 PROMPT_TEXT = """
 Parse this resume into a strict JSON object with the following keys:
 - 'personal_info' (dict with fields: full_name, title, email, phone, location, summary, github_url, linkedin_url, website_url)
-- 'experience' (array of dicts with unique string 'id' for each item, plus fields: company, role, start_date, end_date, is_current, description (List[str]), highlights (List[str])))
+- 'experience' (array of dicts with unique string 'id' for each item, plus fields: company, role, start_date, end_date, is_current, bulletPoints (List[str]), highlights (List[str]), description (List[str]))
 - 'education' (array of dicts with unique string 'id' for each item, plus fields: institution, degree, field_of_study, start_date, end_date, gpa)
 - 'skills' (array of category dicts like {"category": "Programming", "items": ["Python", "JavaScript"]})
-- 'projects' (array of dicts with unique string 'id' for each item, plus fields: title, description, highlights (List[str]), technologies, repo_url, live_url)
+- 'projects' (array of dicts with unique string 'id' for each item, plus fields: title, description, highlights (List[str]), bulletPoints (List[str]), technologies, repo_url, live_url)
 - 'certifications' (array of dicts with unique string 'id' for each item, plus fields: name, issuer, issue_date, expiration_date, credential_url). IMPORTANT: Aggressively extract any professional credentials, training completions, or virtual internships even if they are under different headers. Explicitly look for and include items like Deep Learning competencies, Cloud certifications, and academy programs (e.g., SmartBridge, Hack2skill) in this array.
 - 'achievements' (array of strings representing awards, honors, or publications)
 
-IMPORTANT: For 'experience' and 'projects', strictly return bullet points as a List[str] of explicit strings in 'highlights'.
+CRITICAL INSTRUCTIONS FOR WORK EXPERIENCE:
+For each work experience, extract the descriptive text and break it down into an array of distinct, professional bullet points under the bulletPoints key. Do not return a single block of text.
+
+CRITICAL INSTRUCTIONS FOR PROJECTS:
+For each project, extract the descriptive text and break it down into an array of distinct, professional bullet points under the bulletPoints and highlights keys.
 
 Return ONLY raw JSON matching this structure.
 """
@@ -208,16 +212,66 @@ async def parse_resume_bytes(file_bytes: bytes, mime_type: str) -> dict[str, Any
     skills = parsed_json.get("skills") or []
     projects = parsed_json.get("projects") or []
     certifications = parsed_json.get("certifications") or []
+    achievements = parsed_json.get("achievements") or []
+    leadership = parsed_json.get("leadership") or []
+    additional_info = parsed_json.get("additional_info") or []
 
     for item in experiences:
-        if isinstance(item, dict) and "id" not in item:
-            item["id"] = str(uuid.uuid4())
+        if isinstance(item, dict):
+            if "id" not in item:
+                item["id"] = str(uuid.uuid4())
+            
+            # Extract bullet points from bulletPoints, highlights, bullet_points, or description
+            raw_bullets = item.get("bulletPoints") or item.get("highlights") or item.get("bullet_points") or []
+            if not raw_bullets and item.get("description"):
+                desc = item["description"]
+                if isinstance(desc, list):
+                    raw_bullets = desc
+                elif isinstance(desc, str):
+                    raw_bullets = [b.strip() for b in desc.split("\n") if b.strip()]
+            
+            if isinstance(raw_bullets, str):
+                bullets = [b.strip() for b in raw_bullets.split("\n") if b.strip()]
+            elif isinstance(raw_bullets, list):
+                bullets = [str(b).strip() for b in raw_bullets if str(b).strip()]
+            else:
+                bullets = []
+
+            item["bulletPoints"] = bullets
+            item["highlights"] = bullets
+            item["bullet_points"] = bullets
+            item["description"] = bullets
+
     for item in education:
         if isinstance(item, dict) and "id" not in item:
             item["id"] = str(uuid.uuid4())
+
     for item in projects:
-        if isinstance(item, dict) and "id" not in item:
-            item["id"] = str(uuid.uuid4())
+        if isinstance(item, dict):
+            if "id" not in item:
+                item["id"] = str(uuid.uuid4())
+            
+            raw_bullets = item.get("bulletPoints") or item.get("highlights") or item.get("bullet_points") or []
+            if not raw_bullets and item.get("description"):
+                desc = item["description"]
+                if isinstance(desc, list):
+                    raw_bullets = desc
+                elif isinstance(desc, str):
+                    raw_bullets = [b.strip() for b in desc.split("\n") if b.strip()]
+            
+            if isinstance(raw_bullets, str):
+                bullets = [b.strip() for b in raw_bullets.split("\n") if b.strip()]
+            elif isinstance(raw_bullets, list):
+                bullets = [str(b).strip() for b in raw_bullets if str(b).strip()]
+            else:
+                bullets = []
+
+            item["bulletPoints"] = bullets
+            item["highlights"] = bullets
+            item["bullet_points"] = bullets
+            if not item.get("description") or isinstance(item.get("description"), list):
+                item["description"] = bullets
+
     for item in certifications:
         if isinstance(item, dict) and "id" not in item:
             item["id"] = str(uuid.uuid4())
@@ -230,6 +284,9 @@ async def parse_resume_bytes(file_bytes: bytes, mime_type: str) -> dict[str, Any
         "skills": skills,
         "projects": projects,
         "certifications": certifications,
+        "achievements": achievements,
+        "leadership": leadership,
+        "additional_info": additional_info,
     }
 
 

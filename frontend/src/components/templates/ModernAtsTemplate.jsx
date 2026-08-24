@@ -95,8 +95,16 @@ const ModernAtsTemplate = ({ data = {} }) => {
                     <span className="text-[9.5px] text-slate-500 font-normal">{exp.start_date || exp.startDate} – {exp.end_date || exp.endDate || 'Present'}</span>
                   </div>
                   <ul className="list-disc pl-4 mt-1 space-y-0.5 text-slate-700 text-[10px]">
-                    {exp.highlights?.map((h, j) => <li key={j}>{h}</li>)}
-                    {exp.description && !exp.highlights && <li>{exp.description}</li>}
+                    {(() => {
+                      const bullets = (Array.isArray(exp.bulletPoints) && exp.bulletPoints.length > 0)
+                        ? exp.bulletPoints
+                        : (Array.isArray(exp.highlights) && exp.highlights.length > 0)
+                          ? exp.highlights
+                          : (Array.isArray(exp.description)
+                              ? exp.description
+                              : (exp.description ? [exp.description] : []));
+                      return bullets.filter(Boolean).map((h, j) => <li key={j}>{h}</li>);
+                    })()}
                   </ul>
                 </div>
               ))}

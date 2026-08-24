@@ -47,8 +47,16 @@ const SignatureTemplate = ({ data = {} }) => {
               </div>
               <div className="font-semibold italic mb-1">{exp.company || exp.organization}</div>
               <ul className="list-disc pl-5 space-y-0.5">
-                {exp.highlights?.map((h, j) => <li key={j}>{h}</li>)}
-                {exp.description && !exp.highlights && <li>{exp.description}</li>}
+                {(() => {
+                  const bullets = (Array.isArray(exp.bulletPoints) && exp.bulletPoints.length > 0)
+                    ? exp.bulletPoints
+                    : (Array.isArray(exp.highlights) && exp.highlights.length > 0)
+                      ? exp.highlights
+                      : (Array.isArray(exp.description)
+                          ? exp.description
+                          : (exp.description ? [exp.description] : []));
+                  return bullets.filter(Boolean).map((h, j) => <li key={j}>{h}</li>);
+                })()}
               </ul>
             </div>
           ))}

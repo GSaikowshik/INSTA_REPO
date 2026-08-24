@@ -157,22 +157,16 @@ export async function exportToDocx(data) {
           );
         }
 
-        if (exp.description) {
-          children.push(
-            new Paragraph({
-              spaceAfter: 60,
-              children: [
-                new TextRun({
-                  text: exp.description,
-                  size: 20,
-                }),
-              ],
-            })
-          );
-        }
+        const bullets = (Array.isArray(exp.bulletPoints) && exp.bulletPoints.length > 0)
+          ? exp.bulletPoints
+          : (Array.isArray(exp.highlights) && exp.highlights.length > 0)
+            ? exp.highlights
+            : (Array.isArray(exp.description)
+                ? exp.description
+                : (typeof exp.description === 'string' && exp.description.trim() ? [exp.description] : []));
 
-        if (Array.isArray(exp.highlights)) {
-          exp.highlights.forEach((hl) => {
+        if (Array.isArray(bullets)) {
+          bullets.forEach((hl) => {
             if (hl) {
               children.push(
                 new Paragraph({

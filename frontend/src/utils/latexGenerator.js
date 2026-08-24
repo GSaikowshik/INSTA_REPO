@@ -91,18 +91,21 @@ ${summary}
       const expCompany = escapeLatex(exp.company || 'Company');
       const expStart = escapeLatex(exp.start_date || '');
       const expEnd = escapeLatex(exp.end_date || '');
-      const expDesc = escapeLatex(exp.description || '');
+      const bullets = (Array.isArray(exp.bulletPoints) && exp.bulletPoints.length > 0)
+        ? exp.bulletPoints
+        : (Array.isArray(exp.highlights) && exp.highlights.length > 0)
+          ? exp.highlights
+          : (Array.isArray(exp.description)
+              ? exp.description
+              : (typeof exp.description === 'string' && exp.description.trim() ? [exp.description] : []));
 
       latex += `\\noindent
 \\textbf{${expRole}} \\hfill {\\small \\textbf{${expStart}${expStart && expEnd ? ' -- ' : ''}${expEnd}}} \\\\
 {\\small \\textit{${expCompany}}} \\\\
 `;
-      if (expDesc) {
-        latex += `{\\small ${expDesc}} \\\\[4pt]\n`;
-      }
-      if (Array.isArray(exp.highlights) && exp.highlights.length > 0) {
+      if (Array.isArray(bullets) && bullets.length > 0) {
         latex += `\\begin{itemize}[leftmargin=*, noitemsep, topsep=2pt]\n`;
-        exp.highlights.forEach((item) => {
+        bullets.forEach((item) => {
           if (item) latex += `  \\item ${escapeLatex(item)}\n`;
         });
         latex += `\\end{itemize}\n\\vspace{4pt}\n`;
