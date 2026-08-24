@@ -438,7 +438,7 @@ const Dashboard = () => {
       {/* 2-Column Split Screen Layout (Live Preview above Editor on Mobile) */}
       <div className="flex flex-col lg:flex-row gap-6 relative items-start">
         {/* LEFT COLUMN: Upload Area & Modular Editor (Order 2 on mobile, Order 1 on LG) */}
-        <div className="w-full lg:w-1/2 flex-1 space-y-5 order-2 lg:order-1">
+        <div className="w-full lg:w-1/2 h-[calc(100vh-120px)] overflow-y-auto pr-2 pb-10 custom-scrollbar space-y-5 order-2 lg:order-1">
           {/* Resume Upload Area */}
           <section className="bg-white rounded p-4 border border-gray-200 shadow-sm relative">
             <div className="flex flex-col gap-3">
@@ -1286,7 +1286,7 @@ const Dashboard = () => {
         </div>
 
         {/* RIGHT COLUMN: Real-Time Live Resume Preview (Order 1 on Mobile, Order 2 on LG) */}
-        <div className="w-full lg:w-1/2 lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] overflow-y-auto space-y-2.5 order-1 lg:order-2">
+        <div className="w-full lg:w-1/2 space-y-2.5 order-1 lg:order-2">
           <div className="flex items-center justify-between pb-2 border-b border-gray-200">
             <div className="flex items-center gap-2">
               <Eye className="w-4 h-4 text-blue-700" />
