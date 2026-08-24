@@ -267,6 +267,9 @@ async def generate_dynamic_portfolio(
     projects = resume_data.get("projects") or []
     certifications = resume_data.get("certifications") or []
     achievements = resume_data.get("achievements") or []
+    leadership = resume_data.get("leadership") or resume_data.get("leadership_activities") or []
+    additional_info = resume_data.get("additional_info") or resume_data.get("additionalInfo") or []
+    summary = resume_data.get("summary") or personal_info.get("summary") or ""
 
     return {
         "theme": {
@@ -278,11 +281,15 @@ async def generate_dynamic_portfolio(
         },
         "data": {
             "personal_info": personal_info,
+            "summary": summary,
             "experiences": experiences,
             "education": education,
             "skills": skills,
             "projects": projects,
             "certifications": certifications,
-            "achievements": achievements
+            "achievements": achievements,
+            "leadership": leadership,
+            "additional_info": additional_info,
+            "additionalInfo": additional_info
         }
     }

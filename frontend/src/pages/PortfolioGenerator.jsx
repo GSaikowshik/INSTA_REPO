@@ -265,19 +265,26 @@ const PortfolioGenerator = () => {
           }
         }
 
-        const response = await api.get('/profile', headers);
+        const response = await api.get(`/profile?t=${Date.now()}`, headers);
         if (response.data && response.data.parsed_data) {
           const parsed = response.data.parsed_data;
+          const personalInfo = parsed.personal_info || {};
+          if (!personalInfo.summary && parsed.summary) {
+            personalInfo.summary = parsed.summary;
+          }
           setMasterPayload((prev) => ({
             ...prev,
             data: {
-              personal_info: parsed.personal_info || {},
-              experiences: parsed.experiences || parsed.experience || [],
+              personal_info: personalInfo,
+              summary: parsed.summary || personalInfo.summary || '',
+              experiences: parsed.experiences || parsed.experience || parsed.work_experience || [],
               education: parsed.education || [],
               skills: parsed.skills || [],
               projects: parsed.projects || [],
               certifications: parsed.certifications || [],
               achievements: parsed.achievements || [],
+              leadership: parsed.leadership || parsed.leadership_activities || [],
+              additionalInfo: parsed.additional_info || parsed.additionalInfo || [],
             }
           }));
         }
@@ -407,11 +414,14 @@ const PortfolioGenerator = () => {
   const handleExport = () => {
     const data = masterPayload.data || {};
     const personal = data.personal_info || {};
+    const summary = data.summary || personal.summary || '';
     const experiences = data.experiences || [];
     const projects = data.projects || [];
     const skills = data.skills || [];
     const certifications = data.certifications || [];
     const achievements = data.achievements || [];
+    const leadership = data.leadership || data.leadership_activities || [];
+    const additionalInfo = data.additionalInfo || data.additional_info || [];
 
     const rawPhotoUrl = personal.photo_url || personal.photoUrl || '';
     const photoUrl = getFullImageUrl(rawPhotoUrl);
@@ -441,7 +451,7 @@ const PortfolioGenerator = () => {
       <div class="space-y-3 flex-1 order-2 sm:order-1">
         ${name !== 'Developer' ? `<h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight">${name}</h1>` : ''}
         ${personal.title ? `<p class="text-sm font-semibold uppercase tracking-widest opacity-80 mt-1">${personal.title}</p>` : ''}
-        ${personal.summary ? `<p class="text-xs opacity-85 leading-relaxed pt-3 max-w-2xl">${personal.summary}</p>` : ''}
+        ${summary ? `<p class="text-xs opacity-85 leading-relaxed pt-3 max-w-2xl">${summary}</p>` : ''}
         <div class="flex items-center gap-4 text-xs opacity-75 pt-2">
           ${personal.email ? `<span>${personal.email}</span>` : ''}
           ${personal.location ? `<span>• ${personal.location}</span>` : ''}
@@ -472,8 +482,8 @@ const PortfolioGenerator = () => {
           return `
           <div class="space-y-1.5 border-l-2 border-current/20 pl-4 ml-1">
             <div class="flex justify-between items-center text-xs font-bold">
-              <span>${exp.role} — <span class="opacity-75">${exp.company}</span></span>
-              <span class="text-[10px] opacity-60 font-mono">${exp.start_date} - ${exp.end_date || 'Present'}</span>
+              <span>${exp.role || exp.position || 'Role'} — <span class="opacity-75">${exp.company || exp.organization || ''}</span></span>
+              <span class="text-[10px] opacity-60 font-mono">${exp.start_date || exp.startDate || ''} - ${exp.end_date || exp.endDate || 'Present'}</span>
             </div>
             <p class="text-xs opacity-80 leading-relaxed">${descStr}</p>
           </div>
@@ -487,15 +497,42 @@ const PortfolioGenerator = () => {
     <div class="space-y-6 pb-8 border-b border-current/15">
       <h3 class="text-xs font-bold uppercase tracking-widest opacity-70">Selected Engineering Case Studies</h3>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        ${projects.map(proj => `
+        ${projects.map(proj => {
+          const ghUrl = proj.githubUrl || proj.repo_url || proj.github;
+          const demoUrl = proj.liveUrl || proj.live_url || proj.link || proj.demo_url;
+          return `
           <div class="${currentTheme.cardStyle} space-y-3 flex flex-col justify-between">
             <div class="space-y-2">
-              <h4 class="font-bold text-sm">${proj.title}</h4>
+              <h4 class="font-bold text-sm">${proj.title || proj.name || 'Project'}</h4>
               <div class="flex gap-1.5 flex-wrap">
-                ${(proj.technologies || proj.tech_stack || []).map(t => `<span class="${currentTheme.accentChip}">${t}</span>`).join('')}
+                ${(proj.technologies || proj.tech_stack || proj.techStack || []).map(t => `<span class="${currentTheme.accentChip}">${t}</span>`).join('')}
               </div>
               <p class="text-xs opacity-85 leading-relaxed">${proj.case_study || proj.description || ''}</p>
             </div>
+            ${(ghUrl || demoUrl) ? `
+            <div class="flex items-center gap-3 pt-2 text-xs border-t border-current/10 mt-2">
+              ${ghUrl ? `<a href="${ghUrl.startsWith('http') ? ghUrl : 'https://' + ghUrl}" target="_blank" rel="noopener noreferrer" class="font-bold underline text-xs hover:opacity-80">Code / GitHub ↗</a>` : ''}
+              ${ghUrl && demoUrl ? `<span class="opacity-40">•</span>` : ''}
+              ${demoUrl ? `<a href="${demoUrl.startsWith('http') ? demoUrl : 'https://' + demoUrl}" target="_blank" rel="noopener noreferrer" class="font-bold underline text-xs hover:opacity-80">Live Demo ↗</a>` : ''}
+            </div>` : ''}
+          </div>
+        `}).join('')}
+      </div>
+    </div>
+    ` : ''}
+
+    <!-- Leadership & Activities -->
+    ${leadership && leadership.length > 0 ? `
+    <div class="pb-8 border-b border-current/15 space-y-6">
+      <h3 class="text-xs font-bold uppercase tracking-widest opacity-70">Leadership & Activities</h3>
+      <div class="space-y-4">
+        ${leadership.map(item => `
+          <div class="space-y-1 border-l-2 border-current/20 pl-4 ml-1">
+            <div class="flex justify-between items-center text-xs font-bold">
+              <span>${item.role || item.title || 'Leader'} — <span class="opacity-75">${item.organization || item.company || ''}</span></span>
+              <span class="text-[10px] opacity-60 font-mono">${item.start_date || item.startDate || ''} ${item.end_date || item.endDate ? `- ${item.end_date || item.endDate}` : ''}</span>
+            </div>
+            ${item.description ? `<p class="text-xs opacity-80 leading-relaxed">${item.description}</p>` : ''}
           </div>
         `).join('')}
       </div>
@@ -510,10 +547,10 @@ const PortfolioGenerator = () => {
         ${certifications.map(cert => `
           <div class="space-y-1 py-1">
             <div class="flex items-center justify-between">
-              <h4 class="text-xs font-bold">${cert.name}</h4>
+              <h4 class="text-xs font-bold">${cert.name || cert.title}</h4>
               <span class="text-[10px] font-mono opacity-60">${cert.issue_date || cert.date || ''}</span>
             </div>
-            <p class="text-xs opacity-75 font-medium">${cert.issuer || ''}</p>
+            <p class="text-xs opacity-75 font-medium">${cert.issuer || cert.organization || ''}</p>
           </div>
         `).join('')}
       </div>
@@ -532,6 +569,21 @@ const PortfolioGenerator = () => {
               <h4 class="font-bold opacity-95">${ach.title || (typeof ach === 'string' ? ach : '')}</h4>
               ${ach.description ? `<p class="opacity-75 leading-relaxed">${ach.description}</p>` : ''}
             </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    ` : ''}
+
+    <!-- Additional Information -->
+    ${additionalInfo && additionalInfo.length > 0 ? `
+    <div class="pb-8 border-b border-current/15 space-y-4">
+      <h3 class="text-xs font-bold uppercase tracking-widest opacity-70">Additional Information</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        ${additionalInfo.map(info => `
+          <div class="space-y-1">
+            <h4 class="text-xs font-bold">${typeof info === 'string' ? 'Details' : (info.category || info.label || 'Category')}</h4>
+            <p class="text-xs opacity-80 leading-relaxed">${typeof info === 'string' ? info : (info.details || info.value || info.description || '')}</p>
           </div>
         `).join('')}
       </div>
@@ -557,11 +609,14 @@ const PortfolioGenerator = () => {
 
   const data = masterPayload.data || {};
   const personal = data.personal_info || {};
+  const summary = data.summary || personal.summary || '';
   const experiences = data.experiences || [];
   const projects = data.projects || [];
   const skills = data.skills || [];
   const certifications = data.certifications || [];
   const achievements = data.achievements || [];
+  const leadership = data.leadership || data.leadership_activities || [];
+  const additionalInfo = data.additionalInfo || data.additional_info || [];
 
   return (
     <div className={`space-y-6 bg-slate-50 min-h-[calc(100vh-80px)] ${isPreviewMode ? 'p-0 sm:p-4' : 'p-6'}`}>
@@ -807,7 +862,7 @@ const PortfolioGenerator = () => {
             <div className="space-y-3 flex-1 order-2 sm:order-1">
               {personal.full_name && <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight">{personal.full_name}</h1>}
               {personal.title && <p className="text-sm font-semibold uppercase tracking-widest opacity-80 mt-1">{personal.title}</p>}
-              {personal.summary && <p className="text-xs opacity-85 leading-relaxed pt-3 max-w-2xl">{personal.summary}</p>}
+              {summary && <p className="text-xs opacity-85 leading-relaxed pt-3 max-w-2xl">{summary}</p>}
               <div className="flex items-center gap-4 text-xs opacity-75 pt-2">
                 {personal.email && <span>{personal.email}</span>}
                 {personal.location && <span>• {personal.location}</span>}
@@ -851,8 +906,8 @@ const PortfolioGenerator = () => {
                 {experiences.map((exp, idx) => (
                   <div key={idx} className="space-y-1.5 border-l-2 border-current/20 pl-4 ml-1">
                     <div className="flex justify-between items-center text-xs font-bold">
-                      <span>{exp.role} — <span className="opacity-75">{exp.company}</span></span>
-                      <span className="text-[10px] opacity-60 font-mono">{exp.start_date} - {exp.end_date || 'Present'}</span>
+                      <span>{exp.role || exp.position || 'Role'} — <span className="opacity-75">{exp.company || exp.organization || ''}</span></span>
+                      <span className="text-[10px] opacity-60 font-mono">{exp.start_date || exp.startDate || ''} - {exp.end_date || exp.endDate || 'Present'}</span>
                     </div>
                     <p className="text-xs opacity-80 leading-relaxed">
                       {Array.isArray(exp.description) ? exp.description.join(' ') : exp.description}
@@ -872,34 +927,105 @@ const PortfolioGenerator = () => {
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {projects.map((proj, idx) => (
-                  <div key={idx} className={`${currentTheme.cardStyle} space-y-3 flex flex-col justify-between`}>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-bold text-sm">{proj.title}</h4>
-                        <ExternalLink className="w-3.5 h-3.5 opacity-50" />
+                {projects.map((proj, idx) => {
+                  const ghUrl = proj.githubUrl || proj.repo_url || proj.github;
+                  const demoUrl = proj.liveUrl || proj.live_url || proj.link || proj.demo_url;
+                  return (
+                    <div key={idx} className={`${currentTheme.cardStyle} space-y-3 flex flex-col justify-between`}>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-bold text-sm">{proj.title || proj.name || 'Project'}</h4>
+                          <ExternalLink className="w-3.5 h-3.5 opacity-50" />
+                        </div>
+                        <div className="flex gap-1.5 flex-wrap">
+                          {(proj.technologies || proj.tech_stack || proj.techStack || []).map((t, i) => (
+                            <span key={i} className={currentTheme.accentChip}>{t}</span>
+                          ))}
+                        </div>
+                        <p className="text-xs opacity-85 leading-relaxed">{proj.case_study || proj.description}</p>
                       </div>
-                      <div className="flex gap-1.5 flex-wrap">
-                        {(proj.technologies || proj.tech_stack || []).map((t, i) => (
-                          <span key={i} className={currentTheme.accentChip}>{t}</span>
-                        ))}
-                      </div>
-                      <p className="text-xs opacity-85 leading-relaxed">{proj.case_study || proj.description}</p>
+
+                      {(ghUrl || demoUrl) && (
+                        <div className="flex items-center gap-3 pt-2 text-xs border-t border-current/10 mt-2">
+                          {ghUrl && (
+                            <a
+                              href={ghUrl.startsWith('http') ? ghUrl : `https://${ghUrl}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 font-bold text-xs hover:opacity-80 underline"
+                            >
+                              <Code className="w-3 h-3" />
+                              <span>Code / GitHub</span>
+                            </a>
+                          )}
+                          {ghUrl && demoUrl && <span className="opacity-40">•</span>}
+                          {demoUrl && (
+                            <a
+                              href={demoUrl.startsWith('http') ? demoUrl : `https://${demoUrl}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 font-bold text-xs hover:opacity-80 underline"
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                              <span>Live Demo</span>
+                            </a>
+                          )}
+                        </div>
+                      )}
                     </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* 5. Leadership & Activities */}
+          {leadership && leadership.length > 0 && (
+            <div className="pb-8 border-b border-current/15 space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-widest opacity-70 flex items-center gap-1.5">
+                <Award className="w-3.5 h-3.5" />
+                <span>Leadership & Activities</span>
+              </h3>
+              <div className="space-y-4">
+                {leadership.map((item, idx) => (
+                  <div key={idx} className="space-y-1 border-l-2 border-current/20 pl-4 ml-1">
+                    <div className="flex justify-between items-center text-xs font-bold">
+                      <span>{item.role || item.title || 'Leader'} — <span className="opacity-75">{item.organization || item.company || ''}</span></span>
+                      <span className="text-[10px] opacity-60 font-mono">{item.start_date || item.startDate || ''} {item.end_date || item.endDate ? `- ${item.end_date || item.endDate}` : ''}</span>
+                    </div>
+                    {item.description && <p className="text-xs opacity-80 leading-relaxed">{item.description}</p>}
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* 5. Certifications Section */}
+          {/* 6. Certifications Section */}
           {certifications && certifications.length > 0 && (
             <CertificationsSection data={certifications} />
           )}
 
-          {/* 6. Achievements Section */}
+          {/* 7. Achievements Section */}
           {achievements && achievements.length > 0 && (
             <AchievementsSection data={achievements} />
+          )}
+
+          {/* 8. Additional Information */}
+          {additionalInfo && additionalInfo.length > 0 && (
+            <div className="pb-8 border-b border-current/15 space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-widest opacity-70 flex items-center gap-1.5">
+                <Globe className="w-3.5 h-3.5" />
+                <span>Additional Information</span>
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {additionalInfo.map((info, idx) => (
+                  <div key={idx} className="space-y-1">
+                    <h4 className="text-xs font-bold">{typeof info === 'string' ? 'Details' : (info.category || info.label || 'Category')}</h4>
+                    <p className="text-xs opacity-80 leading-relaxed">{typeof info === 'string' ? info : (info.details || info.value || info.description || '')}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
 
         </div>
