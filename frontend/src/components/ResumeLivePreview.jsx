@@ -122,7 +122,7 @@ const ResumeLivePreview = ({ resumeData = {}, selectedTemplate = 'template1', on
   const handleOpenLatex = () => {
     setShowDropdown(false);
     try {
-      const code = generateLatex(data);
+      const code = generateLatex(data, selectedTemplate);
       setLatexCode(code);
       setShowLatexModal(true);
     } catch (error) {

@@ -107,9 +107,49 @@ const Dashboard = () => {
                   };
                 }),
                 certifications: content.certifications || [],
-                achievements: content.achievements || [],
-                leadership: content.leadership || [],
-                additional_info: content.additional_info || content.additionalInfo || [],
+                achievements: (content.achievements || []).map(ach => {
+                  const title = typeof ach === 'string' ? ach : (ach.title || ach.name || '');
+                  const rawBullets = (typeof ach === 'object' && ach !== null)
+                    ? (ach.bulletPoints || ach.highlights || ach.bullet_points || (Array.isArray(ach.description) ? ach.description : (ach.description ? String(ach.description).split('\n') : [])))
+                    : [];
+                  const bullets = Array.isArray(rawBullets) ? rawBullets : (rawBullets ? [rawBullets] : []);
+                  return {
+                    ...(typeof ach === 'object' ? ach : {}),
+                    title,
+                    bulletPoints: bullets,
+                    highlights: bullets,
+                    description: bullets,
+                  };
+                }),
+                leadership: (content.leadership || []).map(lead => {
+                  const rawBullets = lead.bulletPoints || lead.highlights || lead.bullet_points || (Array.isArray(lead.description) ? lead.description : (lead.description ? lead.description.split('\n') : [])) || [];
+                  const bullets = Array.isArray(rawBullets) ? rawBullets : [rawBullets];
+                  return {
+                    ...lead,
+                    startDate: lead.startDate || lead.start_date || '',
+                    start_date: lead.startDate || lead.start_date || '',
+                    endDate: lead.endDate || lead.end_date || '',
+                    end_date: lead.endDate || lead.end_date || '',
+                    bulletPoints: bullets,
+                    highlights: bullets,
+                    description: bullets,
+                  };
+                }),
+                additional_info: (Array.isArray(content.additional_info || content.additionalInfo) ? (content.additional_info || content.additionalInfo) : ((content.additional_info || content.additionalInfo) ? [content.additional_info || content.additionalInfo] : [])).map(item => {
+                  const category = typeof item === 'object' ? (item.category || item.label || item.name || 'Additional Details') : 'Details';
+                  const rawBullets = (typeof item === 'object' && item !== null)
+                    ? (item.bulletPoints || item.highlights || item.bullet_points || (Array.isArray(item.details) ? item.details : (Array.isArray(item.description) ? item.description : ((item.details || item.description) ? String(item.details || item.description).split('\n') : []))))
+                    : [String(item)];
+                  const bullets = Array.isArray(rawBullets) ? rawBullets : [rawBullets];
+                  return {
+                    ...(typeof item === 'object' ? item : {}),
+                    category,
+                    bulletPoints: bullets,
+                    highlights: bullets,
+                    details: bullets,
+                    description: bullets,
+                  };
+                }),
               });
               setLoading(false);
               return;
@@ -151,9 +191,49 @@ const Dashboard = () => {
             };
           }),
           certifications: parsedData.certifications || [],
-          achievements: parsedData.achievements || [],
-          leadership: parsedData.leadership || [],
-          additional_info: parsedData.additional_info || parsedData.additionalInfo || [],
+          achievements: (parsedData.achievements || []).map(ach => {
+            const title = typeof ach === 'string' ? ach : (ach.title || ach.name || '');
+            const rawBullets = (typeof ach === 'object' && ach !== null)
+              ? (ach.bulletPoints || ach.highlights || ach.bullet_points || (Array.isArray(ach.description) ? ach.description : (ach.description ? String(ach.description).split('\n') : [])))
+              : [];
+            const bullets = Array.isArray(rawBullets) ? rawBullets : (rawBullets ? [rawBullets] : []);
+            return {
+              ...(typeof ach === 'object' ? ach : {}),
+              title,
+              bulletPoints: bullets,
+              highlights: bullets,
+              description: bullets,
+            };
+          }),
+          leadership: (parsedData.leadership || []).map(lead => {
+            const rawBullets = lead.bulletPoints || lead.highlights || lead.bullet_points || (Array.isArray(lead.description) ? lead.description : (lead.description ? lead.description.split('\n') : [])) || [];
+            const bullets = Array.isArray(rawBullets) ? rawBullets : [rawBullets];
+            return {
+              ...lead,
+              startDate: lead.startDate || lead.start_date || '',
+              start_date: lead.startDate || lead.start_date || '',
+              endDate: lead.endDate || lead.end_date || '',
+              end_date: lead.endDate || lead.end_date || '',
+              bulletPoints: bullets,
+              highlights: bullets,
+              description: bullets,
+            };
+          }),
+          additional_info: (Array.isArray(parsedData.additional_info || parsedData.additionalInfo) ? (parsedData.additional_info || parsedData.additionalInfo) : ((parsedData.additional_info || parsedData.additionalInfo) ? [parsedData.additional_info || parsedData.additionalInfo] : [])).map(item => {
+            const category = typeof item === 'object' ? (item.category || item.label || item.name || 'Additional Details') : 'Details';
+            const rawBullets = (typeof item === 'object' && item !== null)
+              ? (item.bulletPoints || item.highlights || item.bullet_points || (Array.isArray(item.details) ? item.details : (Array.isArray(item.description) ? item.description : ((item.details || item.description) ? String(item.details || item.description).split('\n') : []))))
+              : [String(item)];
+            const bullets = Array.isArray(rawBullets) ? rawBullets : [rawBullets];
+            return {
+              ...(typeof item === 'object' ? item : {}),
+              category,
+              bulletPoints: bullets,
+              highlights: bullets,
+              details: bullets,
+              description: bullets,
+            };
+          }),
         });
       }
     } catch (err) {
@@ -229,9 +309,49 @@ const Dashboard = () => {
             };
           }),
           certifications: parsedData.certifications || [],
-          achievements: parsedData.achievements || [],
-          leadership: parsedData.leadership || [],
-          additional_info: parsedData.additional_info || parsedData.additionalInfo || [],
+          achievements: (parsedData.achievements || []).map(ach => {
+            const title = typeof ach === 'string' ? ach : (ach.title || ach.name || '');
+            const rawBullets = (typeof ach === 'object' && ach !== null)
+              ? (ach.bulletPoints || ach.highlights || ach.bullet_points || (Array.isArray(ach.description) ? ach.description : (ach.description ? String(ach.description).split('\n') : [])))
+              : [];
+            const bullets = Array.isArray(rawBullets) ? rawBullets : (rawBullets ? [rawBullets] : []);
+            return {
+              ...(typeof ach === 'object' ? ach : {}),
+              title,
+              bulletPoints: bullets,
+              highlights: bullets,
+              description: bullets,
+            };
+          }),
+          leadership: (parsedData.leadership || []).map(lead => {
+            const rawBullets = lead.bulletPoints || lead.highlights || lead.bullet_points || (Array.isArray(lead.description) ? lead.description : (lead.description ? lead.description.split('\n') : [])) || [];
+            const bullets = Array.isArray(rawBullets) ? rawBullets : [rawBullets];
+            return {
+              ...lead,
+              startDate: lead.startDate || lead.start_date || '',
+              start_date: lead.startDate || lead.start_date || '',
+              endDate: lead.endDate || lead.end_date || '',
+              end_date: lead.endDate || lead.end_date || '',
+              bulletPoints: bullets,
+              highlights: bullets,
+              description: bullets,
+            };
+          }),
+          additional_info: (Array.isArray(parsedData.additional_info || parsedData.additionalInfo) ? (parsedData.additional_info || parsedData.additionalInfo) : ((parsedData.additional_info || parsedData.additionalInfo) ? [parsedData.additional_info || parsedData.additionalInfo] : [])).map(item => {
+            const category = typeof item === 'object' ? (item.category || item.label || item.name || 'Additional Details') : 'Details';
+            const rawBullets = (typeof item === 'object' && item !== null)
+              ? (item.bulletPoints || item.highlights || item.bullet_points || (Array.isArray(item.details) ? item.details : (Array.isArray(item.description) ? item.description : ((item.details || item.description) ? String(item.details || item.description).split('\n') : []))))
+              : [String(item)];
+            const bullets = Array.isArray(rawBullets) ? rawBullets : [rawBullets];
+            return {
+              ...(typeof item === 'object' ? item : {}),
+              category,
+              bulletPoints: bullets,
+              highlights: bullets,
+              details: bullets,
+              description: bullets,
+            };
+          }),
         });
         setMessage({
           type: 'success',
@@ -333,7 +453,10 @@ const Dashboard = () => {
   const updateItem = (section, index, field, value) => {
     setProfileData((prev) => {
       const list = [...(prev[section] || [])];
-      list[index] = { ...list[index], [field]: value };
+      const current = (typeof list[index] === 'object' && list[index] !== null)
+        ? list[index]
+        : { title: String(list[index] || ''), description: '' };
+      list[index] = { ...current, [field]: value };
       return { ...prev, [section]: list };
     });
   };
@@ -449,6 +572,171 @@ const Dashboard = () => {
       proj.bullet_points = bullets;
       list[projIndex] = proj;
       return { ...prev, projects: list };
+    });
+  };
+
+  const addLeadershipBullet = (leadIndex) => {
+    setProfileData((prev) => {
+      const list = [...(prev.leadership || [])];
+      const lead = { ...list[leadIndex] };
+      const rawBullets = (Array.isArray(lead.bulletPoints) && lead.bulletPoints.length > 0)
+        ? lead.bulletPoints
+        : (Array.isArray(lead.highlights) && lead.highlights.length > 0
+            ? lead.highlights
+            : (Array.isArray(lead.description) ? lead.description : (lead.description ? lead.description.split('\n') : [])));
+      const bullets = [...rawBullets, ''];
+      lead.bulletPoints = bullets;
+      lead.highlights = bullets;
+      lead.description = bullets;
+      list[leadIndex] = lead;
+      return { ...prev, leadership: list };
+    });
+  };
+
+  const updateLeadershipBullet = (leadIndex, bulletIndex, value) => {
+    setProfileData((prev) => {
+      const list = [...(prev.leadership || [])];
+      const lead = { ...list[leadIndex] };
+      const rawBullets = (Array.isArray(lead.bulletPoints) && lead.bulletPoints.length > 0)
+        ? lead.bulletPoints
+        : (Array.isArray(lead.highlights) && lead.highlights.length > 0
+            ? lead.highlights
+            : (Array.isArray(lead.description) ? lead.description : (lead.description ? lead.description.split('\n') : [])));
+      const bullets = rawBullets.map((item, idx) => (idx === bulletIndex ? value : item));
+      lead.bulletPoints = bullets;
+      lead.highlights = bullets;
+      lead.description = bullets;
+      list[leadIndex] = lead;
+      return { ...prev, leadership: list };
+    });
+  };
+
+  const removeLeadershipBullet = (leadIndex, bulletIndex) => {
+    setProfileData((prev) => {
+      const list = [...(prev.leadership || [])];
+      const lead = { ...list[leadIndex] };
+      const rawBullets = (Array.isArray(lead.bulletPoints) && lead.bulletPoints.length > 0)
+        ? lead.bulletPoints
+        : (Array.isArray(lead.highlights) && lead.highlights.length > 0
+            ? lead.highlights
+            : (Array.isArray(lead.description) ? lead.description : (lead.description ? lead.description.split('\n') : [])));
+      const bullets = rawBullets.filter((_, idx) => idx !== bulletIndex);
+      lead.bulletPoints = bullets;
+      lead.highlights = bullets;
+      lead.description = bullets;
+      list[leadIndex] = lead;
+      return { ...prev, leadership: list };
+    });
+  };
+
+  const addAchievementBullet = (achIndex) => {
+    setProfileData((prev) => {
+      const list = [...(prev.achievements || [])];
+      const ach = { ...list[achIndex] };
+      const rawBullets = (Array.isArray(ach.bulletPoints) && ach.bulletPoints.length > 0)
+        ? ach.bulletPoints
+        : (Array.isArray(ach.highlights) && ach.highlights.length > 0
+            ? ach.highlights
+            : (Array.isArray(ach.description) ? ach.description : (ach.description ? String(ach.description).split('\n') : [])));
+      const bullets = [...rawBullets, ''];
+      ach.bulletPoints = bullets;
+      ach.highlights = bullets;
+      ach.description = bullets;
+      list[achIndex] = ach;
+      return { ...prev, achievements: list };
+    });
+  };
+
+  const updateAchievementBullet = (achIndex, bulletIndex, value) => {
+    setProfileData((prev) => {
+      const list = [...(prev.achievements || [])];
+      const ach = { ...list[achIndex] };
+      const rawBullets = (Array.isArray(ach.bulletPoints) && ach.bulletPoints.length > 0)
+        ? ach.bulletPoints
+        : (Array.isArray(ach.highlights) && ach.highlights.length > 0
+            ? ach.highlights
+            : (Array.isArray(ach.description) ? ach.description : (ach.description ? String(ach.description).split('\n') : [])));
+      const bullets = rawBullets.map((item, idx) => (idx === bulletIndex ? value : item));
+      ach.bulletPoints = bullets;
+      ach.highlights = bullets;
+      ach.description = bullets;
+      list[achIndex] = ach;
+      return { ...prev, achievements: list };
+    });
+  };
+
+  const removeAchievementBullet = (achIndex, bulletIndex) => {
+    setProfileData((prev) => {
+      const list = [...(prev.achievements || [])];
+      const ach = { ...list[achIndex] };
+      const rawBullets = (Array.isArray(ach.bulletPoints) && ach.bulletPoints.length > 0)
+        ? ach.bulletPoints
+        : (Array.isArray(ach.highlights) && ach.highlights.length > 0
+            ? ach.highlights
+            : (Array.isArray(ach.description) ? ach.description : (ach.description ? String(ach.description).split('\n') : [])));
+      const bullets = rawBullets.filter((_, idx) => idx !== bulletIndex);
+      ach.bulletPoints = bullets;
+      ach.highlights = bullets;
+      ach.description = bullets;
+      list[achIndex] = ach;
+      return { ...prev, achievements: list };
+    });
+  };
+
+  const addAdditionalInfoBullet = (infoIndex) => {
+    setProfileData((prev) => {
+      const list = [...(prev.additional_info || [])];
+      const item = { ...list[infoIndex] };
+      const rawBullets = (Array.isArray(item.bulletPoints) && item.bulletPoints.length > 0)
+        ? item.bulletPoints
+        : (Array.isArray(item.highlights) && item.highlights.length > 0
+            ? item.highlights
+            : (Array.isArray(item.details) ? item.details : (Array.isArray(item.description) ? item.description : ((item.details || item.description) ? String(item.details || item.description).split('\n') : []))));
+      const bullets = [...rawBullets, ''];
+      item.bulletPoints = bullets;
+      item.highlights = bullets;
+      item.details = bullets;
+      item.description = bullets;
+      list[infoIndex] = item;
+      return { ...prev, additional_info: list };
+    });
+  };
+
+  const updateAdditionalInfoBullet = (infoIndex, bulletIndex, value) => {
+    setProfileData((prev) => {
+      const list = [...(prev.additional_info || [])];
+      const item = { ...list[infoIndex] };
+      const rawBullets = (Array.isArray(item.bulletPoints) && item.bulletPoints.length > 0)
+        ? item.bulletPoints
+        : (Array.isArray(item.highlights) && item.highlights.length > 0
+            ? item.highlights
+            : (Array.isArray(item.details) ? item.details : (Array.isArray(item.description) ? item.description : ((item.details || item.description) ? String(item.details || item.description).split('\n') : []))));
+      const bullets = rawBullets.map((b, idx) => (idx === bulletIndex ? value : b));
+      item.bulletPoints = bullets;
+      item.highlights = bullets;
+      item.details = bullets;
+      item.description = bullets;
+      list[infoIndex] = item;
+      return { ...prev, additional_info: list };
+    });
+  };
+
+  const removeAdditionalInfoBullet = (infoIndex, bulletIndex) => {
+    setProfileData((prev) => {
+      const list = [...(prev.additional_info || [])];
+      const item = { ...list[infoIndex] };
+      const rawBullets = (Array.isArray(item.bulletPoints) && item.bulletPoints.length > 0)
+        ? item.bulletPoints
+        : (Array.isArray(item.highlights) && item.highlights.length > 0
+            ? item.highlights
+            : (Array.isArray(item.details) ? item.details : (Array.isArray(item.description) ? item.description : ((item.details || item.description) ? String(item.details || item.description).split('\n') : []))));
+      const bullets = rawBullets.filter((_, idx) => idx !== bulletIndex);
+      item.bulletPoints = bullets;
+      item.highlights = bullets;
+      item.details = bullets;
+      item.description = bullets;
+      list[infoIndex] = item;
+      return { ...prev, additional_info: list };
     });
   };
 
@@ -1198,8 +1486,10 @@ const Dashboard = () => {
                   type="button"
                   onClick={() =>
                     addItem('achievements', {
-                      title: '',
-                      description: '',
+                      title: 'First Place - AI Hackathon',
+                      bulletPoints: ['Built an end-to-end full-stack agentic platform and won 1st prize.'],
+                      highlights: ['Built an end-to-end full-stack agentic platform and won 1st prize.'],
+                      description: ['Built an end-to-end full-stack agentic platform and won 1st prize.'],
                     })
                   }
                   className="px-2.5 py-1 bg-white border border-gray-200 hover:bg-gray-50 rounded text-xs font-medium text-gray-700 flex items-center gap-1 transition-colors cursor-pointer"
@@ -1229,13 +1519,63 @@ const Dashboard = () => {
                       onChange={(e) => updateItem('achievements', idx, 'title', e.target.value)}
                       className="w-full bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-700 rounded px-2.5 py-1 text-xs text-gray-900 outline-none"
                     />
-                    <textarea
-                      rows={2}
-                      placeholder="Brief description..."
-                      value={typeof ach === 'object' ? (ach.description || '') : ''}
-                      onChange={(e) => updateItem('achievements', idx, 'description', e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-700 rounded p-2 text-xs text-gray-900 outline-none resize-none font-sans"
-                    />
+
+                    {/* Dynamic Bullet Point Management */}
+                    <div className="space-y-2 pt-1 border-t border-gray-100">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[11px] font-bold text-gray-700">
+                          Bullet Points / Key Details
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => addAchievementBullet(idx)}
+                          className="px-2 py-0.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded text-[11px] font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                        >
+                          <Plus className="w-3 h-3" /> Add Bullet Point
+                        </button>
+                      </div>
+
+                      {(() => {
+                        const bullets = (Array.isArray(ach.bulletPoints) && ach.bulletPoints.length > 0)
+                          ? ach.bulletPoints
+                          : (Array.isArray(ach.highlights) && ach.highlights.length > 0
+                              ? ach.highlights
+                              : (Array.isArray(ach.description)
+                                  ? ach.description
+                                  : (ach.description ? String(ach.description).split('\n') : [])));
+
+                        if (bullets.length === 0) {
+                          return (
+                            <p className="text-[11px] text-gray-400 italic">No bullet points added yet. Click "+ Add Bullet Point" to add lines.</p>
+                          );
+                        }
+
+                        return (
+                          <div className="space-y-1.5">
+                            {bullets.map((bulletStr, bIdx) => (
+                              <div key={bIdx} className="flex items-center gap-1.5">
+                                <span className="text-blue-600 font-bold text-xs shrink-0">•</span>
+                                <input
+                                  type="text"
+                                  placeholder={`Bullet point #${bIdx + 1}...`}
+                                  value={bulletStr}
+                                  onChange={(e) => updateAchievementBullet(idx, bIdx, e.target.value)}
+                                  className="bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-700 rounded px-2.5 py-1 text-xs text-gray-900 outline-none flex-1 font-sans"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => removeAchievementBullet(idx, bIdx)}
+                                  className="p-1 text-gray-400 hover:text-rose-600 rounded transition-colors cursor-pointer shrink-0"
+                                  title="Remove bullet point"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })()}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -1252,9 +1592,13 @@ const Dashboard = () => {
                   type="button"
                   onClick={() =>
                     addItem('leadership', {
-                      role: 'Lead Lead Developer / VP Student Body',
+                      role: 'Lead Developer / VP Student Body',
                       organization: 'Tech Community / Club',
-                      description: 'Led technical workshops and managed student developer teams.',
+                      startDate: '',
+                      endDate: '',
+                      bulletPoints: ['Led technical workshops and managed student developer teams.'],
+                      highlights: ['Led technical workshops and managed student developer teams.'],
+                      description: ['Led technical workshops and managed student developer teams.'],
                     })
                   }
                   className="px-2.5 py-1 bg-white border border-gray-200 hover:bg-gray-50 rounded text-xs font-medium text-gray-700 flex items-center gap-1 transition-colors cursor-pointer"
@@ -1293,13 +1637,85 @@ const Dashboard = () => {
                     />
                   </div>
 
-                  <textarea
-                    rows={2}
-                    placeholder="Brief description of leadership activity..."
-                    value={lead.description || ''}
-                    onChange={(e) => updateItem('leadership', idx, 'description', e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-700 rounded p-2 text-xs text-gray-900 outline-none resize-none font-sans"
-                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      placeholder="Start Date (e.g., Sep 2025)"
+                      value={lead.startDate || lead.start_date || ''}
+                      onChange={(e) => {
+                        updateItem('leadership', idx, 'startDate', e.target.value);
+                        updateItem('leadership', idx, 'start_date', e.target.value);
+                      }}
+                      className="bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-700 rounded px-2.5 py-1 text-xs text-gray-900 outline-none"
+                    />
+                    <input
+                      type="text"
+                      placeholder="End Date (e.g., May 2026)"
+                      value={lead.endDate || lead.end_date || ''}
+                      onChange={(e) => {
+                        updateItem('leadership', idx, 'endDate', e.target.value);
+                        updateItem('leadership', idx, 'end_date', e.target.value);
+                      }}
+                      className="bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-700 rounded px-2.5 py-1 text-xs text-gray-900 outline-none"
+                    />
+                  </div>
+
+                  {/* Dynamic Bullet Point Management */}
+                  <div className="space-y-2 pt-1 border-t border-gray-100">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px] font-bold text-gray-700">
+                        Bullet Points / Key Contributions
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => addLeadershipBullet(idx)}
+                        className="px-2 py-0.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded text-[11px] font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                      >
+                        <Plus className="w-3 h-3" /> Add Bullet Point
+                      </button>
+                    </div>
+
+                    {(() => {
+                      const bullets = (Array.isArray(lead.bulletPoints) && lead.bulletPoints.length > 0)
+                        ? lead.bulletPoints
+                        : (Array.isArray(lead.highlights) && lead.highlights.length > 0
+                            ? lead.highlights
+                            : (Array.isArray(lead.description)
+                                ? lead.description
+                                : (lead.description ? lead.description.split('\n') : [])));
+
+                      if (bullets.length === 0) {
+                        return (
+                          <p className="text-[11px] text-gray-400 italic">No bullet points added yet. Click "+ Add Bullet Point" to add lines.</p>
+                        );
+                      }
+
+                      return (
+                        <div className="space-y-1.5">
+                          {bullets.map((bulletStr, bIdx) => (
+                            <div key={bIdx} className="flex items-center gap-1.5">
+                              <span className="text-blue-600 font-bold text-xs shrink-0">•</span>
+                              <input
+                                type="text"
+                                placeholder={`Bullet point #${bIdx + 1}...`}
+                                value={bulletStr}
+                                onChange={(e) => updateLeadershipBullet(idx, bIdx, e.target.value)}
+                                className="bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-700 rounded px-2.5 py-1 text-xs text-gray-900 outline-none flex-1 font-sans"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeLeadershipBullet(idx, bIdx)}
+                                className="p-1 text-gray-400 hover:text-rose-600 rounded transition-colors cursor-pointer shrink-0"
+                                title="Remove bullet point"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
+                  </div>
                 </div>
               ))}
             </div>
@@ -1316,7 +1732,10 @@ const Dashboard = () => {
                   onClick={() =>
                     addItem('additional_info', {
                       category: 'Languages & Interests',
-                      details: 'English (Native), Telugu (Native), Competitive Programming, Open Source Contributing',
+                      bulletPoints: ['English (Native), Telugu (Native)', 'Competitive Programming, Open Source Contributing'],
+                      highlights: ['English (Native), Telugu (Native)', 'Competitive Programming, Open Source Contributing'],
+                      details: ['English (Native), Telugu (Native)', 'Competitive Programming, Open Source Contributing'],
+                      description: ['English (Native), Telugu (Native)', 'Competitive Programming, Open Source Contributing'],
                     })
                   }
                   className="px-2.5 py-1 bg-white border border-gray-200 hover:bg-gray-50 rounded text-xs font-medium text-gray-700 flex items-center gap-1 transition-colors cursor-pointer"
@@ -1347,13 +1766,65 @@ const Dashboard = () => {
                         onChange={(e) => updateItem('additional_info', idx, 'category', e.target.value)}
                         className="w-full bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-700 rounded px-2.5 py-1 text-xs text-gray-900 outline-none"
                       />
-                      <textarea
-                        rows={2}
-                        placeholder="Details (e.g. English, German, Security Clearance, US Citizen)..."
-                        value={typeof infoItem === 'string' ? infoItem : (infoItem.details || infoItem.description || '')}
-                        onChange={(e) => updateItem('additional_info', idx, 'details', e.target.value)}
-                        className="w-full bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-700 rounded p-2 text-xs text-gray-900 outline-none resize-none font-sans"
-                      />
+
+                      {/* Dynamic Bullet Point Management */}
+                      <div className="space-y-2 pt-1 border-t border-gray-100">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[11px] font-bold text-gray-700">
+                            Bullet Points / Detail Items
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => addAdditionalInfoBullet(idx)}
+                            className="px-2 py-0.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded text-[11px] font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                          >
+                            <Plus className="w-3 h-3" /> Add Bullet Point
+                          </button>
+                        </div>
+
+                        {(() => {
+                          const bullets = (Array.isArray(infoItem.bulletPoints) && infoItem.bulletPoints.length > 0)
+                            ? infoItem.bulletPoints
+                            : (Array.isArray(infoItem.highlights) && infoItem.highlights.length > 0
+                                ? infoItem.highlights
+                                : (Array.isArray(infoItem.details)
+                                    ? infoItem.details
+                                    : (Array.isArray(infoItem.description)
+                                        ? infoItem.description
+                                        : ((infoItem.details || infoItem.description) ? String(infoItem.details || infoItem.description).split('\n') : []))));
+
+                          if (bullets.length === 0) {
+                            return (
+                              <p className="text-[11px] text-gray-400 italic">No bullet points added yet. Click "+ Add Bullet Point" to add lines.</p>
+                            );
+                          }
+
+                          return (
+                            <div className="space-y-1.5">
+                              {bullets.map((bulletStr, bIdx) => (
+                                <div key={bIdx} className="flex items-center gap-1.5">
+                                  <span className="text-blue-600 font-bold text-xs shrink-0">•</span>
+                                  <input
+                                    type="text"
+                                    placeholder={`Detail item #${bIdx + 1}...`}
+                                    value={bulletStr}
+                                    onChange={(e) => updateAdditionalInfoBullet(idx, bIdx, e.target.value)}
+                                    className="bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-700 rounded px-2.5 py-1 text-xs text-gray-900 outline-none flex-1 font-sans"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => removeAdditionalInfoBullet(idx, bIdx)}
+                                    className="p-1 text-gray-400 hover:text-rose-600 rounded transition-colors cursor-pointer shrink-0"
+                                    title="Remove item"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })()}
+                      </div>
                     </div>
                   </div>
                 ))

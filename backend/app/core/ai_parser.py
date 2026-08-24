@@ -35,6 +35,7 @@ Parse this resume into a strict JSON object with the following keys:
 - 'skills' (array of category dicts like {"category": "Programming", "items": ["Python", "JavaScript"]})
 - 'projects' (array of dicts with unique string 'id' for each item, plus fields: title, description, highlights (List[str]), bulletPoints (List[str]), technologies, repo_url, live_url)
 - 'certifications' (array of dicts with unique string 'id' for each item, plus fields: name, issuer, issue_date, expiration_date, credential_url). IMPORTANT: Aggressively extract any professional credentials, training completions, or virtual internships even if they are under different headers. Explicitly look for and include items like Deep Learning competencies, Cloud certifications, and academy programs (e.g., SmartBridge, Hack2skill) in this array.
+- 'leadership' (array of dicts with unique string 'id' for each item, plus fields: role, organization, start_date, end_date, bulletPoints (List[str]), description (List[str]))
 - 'achievements' (array of strings representing awards, honors, or publications)
 
 CRITICAL INSTRUCTIONS FOR WORK EXPERIENCE:
@@ -42,6 +43,9 @@ For each work experience, extract the descriptive text and break it down into an
 
 CRITICAL INSTRUCTIONS FOR PROJECTS:
 For each project, extract the descriptive text and break it down into an array of distinct, professional bullet points under the bulletPoints and highlights keys.
+
+CRITICAL INSTRUCTIONS FOR LEADERSHIP & ACTIVITIES:
+For each leadership or activity item, extract the role, organization, start_date, end_date, and break down the descriptive text into an array of distinct bullet points under the bulletPoints key.
 
 Return ONLY raw JSON matching this structure.
 """
@@ -275,6 +279,113 @@ async def parse_resume_bytes(file_bytes: bytes, mime_type: str) -> dict[str, Any
     for item in certifications:
         if isinstance(item, dict) and "id" not in item:
             item["id"] = str(uuid.uuid4())
+
+    for item in leadership:
+        if isinstance(item, dict):
+            if "id" not in item:
+                item["id"] = str(uuid.uuid4())
+
+            start_d = item.get("startDate") or item.get("start_date") or ""
+            end_d = item.get("endDate") or item.get("end_date") or ""
+            item["startDate"] = start_d
+            item["start_date"] = start_d
+            item["endDate"] = end_d
+            item["end_date"] = end_d
+
+            raw_bullets = item.get("bulletPoints") or item.get("highlights") or item.get("bullet_points") or []
+            if not raw_bullets and item.get("description"):
+                desc = item["description"]
+                if isinstance(desc, list):
+                    raw_bullets = desc
+                elif isinstance(desc, str):
+                    raw_bullets = [b.strip() for b in desc.split("\n") if b.strip()]
+
+            if isinstance(raw_bullets, str):
+                bullets = [b.strip() for b in raw_bullets.split("\n") if b.strip()]
+            elif isinstance(raw_bullets, list):
+                bullets = [str(b).strip() for b in raw_bullets if str(b).strip()]
+            else:
+                bullets = []
+
+            item["bulletPoints"] = bullets
+            item["highlights"] = bullets
+            item["bullet_points"] = bullets
+            item["description"] = bullets
+
+    normalized_achievements = []
+    for item in achievements:
+        if isinstance(item, str):
+            normalized_achievements.append({
+                "id": str(uuid.uuid4()),
+                "title": item,
+                "description": [item],
+                "bulletPoints": [item],
+                "highlights": [item],
+                "bullet_points": [item],
+            })
+        elif isinstance(item, dict):
+            if "id" not in item:
+                item["id"] = str(uuid.uuid4())
+            title = item.get("title") or item.get("name") or ""
+            item["title"] = title
+            raw_bullets = item.get("bulletPoints") or item.get("highlights") or item.get("bullet_points") or []
+            if not raw_bullets and item.get("description"):
+                desc = item["description"]
+                if isinstance(desc, list):
+                    raw_bullets = desc
+                elif isinstance(desc, str):
+                    raw_bullets = [b.strip() for b in desc.split("\n") if b.strip()]
+            if isinstance(raw_bullets, str):
+                bullets = [b.strip() for b in raw_bullets.split("\n") if b.strip()]
+            elif isinstance(raw_bullets, list):
+                bullets = [str(b).strip() for b in raw_bullets if str(b).strip()]
+            else:
+                bullets = []
+            item["bulletPoints"] = bullets
+            item["highlights"] = bullets
+            item["bullet_points"] = bullets
+            item["description"] = bullets
+            normalized_achievements.append(item)
+    achievements = normalized_achievements
+
+    normalized_additional_info = []
+    if isinstance(additional_info, list):
+        for item in additional_info:
+            if isinstance(item, str):
+                normalized_additional_info.append({
+                    "id": str(uuid.uuid4()),
+                    "category": "Details",
+                    "details": [item],
+                    "description": [item],
+                    "bulletPoints": [item],
+                    "highlights": [item],
+                    "bullet_points": [item],
+                })
+            elif isinstance(item, dict):
+                if "id" not in item:
+                    item["id"] = str(uuid.uuid4())
+                category = item.get("category") or item.get("label") or item.get("name") or "Details"
+                item["category"] = category
+                raw_bullets = item.get("bulletPoints") or item.get("highlights") or item.get("bullet_points") or []
+                if not raw_bullets:
+                    raw_src = item.get("details") or item.get("description")
+                    if isinstance(raw_src, list):
+                        raw_bullets = raw_src
+                    elif isinstance(raw_src, str):
+                        raw_bullets = [b.strip() for b in raw_src.split("\n") if b.strip()]
+                if isinstance(raw_bullets, str):
+                    bullets = [b.strip() for b in raw_bullets.split("\n") if b.strip()]
+                elif isinstance(raw_bullets, list):
+                    bullets = [str(b).strip() for b in raw_bullets if str(b).strip()]
+                else:
+                    bullets = []
+                item["bulletPoints"] = bullets
+                item["highlights"] = bullets
+                item["bullet_points"] = bullets
+                item["details"] = bullets
+                item["description"] = bullets
+                normalized_additional_info.append(item)
+        additional_info = normalized_additional_info
 
     return {
         "personal_info": personal_info,

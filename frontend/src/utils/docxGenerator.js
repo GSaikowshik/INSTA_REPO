@@ -20,6 +20,9 @@ export async function exportToDocx(data) {
     const skills = data?.skills || [];
     const projects = data?.projects || [];
     const certifications = data?.certifications || [];
+    const achievements = data?.achievements || [];
+    const leadership = data?.leadership || data?.leadership_activities || [];
+    const additionalInfo = data?.additional_info || data?.additionalInfo || [];
 
     const children = [];
 
@@ -306,6 +309,56 @@ export async function exportToDocx(data) {
       });
     }
 
+    // --- ACHIEVEMENTS & HONORS ---
+    if (achievements.length > 0) {
+      children.push(createSectionHeading('Honors & Key Achievements'));
+      achievements.forEach((ach) => {
+        const title = typeof ach === 'string' ? ach : (ach.title || ach.name || '');
+        const bullets = (typeof ach === 'object' && ach !== null)
+          ? ((Array.isArray(ach.bulletPoints) && ach.bulletPoints.length > 0)
+              ? ach.bulletPoints
+              : (Array.isArray(ach.highlights) && ach.highlights.length > 0
+                  ? ach.highlights
+                  : (Array.isArray(ach.description)
+                      ? ach.description
+                      : (ach.description ? [ach.description] : []))))
+          : [];
+
+        if (title) {
+          children.push(
+            new Paragraph({
+              spaceBefore: 60,
+              children: [
+                new TextRun({
+                  text: title,
+                  bold: true,
+                  size: 22,
+                }),
+              ],
+            })
+          );
+        }
+
+        if (bullets.length > 0) {
+          bullets.filter(Boolean).forEach((pt) => {
+            children.push(
+              new Paragraph({
+                bullet: { level: 0 },
+                children: [new TextRun({ text: String(pt), size: 20 })],
+              })
+            );
+          });
+        } else if (typeof ach === 'object' && ach.description && typeof ach.description === 'string') {
+          children.push(
+            new Paragraph({
+              bullet: { level: 0 },
+              children: [new TextRun({ text: ach.description, size: 20 })],
+            })
+          );
+        }
+      });
+    }
+
     // --- SKILLS ---
     if (skills.length > 0) {
       children.push(createSectionHeading('Technical Skills'));
@@ -327,6 +380,113 @@ export async function exportToDocx(data) {
             ],
           })
         );
+      });
+    }
+
+    // --- LEADERSHIP & ACTIVITIES ---
+    if (leadership.length > 0) {
+      children.push(createSectionHeading('Leadership & Activities'));
+      leadership.forEach((lead) => {
+        const org = lead.organization || lead.company || lead.institution || '';
+        const role = lead.role || lead.title || lead.position || '';
+        const start = lead.startDate || lead.start_date || '';
+        const end = lead.endDate || lead.end_date || '';
+        const dateStr = start || end ? `${start}${start && end ? ' - ' : ''}${end}` : '';
+
+        children.push(
+          new Paragraph({
+            spaceBefore: 120,
+            children: [
+              new TextRun({
+                text: org,
+                bold: true,
+                size: 22,
+              }),
+              dateStr
+                ? new TextRun({
+                    text: `\t${dateStr}`,
+                    size: 18,
+                    color: '64748B',
+                  })
+                : new TextRun(''),
+            ],
+          })
+        );
+
+        if (role) {
+          children.push(
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: role,
+                  italics: true,
+                  size: 20,
+                  color: '4F46E5',
+                }),
+              ],
+            })
+          );
+        }
+
+        const bullets = (Array.isArray(lead.bulletPoints) && lead.bulletPoints.length > 0)
+          ? lead.bulletPoints
+          : (Array.isArray(lead.highlights) && lead.highlights.length > 0)
+            ? lead.highlights
+            : (Array.isArray(lead.description)
+                ? lead.description
+                : (lead.description ? [lead.description] : []));
+
+        bullets.filter(Boolean).forEach((pt) => {
+          children.push(
+            new Paragraph({
+              bullet: { level: 0 },
+              children: [new TextRun({ text: String(pt), size: 20 })],
+            })
+          );
+        });
+      });
+    }
+
+    // --- ADDITIONAL INFORMATION ---
+    if (Array.isArray(additionalInfo) && additionalInfo.length > 0) {
+      children.push(createSectionHeading('Additional Information'));
+      additionalInfo.forEach((item) => {
+        const label = typeof item === 'object' ? (item.label || item.category || item.name || item.title || 'Details') : '';
+        const bullets = (typeof item === 'object' && item !== null)
+          ? ((Array.isArray(item.bulletPoints) && item.bulletPoints.length > 0)
+              ? item.bulletPoints
+              : (Array.isArray(item.highlights) && item.highlights.length > 0
+                  ? item.highlights
+                  : (Array.isArray(item.details)
+                      ? item.details
+                      : (Array.isArray(item.description)
+                          ? item.description
+                          : ((item.details || item.description) ? [item.details || item.description] : [])))))
+          : [String(item)];
+
+        if (label) {
+          children.push(
+            new Paragraph({
+              spaceBefore: 60,
+              children: [
+                new TextRun({
+                  text: label,
+                  bold: true,
+                  size: 22,
+                }),
+              ],
+            })
+          );
+        }
+
+        bullets.filter(Boolean).forEach((pt) => {
+          children.push(
+            new Paragraph({
+              bullet: { level: 0 },
+              children: [new TextRun({ text: String(pt), size: 20 })],
+            })
+          );
+        });
       });
     }
 

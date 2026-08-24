@@ -259,18 +259,38 @@ const TemplateExecutive = ({ data = {} }) => {
           <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-900 border-t-2 border-b border-slate-900 py-0.5 mb-1.5">
             Honors & Executive Recognition
           </h2>
-          <ul className="list-disc list-inside space-y-0.5 text-[10.5px] text-slate-800">
+          <div className="space-y-2 text-[10.5px] text-slate-800">
             {achievements.map((ach, idx) => {
               const title = typeof ach === 'string' ? ach : (ach.title || ach.name || '');
-              const desc = typeof ach === 'object' ? ach.description : '';
+              const bullets = (typeof ach === 'object' && ach !== null)
+                ? ((Array.isArray(ach.bulletPoints) && ach.bulletPoints.length > 0)
+                    ? ach.bulletPoints
+                    : (Array.isArray(ach.highlights) && ach.highlights.length > 0
+                        ? ach.highlights
+                        : (Array.isArray(ach.description)
+                            ? ach.description
+                            : (ach.description ? [ach.description] : []))))
+                : [];
               return (
-                <li key={idx}>
-                  <span className="font-bold text-slate-900">{title}</span>
-                  {desc && <span className="text-slate-700 italic"> — {desc}</span>}
-                </li>
+                <div key={idx}>
+                  {title && <div className="font-bold text-slate-900">{title}</div>}
+                  {bullets.length > 0 ? (
+                    <ul className="list-disc list-inside space-y-0.5 text-[10.5px] text-slate-800 mt-0.5 pl-1">
+                      {bullets.filter(Boolean).map((line, bIdx) => (
+                        <li key={bIdx}>{line}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    typeof ach === 'object' && ach.description && typeof ach.description === 'string' && (
+                      <ul className="list-disc list-inside space-y-0.5 text-[10.5px] text-slate-800 mt-0.5 pl-1">
+                        <li>{ach.description}</li>
+                      </ul>
+                    )
+                  )}
+                </div>
               );
             })}
-          </ul>
+          </div>
         </section>
       )}
 
@@ -283,14 +303,31 @@ const TemplateExecutive = ({ data = {} }) => {
           {leadership.map((item, index) => {
             const org = item.organization || item.company || item.institution || item.label || '';
             const role = item.role || item.title || item.position || '';
-            const desc = item.description || (Array.isArray(item.highlights) ? item.highlights.join(' ') : '');
+            const start = item.startDate || item.start_date || '';
+            const end = item.endDate || item.end_date || '';
+            const dateStr = start || end ? `${start}${start && end ? ' – ' : ''}${end}` : '';
+            const bullets = (Array.isArray(item.bulletPoints) && item.bulletPoints.length > 0)
+              ? item.bulletPoints
+              : (Array.isArray(item.highlights) && item.highlights.length > 0)
+                ? item.highlights
+                : (Array.isArray(item.description)
+                    ? item.description
+                    : (item.description ? [item.description] : []));
+
             return (
-              <div key={index} className="mb-2">
-                <div className="flex justify-between text-xs font-bold text-slate-900">
-                  <span>{org}</span>
-                  <span>{role}</span>
+              <div key={index} className="mb-3">
+                <div className="flex justify-between items-baseline">
+                  <span className="text-[11.5px] font-bold text-slate-900">{org}</span>
+                  {dateStr && <span className="text-[10px] text-slate-600 font-medium">{dateStr}</span>}
                 </div>
-                {desc && <p className="text-xs opacity-80 mt-1 text-slate-800 italic">{desc}</p>}
+                {role && <div className="text-[11px] font-semibold italic text-slate-800 mb-1">{role}</div>}
+                {bullets.length > 0 && (
+                  <ul className="list-disc list-inside text-[10.5px] text-slate-800 space-y-0.5 pl-1">
+                    {bullets.filter(Boolean).map((line, dIdx) => (
+                      <li key={dIdx}>{line}</li>
+                    ))}
+                  </ul>
+                )}
               </div>
             );
           })}
@@ -306,11 +343,27 @@ const TemplateExecutive = ({ data = {} }) => {
           {Array.isArray(additionalInfo) ? (
             additionalInfo.map((item, index) => {
               const label = typeof item === 'object' ? (item.label || item.category || item.name || item.title || 'Details') : '';
-              const val = typeof item === 'object' ? (item.value || item.details || item.description || '') : item;
+              const bullets = (typeof item === 'object' && item !== null)
+                ? ((Array.isArray(item.bulletPoints) && item.bulletPoints.length > 0)
+                    ? item.bulletPoints
+                    : (Array.isArray(item.highlights) && item.highlights.length > 0
+                        ? item.highlights
+                        : (Array.isArray(item.details)
+                            ? item.details
+                            : (Array.isArray(item.description)
+                                ? item.description
+                                : ((item.details || item.description) ? [item.details || item.description] : [])))))
+                : [String(item)];
               return (
-                <div key={index} className="mb-1 text-xs text-slate-800">
-                  {label && <span className="font-bold">{label}: </span>}
-                  <span className="opacity-80">{val}</span>
+                <div key={index} className="mb-2 text-xs text-slate-800">
+                  {label && <div className="font-bold text-slate-900">{label}</div>}
+                  {bullets.length > 0 && (
+                    <ul className="list-disc list-inside text-[10.5px] text-slate-800 space-y-0.5 pl-1 mt-0.5">
+                      {bullets.filter(Boolean).map((line, bIdx) => (
+                        <li key={bIdx}>{line}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               );
             })

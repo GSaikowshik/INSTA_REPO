@@ -61,17 +61,34 @@ class CertificationItemSchema(BaseModel):
 class AchievementItemSchema(BaseModel):
     id: Optional[str] = None
     title: Optional[str] = ""
-    description: Optional[str] = ""
+    name: Optional[str] = ""
+    description: Optional[Union[str, list[str]]] = None
+    highlights: Optional[list[str]] = Field(default_factory=list)
+    bulletPoints: Optional[list[str]] = Field(default_factory=list)
+    bullet_points: Optional[list[str]] = Field(default_factory=list)
 
 class LeadershipItemSchema(BaseModel):
     id: Optional[str] = None
     role: Optional[str] = ""
     organization: Optional[str] = ""
-    description: Optional[str] = ""
+    start_date: Optional[str] = ""
+    end_date: Optional[str] = ""
+    startDate: Optional[str] = ""
+    endDate: Optional[str] = ""
+    description: Optional[Union[str, list[str]]] = None
+    highlights: Optional[list[str]] = Field(default_factory=list)
+    bulletPoints: Optional[list[str]] = Field(default_factory=list)
+    bullet_points: Optional[list[str]] = Field(default_factory=list)
 
 class AdditionalInfoSchema(BaseModel):
+    id: Optional[str] = None
     category: Optional[str] = ""
-    details: Optional[str] = ""
+    label: Optional[str] = ""
+    details: Optional[Union[str, list[str]]] = None
+    description: Optional[Union[str, list[str]]] = None
+    highlights: Optional[list[str]] = Field(default_factory=list)
+    bulletPoints: Optional[list[str]] = Field(default_factory=list)
+    bullet_points: Optional[list[str]] = Field(default_factory=list)
 
 class ParsedDataSchema(BaseModel):
     personal_info: Optional[PersonalInfoSchema] = Field(default_factory=PersonalInfoSchema)

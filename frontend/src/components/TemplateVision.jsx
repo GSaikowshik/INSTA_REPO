@@ -99,7 +99,7 @@ const TemplateVision = ({ parsedData }) => {
   // 4. LaTeX Clipboard Copy
   const handleCopyLatex = async () => {
     try {
-      const latexString = generateLatex(parsed_data);
+      const latexString = generateLatex(parsed_data, selectedAtsId);
       await navigator.clipboard.writeText(latexString);
       setCopiedLatex(true);
       setTimeout(() => setCopiedLatex(false), 2000);

@@ -9,6 +9,7 @@ const DefaultAtsTemplate = ({ data = {} }) => {
   const certList = data.certifications || [];
   const skillList = data.skills || [];
   const summaryText = data.summary || personal.summary || personal.bio || '';
+  const achievementsList = data.achievements || [];
   const leadershipList = data.leadership || data.leadership_activities || [];
   const additionalInfoList = data.additional_info || data.additionalInfo || [];
 
@@ -143,29 +144,84 @@ const DefaultAtsTemplate = ({ data = {} }) => {
           <h2 className="text-xs font-bold uppercase border-b border-black pb-0.5 mb-1.5 text-black">Certification</h2>
           <ul style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.25rem' }} className="list-disc pl-4 mt-0.5 text-black">
             {certList.map((c, i) => (
-              <li key={i} className="mb-0.5">
-                <span className="font-bold">{c.name || c.title}</span> {c.issuer ? `(${c.issuer})` : ''}
-              </li>
+               <li key={i} className="mb-0.5">
+                 <span className="font-bold">{c.name || c.title}</span> {c.issuer ? `(${c.issuer})` : ''}
+               </li>
             ))}
           </ul>
         </div>
       )}
 
+      {/* ACHIEVEMENTS & HONORS */}
+      {Array.isArray(achievementsList) && achievementsList.length > 0 && (
+        <div className="mb-3 text-black">
+          <h2 className="text-xs font-bold uppercase border-b border-black pb-0.5 mb-1.5 text-black">Achievements & Honors</h2>
+          <div className="space-y-1.5">
+            {achievementsList.map((achievement, index) => {
+              const title = typeof achievement === 'string' ? achievement : (achievement.title || achievement.name || '');
+              const bullets = (typeof achievement === 'object' && achievement !== null)
+                ? ((Array.isArray(achievement.bulletPoints) && achievement.bulletPoints.length > 0)
+                    ? achievement.bulletPoints
+                    : (Array.isArray(achievement.highlights) && achievement.highlights.length > 0
+                        ? achievement.highlights
+                        : (Array.isArray(achievement.description)
+                            ? achievement.description
+                            : (achievement.description ? [achievement.description] : []))))
+                : [];
+              return (
+                <div key={index} className="text-xs">
+                  {title && <div className="font-bold">{title}</div>}
+                  {bullets.length > 0 ? (
+                    <ul className="list-disc pl-5 space-y-0.5 mt-0.5">
+                      {bullets.filter(Boolean).map((line, bIdx) => (
+                        <li key={bIdx}>{line}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    typeof achievement === 'object' && achievement.description && typeof achievement.description === 'string' && (
+                      <ul className="list-disc pl-5 space-y-0.5 mt-0.5">
+                        <li>{achievement.description}</li>
+                      </ul>
+                    )
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* LEADERSHIP & ACTIVITIES */}
       {leadershipList && leadershipList.length > 0 && (
-        <div className="mb-4">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-blue-800 border-b pb-1 mb-2">Leadership & Activities</h3>
+        <div className="mb-3 text-black">
+          <h2 className="text-xs font-bold uppercase border-b border-black pb-0.5 mb-1.5 text-black">Leadership & Activities</h2>
           {leadershipList.map((item, index) => {
             const org = item.organization || item.company || item.institution || item.label || '';
             const role = item.role || item.title || item.position || '';
-            const desc = item.description || (Array.isArray(item.highlights) ? item.highlights.join(' ') : '');
+            const start = item.startDate || item.start_date || '';
+            const end = item.endDate || item.end_date || '';
+            const dateStr = start || end ? `${start}${start && end ? ' - ' : ''}${end}` : '';
+            const bullets = (Array.isArray(item.bulletPoints) && item.bulletPoints.length > 0)
+              ? item.bulletPoints
+              : (Array.isArray(item.highlights) && item.highlights.length > 0)
+                ? item.highlights
+                : (Array.isArray(item.description)
+                    ? item.description
+                    : (item.description ? [item.description] : []));
+
             return (
-              <div key={index} className="mb-2">
-                <div className="flex justify-between text-xs font-bold">
-                  <span>{org}</span>
-                  <span>{role}</span>
+              <div key={index} className="mb-2 text-black">
+                <div className="flex justify-between font-bold w-full">
+                  <span>{role ? `${role} | ${org}` : org}</span>
+                  {dateStr && <span>{dateStr}</span>}
                 </div>
-                {desc && <p className="text-xs opacity-80 mt-1">{desc}</p>}
+                {bullets.length > 0 && (
+                  <ul className="list-disc pl-5 mt-0.5 space-y-0.5">
+                    {bullets.filter(Boolean).map((line, j) => (
+                      <li key={j}>{line}</li>
+                    ))}
+                  </ul>
+                )}
               </div>
             );
           })}
@@ -175,15 +231,31 @@ const DefaultAtsTemplate = ({ data = {} }) => {
       {/* ADDITIONAL INFORMATION */}
       {((Array.isArray(additionalInfoList) && additionalInfoList.length > 0) || (typeof additionalInfoList === 'object' && Object.keys(additionalInfoList).length > 0)) && (
         <div className="mb-4">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-blue-800 border-b pb-1 mb-2">Additional Information</h3>
+          <h2 className="text-xs font-bold uppercase border-b border-black pb-0.5 mb-1.5 text-black">Additional Information</h2>
           {Array.isArray(additionalInfoList) ? (
             additionalInfoList.map((item, index) => {
               const label = typeof item === 'object' ? (item.label || item.category || item.name || item.title || 'Details') : '';
-              const val = typeof item === 'object' ? (item.value || item.details || item.description || '') : item;
+              const bullets = (typeof item === 'object' && item !== null)
+                ? ((Array.isArray(item.bulletPoints) && item.bulletPoints.length > 0)
+                    ? item.bulletPoints
+                    : (Array.isArray(item.highlights) && item.highlights.length > 0
+                        ? item.highlights
+                        : (Array.isArray(item.details)
+                            ? item.details
+                            : (Array.isArray(item.description)
+                                ? item.description
+                                : ((item.details || item.description) ? [item.details || item.description] : [])))))
+                : [String(item)];
               return (
-                <div key={index} className="mb-1 text-xs">
-                  {label && <span className="font-bold">{label}: </span>}
-                  <span className="opacity-80">{val}</span>
+                <div key={index} className="mb-2 text-xs">
+                  {label && <div className="font-bold">{label}</div>}
+                  {bullets.length > 0 && (
+                    <ul className="list-disc pl-5 space-y-0.5 mt-0.5 opacity-90">
+                      {bullets.filter(Boolean).map((line, bIdx) => (
+                        <li key={bIdx}>{line}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               );
             })

@@ -201,18 +201,38 @@ const ClassicAtsTemplate = ({ data = {} }) => {
             <svg className="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
             Honors & Key Achievements
           </h2>
-          <ul className="list-disc pl-4 space-y-1 text-gray-700">
+          <div className="space-y-2 text-gray-700">
             {data.achievements.map((ach, i) => {
               const title = typeof ach === 'string' ? ach : (ach.title || ach.name || '');
-              const desc = typeof ach === 'object' ? ach.description : '';
+              const bullets = (typeof ach === 'object' && ach !== null)
+                ? ((Array.isArray(ach.bulletPoints) && ach.bulletPoints.length > 0)
+                    ? ach.bulletPoints
+                    : (Array.isArray(ach.highlights) && ach.highlights.length > 0
+                        ? ach.highlights
+                        : (Array.isArray(ach.description)
+                            ? ach.description
+                            : (ach.description ? [ach.description] : []))))
+                : [];
               return (
-                <li key={i} className="pl-1">
-                  <span className="font-bold text-gray-900">{title}</span>
-                  {desc && <span> — {desc}</span>}
-                </li>
+                <div key={i} className="text-[10.5px]">
+                  {title && <div className="font-bold text-gray-900">{title}</div>}
+                  {bullets.length > 0 ? (
+                    <ul className="list-disc pl-4 space-y-0.5 text-gray-700 mt-0.5">
+                      {bullets.filter(Boolean).map((line, bIdx) => (
+                        <li key={`ach-${bIdx}`} className="pl-1">{line}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    typeof ach === 'object' && ach.description && typeof ach.description === 'string' && (
+                      <ul className="list-disc pl-4 space-y-0.5 text-gray-700 mt-0.5">
+                        <li className="pl-1">{ach.description}</li>
+                      </ul>
+                    )
+                  )}
+                </div>
               );
             })}
-          </ul>
+          </div>
         </div>
       )}
 
@@ -237,18 +257,38 @@ const ClassicAtsTemplate = ({ data = {} }) => {
       {/* LEADERSHIP & ACTIVITIES */}
       {leadershipList && leadershipList.length > 0 && (
         <div className="mb-4 mt-4">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-indigo-800 border-b pb-1 mb-2">Leadership & Activities</h3>
+          <h2 className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase text-indigo-800 border-b border-indigo-200 pb-1 mb-2.5">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+            Leadership & Activities
+          </h2>
           {leadershipList.map((item, index) => {
             const org = item.organization || item.company || item.institution || item.label || '';
             const role = item.role || item.title || item.position || '';
-            const desc = item.description || (Array.isArray(item.highlights) ? item.highlights.join(' ') : '');
+            const start = item.startDate || item.start_date || '';
+            const end = item.endDate || item.end_date || '';
+            const dateStr = start || end ? `${start}${start && end ? ' – ' : ''}${end}` : '';
+            const bullets = (Array.isArray(item.bulletPoints) && item.bulletPoints.length > 0)
+              ? item.bulletPoints
+              : (Array.isArray(item.highlights) && item.highlights.length > 0)
+                ? item.highlights
+                : (Array.isArray(item.description)
+                    ? item.description
+                    : (item.description ? [item.description] : []));
+
             return (
-              <div key={index} className="mb-2">
-                <div className="flex justify-between text-xs font-bold text-gray-900">
-                  <span>{org}</span>
-                  <span>{role}</span>
+              <div key={index} className="mb-3.5">
+                <div className="flex justify-between items-end w-full">
+                  <span className="text-[11.5px] font-bold text-gray-900">{org}</span>
+                  {dateStr && <span className="text-[9.5px] text-gray-500 font-medium">{dateStr}</span>}
                 </div>
-                {desc && <p className="text-xs opacity-80 mt-1 text-gray-700">{desc}</p>}
+                {role && <div className="text-indigo-700 font-medium mb-1.5 text-[10.5px]">{role}</div>}
+                {bullets.length > 0 && (
+                  <ul className="list-disc pl-4 space-y-0.5 text-gray-700">
+                    {bullets.filter(Boolean).map((line, j) => (
+                      <li key={`lead-${j}`} className="pl-1">{line}</li>
+                    ))}
+                  </ul>
+                )}
               </div>
             );
           })}
@@ -258,15 +298,34 @@ const ClassicAtsTemplate = ({ data = {} }) => {
       {/* ADDITIONAL INFORMATION */}
       {((Array.isArray(additionalInfoList) && additionalInfoList.length > 0) || (typeof additionalInfoList === 'object' && Object.keys(additionalInfoList).length > 0)) && (
         <div className="mb-4 mt-4">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-indigo-800 border-b pb-1 mb-2">Additional Information</h3>
+          <h2 className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase text-indigo-800 border-b border-indigo-200 pb-1 mb-2.5">
+            <svg className="w-4 h-4 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            Additional Information
+          </h2>
           {Array.isArray(additionalInfoList) ? (
             additionalInfoList.map((item, index) => {
               const label = typeof item === 'object' ? (item.label || item.category || item.name || item.title || 'Details') : '';
-              const val = typeof item === 'object' ? (item.value || item.details || item.description || '') : item;
+              const bullets = (typeof item === 'object' && item !== null)
+                ? ((Array.isArray(item.bulletPoints) && item.bulletPoints.length > 0)
+                    ? item.bulletPoints
+                    : (Array.isArray(item.highlights) && item.highlights.length > 0
+                        ? item.highlights
+                        : (Array.isArray(item.details)
+                            ? item.details
+                            : (Array.isArray(item.description)
+                                ? item.description
+                                : ((item.details || item.description) ? [item.details || item.description] : [])))))
+                : [String(item)];
               return (
-                <div key={index} className="mb-1 text-xs text-gray-800">
-                  {label && <span className="font-bold">{label}: </span>}
-                  <span className="opacity-80">{val}</span>
+                <div key={index} className="mb-2 text-xs text-gray-800">
+                  {label && <div className="font-bold text-gray-900">{label}</div>}
+                  {bullets.length > 0 && (
+                    <ul className="list-disc pl-4 space-y-0.5 text-gray-700 mt-0.5">
+                      {bullets.filter(Boolean).map((line, bIdx) => (
+                        <li key={`add-${bIdx}`} className="pl-1">{line}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               );
             })
