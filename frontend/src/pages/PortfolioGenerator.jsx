@@ -501,8 +501,8 @@ const PortfolioGenerator = () => {
           const ghUrl = proj.githubUrl || proj.repo_url || proj.github;
           const demoUrl = proj.liveUrl || proj.live_url || proj.link || proj.demo_url;
           return `
-          <div class="${currentTheme.cardStyle} space-y-3 flex flex-col justify-between">
-            <div class="space-y-2">
+          <div class="${currentTheme.cardStyle} flex flex-col h-full">
+            <div class="flex-grow space-y-2">
               <h4 class="font-bold text-sm">${proj.title || proj.name || 'Project'}</h4>
               <div class="flex gap-1.5 flex-wrap">
                 ${(proj.technologies || proj.tech_stack || proj.techStack || []).map(t => `<span class="${currentTheme.accentChip}">${t}</span>`).join('')}
@@ -510,7 +510,7 @@ const PortfolioGenerator = () => {
               <p class="text-xs opacity-85 leading-relaxed">${proj.case_study || proj.description || ''}</p>
             </div>
             ${(ghUrl || demoUrl) ? `
-            <div class="flex items-center gap-3 pt-2 text-xs border-t border-current/10 mt-2">
+            <div class="mt-auto pt-4 border-t border-current/10 flex items-center gap-3 text-xs">
               ${ghUrl ? `<a href="${ghUrl.startsWith('http') ? ghUrl : 'https://' + ghUrl}" target="_blank" rel="noopener noreferrer" class="font-bold underline text-xs hover:opacity-80">Code / GitHub ↗</a>` : ''}
               ${ghUrl && demoUrl ? `<span class="opacity-40">•</span>` : ''}
               ${demoUrl ? `<a href="${demoUrl.startsWith('http') ? demoUrl : 'https://' + demoUrl}" target="_blank" rel="noopener noreferrer" class="font-bold underline text-xs hover:opacity-80">Live Demo ↗</a>` : ''}
@@ -931,12 +931,9 @@ const PortfolioGenerator = () => {
                   const ghUrl = proj.githubUrl || proj.repo_url || proj.github;
                   const demoUrl = proj.liveUrl || proj.live_url || proj.link || proj.demo_url;
                   return (
-                    <div key={idx} className={`${currentTheme.cardStyle} space-y-3 flex flex-col justify-between`}>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <h4 className="font-bold text-sm">{proj.title || proj.name || 'Project'}</h4>
-                          <ExternalLink className="w-3.5 h-3.5 opacity-50" />
-                        </div>
+                    <div key={idx} className={`${currentTheme.cardStyle} flex flex-col h-full`}>
+                      <div className="flex-grow space-y-2">
+                        <h4 className="font-bold text-sm">{proj.title || proj.name || 'Project'}</h4>
                         <div className="flex gap-1.5 flex-wrap">
                           {(proj.technologies || proj.tech_stack || proj.techStack || []).map((t, i) => (
                             <span key={i} className={currentTheme.accentChip}>{t}</span>
@@ -946,7 +943,7 @@ const PortfolioGenerator = () => {
                       </div>
 
                       {(ghUrl || demoUrl) && (
-                        <div className="flex items-center gap-3 pt-2 text-xs border-t border-current/10 mt-2">
+                        <div className="mt-auto pt-4 border-t border-current/10 flex items-center gap-3 text-xs">
                           {ghUrl && (
                             <a
                               href={ghUrl.startsWith('http') ? ghUrl : `https://${ghUrl}`}
@@ -966,7 +963,7 @@ const PortfolioGenerator = () => {
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1 font-bold text-xs hover:opacity-80 underline"
                             >
-                              <ExternalLink className="w-3 h-3" />
+                              <ExternalLink className="w-3 h-3 text-current opacity-80" />
                               <span>Live Demo</span>
                             </a>
                           )}
