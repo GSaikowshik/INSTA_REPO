@@ -39,7 +39,10 @@ export const templateOptions = [
 ];
 
 const ResumeLivePreview = ({ resumeData = {}, selectedTemplate = 'template1', onSelectTemplate }) => {
+  const containerRef = useRef(null);
   const resumeRef = useRef(null);
+  const [scale, setScale] = useState(0.75);
+  const [contentHeight, setContentHeight] = useState(1122);
   const [exporting, setExporting] = useState(false);
   const [exportType, setExportType] = useState('');
   const [showLatexModal, setShowLatexModal] = useState(false);
@@ -49,6 +52,28 @@ const ResumeLivePreview = ({ resumeData = {}, selectedTemplate = 'template1', on
   const data = resumeData;
   const personal = data?.personal_info || data?.basics || {};
   const baseFileName = personal.full_name || 'Resume';
+
+  // Dynamic Auto-Scaler & Height Measurer to fit full template inside viewport pane
+  useEffect(() => {
+    const updateLayout = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.clientWidth;
+        // Dynamically compute scale factor so 794px (210mm A4) fits inside container width with padding
+        const calculatedScale = Math.min(1, Math.max(0.3, (containerWidth - 28) / 794));
+        setScale(calculatedScale);
+      }
+      if (resumeRef.current) {
+        setContentHeight(resumeRef.current.scrollHeight || 1122);
+      }
+    };
+
+    updateLayout();
+    const observer = new ResizeObserver(updateLayout);
+    if (containerRef.current) observer.observe(containerRef.current);
+    if (resumeRef.current) observer.observe(resumeRef.current);
+
+    return () => observer.disconnect();
+  }, [data, selectedTemplate]);
 
   // Native Vector PDF Export
   const handleDownloadPDF = useReactToPrint({
@@ -134,6 +159,9 @@ const ResumeLivePreview = ({ resumeData = {}, selectedTemplate = 'template1', on
           <span className="text-xs font-bold text-white bg-slate-800 px-2.5 py-1 rounded-md border border-slate-700">
             {activeTemplateObj.name}
           </span>
+          <span className="text-[10px] text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700 font-mono">
+            {Math.round(scale * 100)}% Auto-fit
+          </span>
         </div>
 
         {/* Dropdown Export Action Button */}
@@ -215,10 +243,32 @@ const ResumeLivePreview = ({ resumeData = {}, selectedTemplate = 'template1', on
         </div>
       </div>
 
-      {/* DYNAMIC TEMPLATE RENDER CONTAINER */}
-      <div className="w-full max-w-full max-h-[60vh] lg:max-h-[calc(100vh-140px)] overflow-y-auto overflow-x-auto p-1 sm:p-2 bg-slate-900/40 rounded-xl border border-slate-800 flex justify-center min-h-0 min-w-0">
-        <div ref={resumeRef} className="w-full max-w-[794px]">
-          {renderTemplateComponent()}
+      {/* DYNAMIC TEMPLATE AUTO-SCALING RENDER PANE */}
+      <div 
+        ref={containerRef}
+        className="w-full max-h-[65vh] lg:max-h-[calc(100vh-140px)] bg-slate-900/40 rounded-xl border border-slate-800 overflow-y-auto overflow-x-hidden p-3 flex flex-col items-center justify-start min-h-[450px]"
+      >
+        <div 
+          className="flex justify-center items-start shrink-0"
+          style={{
+            width: '210mm',
+            height: `${contentHeight * scale + 32}px`,
+          }}
+        >
+          <div
+            style={{
+              transform: `scale(${scale})`,
+              transformOrigin: 'top center',
+            }}
+            className="shrink-0"
+          >
+            <div 
+              ref={resumeRef} 
+              className="w-[210mm] min-h-[297mm] bg-white shadow-2xl border border-slate-200 shrink-0 break-words text-slate-900 overflow-hidden rounded-xs"
+            >
+              {renderTemplateComponent()}
+            </div>
+          </div>
         </div>
       </div>
 
