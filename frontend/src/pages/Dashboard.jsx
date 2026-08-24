@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import api, { getAuthHeaders } from '../api';
 import ResumePreview from '../components/ResumePreview';
+import ResumeLivePreview from '../components/ResumeLivePreview';
 
 import TemplateVision from '../components/TemplateVision';
 import {
@@ -59,6 +60,7 @@ const Dashboard = () => {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedTemplate, setSelectedTemplate] = useState('minimal');
   const [message, setMessage] = useState({ type: '', text: '' });
   const [previewMode, setPreviewMode] = useState('default'); // 'default' | 'vision'
   const navigate = useNavigate();
@@ -436,9 +438,9 @@ const Dashboard = () => {
       )}
 
       {/* 2-Column Split Screen Layout (Live Preview above Editor on Mobile) */}
-      <div className="flex flex-col lg:flex-row gap-6 items-start min-w-0">
+      <div className="flex flex-col lg:flex-row gap-6 relative items-start">
         {/* LEFT COLUMN: Upload Area & Modular Editor (Order 2 on mobile, Order 1 on LG) */}
-        <div className="space-y-5 min-w-0 w-full lg:w-1/2 order-2 lg:order-1">
+        <div className="w-full lg:w-1/2 flex-1 space-y-5 order-2 lg:order-1">
           {/* Resume Upload Area */}
           <section className="bg-white rounded p-4 border border-gray-200 shadow-sm relative">
             <div className="flex flex-col gap-3">
@@ -931,7 +933,7 @@ const Dashboard = () => {
                     <input
                       type="text"
                       placeholder="Project Title"
-                      value={proj.title || ''}
+                      value={proj.title || proj.name || ''}
                       onChange={(e) => updateItem('projects', idx, 'title', e.target.value)}
                       className="bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-700 rounded px-2.5 py-1 text-xs text-gray-900 outline-none"
                     />
@@ -940,6 +942,32 @@ const Dashboard = () => {
                       placeholder="Technologies (comma separated)"
                       value={Array.isArray(proj.technologies) ? proj.technologies.join(', ') : (proj.technologies || '')}
                       onChange={(e) => updateItem('projects', idx, 'technologies', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+                      className="bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-700 rounded px-2.5 py-1 text-xs text-gray-900 outline-none"
+                    />
+                  </div>
+
+                  {/* GitHub & Live Demo URL Inputs */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <input 
+                      type="url" 
+                      placeholder="GitHub URL (optional)" 
+                      value={proj.githubUrl || proj.repo_url || ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        updateItem('projects', idx, 'githubUrl', val);
+                        updateItem('projects', idx, 'repo_url', val);
+                      }}
+                      className="bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-700 rounded px-2.5 py-1 text-xs text-gray-900 outline-none"
+                    />
+                    <input 
+                      type="url" 
+                      placeholder="Live Demo URL (optional)" 
+                      value={proj.liveUrl || proj.live_url || ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        updateItem('projects', idx, 'liveUrl', val);
+                        updateItem('projects', idx, 'live_url', val);
+                      }}
                       className="bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-700 rounded px-2.5 py-1 text-xs text-gray-900 outline-none"
                     />
                   </div>
@@ -1260,17 +1288,35 @@ const Dashboard = () => {
         </div>
 
         {/* RIGHT COLUMN: Real-Time Live Resume Preview (Order 1 on Mobile, Order 2 on LG) */}
-        <div className="lg:sticky lg:top-16 space-y-2.5 min-w-0 min-h-0 w-full lg:w-1/2 order-1 lg:order-2">
+        <div className="w-full lg:w-1/2 lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] overflow-y-auto space-y-2.5 order-1 lg:order-2">
           <div className="flex items-center justify-between pb-2 border-b border-gray-200">
             <div className="flex items-center gap-2">
               <Eye className="w-4 h-4 text-blue-700" />
               <h2 className="text-sm font-bold text-gray-900 tracking-tight">Live Resume Preview</h2>
             </div>
+
+            {/* Template Selector Dropdown */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-semibold text-gray-500 hidden sm:inline">Template:</span>
+              <select
+                value={selectedTemplate}
+                onChange={(e) => setSelectedTemplate(e.target.value)}
+                className="bg-white border border-gray-200 text-xs font-semibold text-gray-800 rounded px-2 py-1 outline-none focus:border-blue-700 cursor-pointer shadow-2xs"
+              >
+                <option value="minimal">Minimalist Classic</option>
+                <option value="modern-split">Modern Two-Column Split</option>
+                <option value="executive">Executive Serif</option>
+              </select>
+            </div>
           </div>
 
           {/* Template Container View */}
           <div className="rounded p-1 bg-gray-50 border border-gray-200 shadow-sm min-w-0 min-h-0 w-full overflow-hidden">
-            <TemplateVision parsedData={profileData} />
+            <ResumeLivePreview
+              resumeData={profileData}
+              selectedTemplate={selectedTemplate}
+              onSelectTemplate={setSelectedTemplate}
+            />
           </div>
         </div>
       </div>

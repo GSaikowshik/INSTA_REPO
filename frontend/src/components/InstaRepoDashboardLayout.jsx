@@ -270,7 +270,7 @@ const InstaRepoDashboardLayout = () => {
         )}
 
         {/* Nested Route Main Content Area */}
-        <main className="flex-1 p-4 sm:p-6 overflow-x-hidden bg-slate-50 min-w-0">
+        <main className="flex-1 p-4 sm:p-6 bg-slate-50 min-w-0">
           <Outlet />
         </main>
       </div>

@@ -26,6 +26,9 @@ const AtsTemplateLibrary = ({ data = {}, templateId = 'template1' }) => {
   const eduList = data.education || [];
   const certList = data.certifications || [];
   const skillList = data.skills || [];
+  const summaryText = data.summary || personal.summary || personal.bio || '';
+  const leadershipList = data.leadership || data.leadership_activities || [];
+  const additionalInfoList = data.additional_info || data.additionalInfo || [];
 
   return (
     <div className={`w-[210mm] min-h-[297mm] bg-white text-black p-8 box-border mx-auto overflow-hidden text-[10.5px] leading-snug break-words ${activeTheme.font}`}>
@@ -64,6 +67,13 @@ const AtsTemplateLibrary = ({ data = {}, templateId = 'template1' }) => {
           )}
         </div>
       </div>
+
+      {/* PROFESSIONAL SUMMARY */}
+      {summaryText && (
+        <div className="mb-4">
+          <p className="text-xs opacity-85 leading-relaxed">{summaryText}</p>
+        </div>
+      )}
 
       {/* WORK EXPERIENCE */}
       {expList.length > 0 && (
@@ -199,6 +209,53 @@ const AtsTemplateLibrary = ({ data = {}, templateId = 'template1' }) => {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* LEADERSHIP & ACTIVITIES */}
+      {leadershipList && leadershipList.length > 0 && (
+        <div className="mb-4 mt-4">
+          <h3 className={`text-xs font-bold uppercase tracking-widest ${activeTheme.primaryColor} ${activeTheme.borderColor} pb-1 mb-2`}>Leadership & Activities</h3>
+          {leadershipList.map((item, index) => {
+            const org = item.organization || item.company || item.institution || item.label || '';
+            const role = item.role || item.title || item.position || '';
+            const desc = item.description || (Array.isArray(item.highlights) ? item.highlights.join(' ') : '');
+            return (
+              <div key={index} className="mb-2">
+                <div className="flex justify-between text-xs font-bold">
+                  <span>{org}</span>
+                  <span>{role}</span>
+                </div>
+                {desc && <p className="text-xs opacity-80 mt-1">{desc}</p>}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ADDITIONAL INFORMATION */}
+      {((Array.isArray(additionalInfoList) && additionalInfoList.length > 0) || (typeof additionalInfoList === 'object' && Object.keys(additionalInfoList).length > 0)) && (
+        <div className="mb-4 mt-4">
+          <h3 className={`text-xs font-bold uppercase tracking-widest ${activeTheme.primaryColor} ${activeTheme.borderColor} pb-1 mb-2`}>Additional Information</h3>
+          {Array.isArray(additionalInfoList) ? (
+            additionalInfoList.map((item, index) => {
+              const label = typeof item === 'object' ? (item.label || item.category || item.name || item.title || 'Details') : '';
+              const val = typeof item === 'object' ? (item.value || item.details || item.description || '') : item;
+              return (
+                <div key={index} className="mb-1 text-xs">
+                  {label && <span className="font-bold">{label}: </span>}
+                  <span className="opacity-80">{val}</span>
+                </div>
+              );
+            })
+          ) : (
+            Object.entries(additionalInfoList).map(([key, val], index) => (
+              <div key={index} className="mb-1 text-xs">
+                <span className="font-bold">{key}: </span>
+                <span className="opacity-80">{Array.isArray(val) ? val.join(', ') : val}</span>
+              </div>
+            ))
+          )}
         </div>
       )}
 

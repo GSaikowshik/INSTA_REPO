@@ -7,6 +7,9 @@ const ClassicAtsTemplate = ({ data = {} }) => {
   const projList = data.projects || [];
   const certList = data.certifications || [];
   const skillList = data.skills || [];
+  const summaryText = data.summary || personal.summary || personal.bio || '';
+  const leadershipList = data.leadership || data.leadership_activities || [];
+  const additionalInfoList = data.additional_info || data.additionalInfo || [];
 
   return (
     <div className="w-[210mm] min-h-[297mm] bg-white p-8 box-border mx-auto font-sans text-[10.5px] leading-relaxed break-words text-gray-800">
@@ -48,6 +51,13 @@ const ClassicAtsTemplate = ({ data = {} }) => {
           )}
         </div>
       </div>
+
+      {/* PROFESSIONAL SUMMARY */}
+      {summaryText && (
+        <div className="mb-4">
+          <p className="text-xs opacity-85 leading-relaxed">{summaryText}</p>
+        </div>
+      )}
 
       {/* WORK EXPERIENCE */}
       {expList.length > 0 && (
@@ -107,8 +117,8 @@ const ClassicAtsTemplate = ({ data = {} }) => {
           </h2>
           {projList.map((proj, i) => {
             // Map directly to the exact form outputs
-            const repoUrl = proj.url || proj.github || proj.repo_url;
-            const demoUrl = proj.live_url || proj.link || proj.demo_url || proj.website;
+            const repoUrl = proj.githubUrl || proj.repo_url || proj.github || proj.url;
+            const demoUrl = proj.liveUrl || proj.live_url || proj.link || proj.demo_url || proj.website;
             const techList = proj.techStack || proj.technologies;
             
             return (
@@ -215,6 +225,53 @@ const ClassicAtsTemplate = ({ data = {} }) => {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* LEADERSHIP & ACTIVITIES */}
+      {leadershipList && leadershipList.length > 0 && (
+        <div className="mb-4 mt-4">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-indigo-800 border-b pb-1 mb-2">Leadership & Activities</h3>
+          {leadershipList.map((item, index) => {
+            const org = item.organization || item.company || item.institution || item.label || '';
+            const role = item.role || item.title || item.position || '';
+            const desc = item.description || (Array.isArray(item.highlights) ? item.highlights.join(' ') : '');
+            return (
+              <div key={index} className="mb-2">
+                <div className="flex justify-between text-xs font-bold text-gray-900">
+                  <span>{org}</span>
+                  <span>{role}</span>
+                </div>
+                {desc && <p className="text-xs opacity-80 mt-1 text-gray-700">{desc}</p>}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ADDITIONAL INFORMATION */}
+      {((Array.isArray(additionalInfoList) && additionalInfoList.length > 0) || (typeof additionalInfoList === 'object' && Object.keys(additionalInfoList).length > 0)) && (
+        <div className="mb-4 mt-4">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-indigo-800 border-b pb-1 mb-2">Additional Information</h3>
+          {Array.isArray(additionalInfoList) ? (
+            additionalInfoList.map((item, index) => {
+              const label = typeof item === 'object' ? (item.label || item.category || item.name || item.title || 'Details') : '';
+              const val = typeof item === 'object' ? (item.value || item.details || item.description || '') : item;
+              return (
+                <div key={index} className="mb-1 text-xs text-gray-800">
+                  {label && <span className="font-bold">{label}: </span>}
+                  <span className="opacity-80">{val}</span>
+                </div>
+              );
+            })
+          ) : (
+            Object.entries(additionalInfoList).map(([key, val], index) => (
+              <div key={index} className="mb-1 text-xs text-gray-800">
+                <span className="font-bold">{key}: </span>
+                <span className="opacity-80">{Array.isArray(val) ? val.join(', ') : val}</span>
+              </div>
+            ))
+          )}
         </div>
       )}
 
