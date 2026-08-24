@@ -25,6 +25,10 @@ import {
   AlertCircle,
   LogOut,
   Eye,
+  ChevronUp,
+  ChevronDown,
+  Layers,
+  ArrowUpDown,
 } from 'lucide-react';
 
 const defaultParsedData = {
@@ -61,9 +65,34 @@ const Dashboard = () => {
   const [selectedTemplate, setSelectedTemplate] = useState('template1');
   const [message, setMessage] = useState({ type: '', text: '' });
   const [previewMode, setPreviewMode] = useState('default'); // 'default' | 'vision'
+  const [sectionOrder, setSectionOrder] = useState([
+    'summary',
+    'experience',
+    'projects',
+    'education',
+    'certifications',
+    'skills',
+    'leadership',
+    'achievements',
+    'additionalInfo'
+  ]);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const resumeIdParam = searchParams.get('id');
+
+  const moveSection = (target, direction) => {
+    setSectionOrder((prevOrder) => {
+      const idx = typeof target === 'number' ? target : prevOrder.indexOf(target);
+      if (idx === -1) return prevOrder;
+      const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+      if (targetIdx < 0 || targetIdx >= prevOrder.length) return prevOrder;
+      const newOrder = [...prevOrder];
+      const temp = newOrder[idx];
+      newOrder[idx] = newOrder[targetIdx];
+      newOrder[targetIdx] = temp;
+      return newOrder;
+    });
+  };
 
   // Fetch current user profile or specific resume on mount
   const fetchProfile = async () => {
@@ -881,6 +910,64 @@ const Dashboard = () => {
                 placeholder="e.g. Full Stack Resume - PDF, Software Engineer 2026"
                 className="w-full bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-700 rounded px-3 py-1.5 text-xs font-semibold text-gray-900 outline-none transition-colors"
               />
+            </div>
+
+            {/* Reorder Sections Control Panel */}
+            <div className="bg-white rounded p-3.5 border border-gray-200 shadow-sm space-y-2.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-gray-900">
+                  <Layers className="w-4 h-4 text-blue-700" />
+                  <span>Reorder Resume Sections</span>
+                </div>
+                <span className="text-[10px] text-gray-500 font-medium">Controls Live Preview & LaTeX Export</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+                {sectionOrder.map((secKey, idx) => {
+                  const meta = {
+                    summary: 'Professional Summary',
+                    experience: 'Work Experience',
+                    projects: 'Projects',
+                    education: 'Education',
+                    certifications: 'Certifications',
+                    skills: 'Technical Skills',
+                    leadership: 'Leadership',
+                    achievements: 'Achievements',
+                    additionalInfo: 'Additional Info',
+                  }[secKey] || secKey;
+
+                  return (
+                    <div
+                      key={secKey}
+                      className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded px-2.5 py-1 text-xs text-gray-800"
+                    >
+                      <span className="truncate font-medium text-[11px]">
+                        <span className="text-gray-400 mr-1 font-mono text-[10px]">{idx + 1}.</span>
+                        {meta}
+                      </span>
+                      <div className="flex items-center gap-0.5 shrink-0">
+                        <button
+                          type="button"
+                          disabled={idx === 0}
+                          onClick={() => moveSection(idx, 'up')}
+                          className="p-0.5 hover:bg-gray-200 disabled:opacity-20 disabled:hover:bg-transparent rounded text-gray-600 transition-colors cursor-pointer"
+                          title="Move Up"
+                        >
+                          <ChevronUp className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={idx === sectionOrder.length - 1}
+                          onClick={() => moveSection(idx, 'down')}
+                          className="p-0.5 hover:bg-gray-200 disabled:opacity-20 disabled:hover:bg-transparent rounded text-gray-600 transition-colors cursor-pointer"
+                          title="Move Down"
+                        >
+                          <ChevronDown className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             <div className="flex items-center justify-between border-b border-gray-200 pb-2">
@@ -1862,7 +1949,7 @@ const Dashboard = () => {
           {/* Template Container View */}
           <div className="rounded p-1 bg-gray-50 border border-gray-200 shadow-sm min-w-0 min-h-0 w-full overflow-hidden">
             <ResumeLivePreview
-              resumeData={profileData}
+              resumeData={{ ...profileData, sectionOrder }}
               selectedTemplate={selectedTemplate}
               onSelectTemplate={setSelectedTemplate}
             />

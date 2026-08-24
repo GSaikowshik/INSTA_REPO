@@ -300,17 +300,30 @@ ${leadership.length > 0 ? `\\section*{Leadership}
 \\vspace{-5pt}
 `;
 
-  // --- SUMMARY ---
-  if (summary) {
-    latex += `
+  const sectionOrder = data?.sectionOrder || [
+    'summary',
+    'experience',
+    'projects',
+    'education',
+    'certifications',
+    'skills',
+    'leadership',
+    'achievements',
+    'additionalInfo'
+  ];
+
+  // Helper generators for single-column layout
+  const renderSummaryTex = () => {
+    if (!summary) return '';
+    return `
 \\section{Executive Summary}
 ${summary}
 `;
-  }
+  };
 
-  // --- EXPERIENCE ---
-  if (experiences.length > 0) {
-    latex += `
+  const renderExperienceTex = () => {
+    if (experiences.length === 0) return '';
+    let res = `
 \\section{Work Experience}
 `;
     experiences.forEach((exp) => {
@@ -326,23 +339,24 @@ ${summary}
               ? exp.description
               : (typeof exp.description === 'string' && exp.description.trim() ? exp.description.split('\n') : []));
 
-      latex += `\\noindent
+      res += `\\noindent
 \\textbf{${expRole}} \\hfill {\\small \\textbf{${expStart}${expStart && expEnd ? ' -- ' : ''}${expEnd}}} \\\\
 {\\small \\textit{${expCompany}}} \\\\
 `;
       if (Array.isArray(bullets) && bullets.length > 0) {
-        latex += `\\begin{itemize}[leftmargin=*, noitemsep, topsep=2pt]\n`;
+        res += `\\begin{itemize}[leftmargin=*, noitemsep, topsep=2pt]\n`;
         bullets.forEach((item) => {
-          if (item) latex += `  \\item ${escapeLatex(String(item))}\n`;
+          if (item) res += `  \\item ${escapeLatex(String(item))}\n`;
         });
-        latex += `\\end{itemize}\n\\vspace{4pt}\n`;
+        res += `\\end{itemize}\n\\vspace{4pt}\n`;
       }
     });
-  }
+    return res;
+  };
 
-  // --- EDUCATION ---
-  if (education.length > 0) {
-    latex += `
+  const renderEducationTex = () => {
+    if (education.length === 0) return '';
+    let res = `
 \\section{Education}
 `;
     education.forEach((edu) => {
@@ -353,16 +367,17 @@ ${summary}
       const eduEnd = escapeLatex(edu.end_date || edu.endDate || '');
       const gpa = escapeLatex(edu.gpa || '');
 
-      latex += `\\noindent
+      res += `\\noindent
 \\textbf{${degree}${field ? ` in ${field}` : ''}} \\hfill {\\small ${eduStart}${eduStart && eduEnd ? ' -- ' : ''}${eduEnd}} \\\\
 {\\small \\textit{${inst}}${gpa ? ` $|$ GPA: ${gpa}` : ''}} \\\\[4pt]
 `;
     });
-  }
+    return res;
+  };
 
-  // --- PROJECTS ---
-  if (projects.length > 0) {
-    latex += `
+  const renderProjectsTex = () => {
+    if (projects.length === 0) return '';
+    let res = `
 \\section{Key Projects}
 `;
     projects.forEach((proj) => {
@@ -376,11 +391,11 @@ ${summary}
       if (liveUrl) projectLinks.push(`\\href{${liveUrl}}{Demo}`);
       const linksStr = projectLinks.length > 0 ? ` \\hfill {\\small [${projectLinks.join(' | ')}]}` : '';
 
-      latex += `\\noindent
+      res += `\\noindent
 \\textbf{${projTitle}}${linksStr} \\\\
 `;
       if (projDesc) {
-        latex += `{\\small ${projDesc}} \\\\\n`;
+        res += `{\\small ${projDesc}} \\\\\n`;
       }
 
       const bullets = (Array.isArray(proj.bulletPoints) && proj.bulletPoints.length > 0)
@@ -390,25 +405,26 @@ ${summary}
             : (Array.isArray(proj.description) ? proj.description : []));
 
       if (Array.isArray(bullets) && bullets.length > 0) {
-        latex += `\\begin{itemize}[leftmargin=*, noitemsep, topsep=2pt]\n`;
+        res += `\\begin{itemize}[leftmargin=*, noitemsep, topsep=2pt]\n`;
         bullets.forEach((pt) => {
-          if (pt) latex += `  \\item ${escapeLatex(String(pt))}\n`;
+          if (pt) res += `  \\item ${escapeLatex(String(pt))}\n`;
         });
-        latex += `\\end{itemize}\n`;
+        res += `\\end{itemize}\n`;
       }
 
       if (Array.isArray(proj.technologies) && proj.technologies.length > 0) {
         const techStr = escapeLatex(proj.technologies.filter(Boolean).join(', '));
-        latex += `{\\small \\textbf{Technologies:} ${techStr}} \\\\[4pt]\n`;
+        res += `{\\small \\textbf{Technologies:} ${techStr}} \\\\[4pt]\n`;
       } else if (typeof proj.technologies === 'string' && proj.technologies.trim()) {
-        latex += `{\\small \\textbf{Technologies:} ${escapeLatex(proj.technologies)}} \\\\[4pt]\n`;
+        res += `{\\small \\textbf{Technologies:} ${escapeLatex(proj.technologies)}} \\\\[4pt]\n`;
       }
     });
-  }
+    return res;
+  };
 
-  // --- CERTIFICATIONS ---
-  if (certifications.length > 0) {
-    latex += `
+  const renderCertificationsTex = () => {
+    if (certifications.length === 0) return '';
+    let res = `
 \\section{Certifications}
 `;
     certifications.forEach((cert) => {
@@ -421,15 +437,16 @@ ${summary}
       const dateStr = certIssueDate && certExpDate ? `${certIssueDate} -- ${certExpDate}` : certIssueDate || certExpDate;
       const nameStr = credUrl ? `\\href{${credUrl}}{${certName}}` : certName;
 
-      latex += `\\noindent
+      res += `\\noindent
 \\textbf{${nameStr}} ${certIssuer ? `--- \\textit{${certIssuer}}` : ''} \\hfill {\\small ${dateStr}} \\\\[3pt]
 `;
     });
-  }
+    return res;
+  };
 
-  // --- ACHIEVEMENTS ---
-  if (achievements.length > 0) {
-    latex += `
+  const renderAchievementsTex = () => {
+    if (achievements.length === 0) return '';
+    let res = `
 \\section{Honors \\& Key Achievements}
 `;
     achievements.forEach((ach) => {
@@ -444,45 +461,41 @@ ${summary}
                     : (ach.description ? [ach.description] : []))))
         : [];
       if (title) {
-        latex += `\\noindent
+        res += `\\noindent
 \\textbf{${title}} \\\\[2pt]
 `;
       }
       if (bullets.length > 0) {
-        latex += `\\begin{itemize}[leftmargin=15pt, itemsep=1pt, topsep=1pt]
-`;
+        res += `\\begin{itemize}[leftmargin=15pt, itemsep=1pt, topsep=1pt]\n`;
         bullets.filter(Boolean).forEach((pt) => {
-          latex += `  \\item ${escapeLatex(String(pt))}\n`;
+          res += `  \\item ${escapeLatex(String(pt))}\n`;
         });
-        latex += `\\end{itemize}
-`;
+        res += `\\end{itemize}\n`;
       } else if (typeof ach === 'object' && ach.description && typeof ach.description === 'string') {
-        latex += `\\begin{itemize}[leftmargin=15pt, itemsep=1pt, topsep=1pt]
-  \\item ${escapeLatex(ach.description)}
-\\end{itemize}
-`;
+        res += `\\begin{itemize}[leftmargin=15pt, itemsep=1pt, topsep=1pt]\n  \\item ${escapeLatex(ach.description)}\n\\end{itemize}\n`;
       }
     });
-  }
+    return res;
+  };
 
-  // --- SKILLS ---
-  if (skills.length > 0) {
-    latex += `
+  const renderSkillsTex = () => {
+    if (skills.length === 0) return '';
+    let res = `
 \\section{Technical Skills}
 \\begin{description}[leftmargin=0pt, itemsep=2pt]
 `;
     skills.forEach((sk) => {
       const cat = escapeLatex(sk.category || sk.name || 'Skills');
       const items = escapeLatex(Array.isArray(sk.items || sk.keywords) ? (sk.items || sk.keywords).filter(Boolean).join(', ') : (sk.items || sk.keywords || ''));
-      latex += `  \\item[${cat}:] ${items}\n`;
+      res += `  \\item[${cat}:] ${items}\n`;
     });
-    latex += `\\end{description}
-`;
-  }
+    res += `\\end{description}\n`;
+    return res;
+  };
 
-  // --- LEADERSHIP & ACTIVITIES ---
-  if (leadership.length > 0) {
-    latex += `
+  const renderLeadershipTex = () => {
+    if (leadership.length === 0) return '';
+    let res = `
 \\section{Leadership & Activities}
 `;
     leadership.forEach((lead) => {
@@ -492,7 +505,7 @@ ${summary}
       const end = escapeLatex(lead.endDate || lead.end_date || '');
       const dateStr = start || end ? `${start}${start && end ? ' -- ' : ''}${end}` : '';
 
-      latex += `\\noindent
+      res += `\\noindent
 \\textbf{${org}} ${role ? `--- \\textit{${role}}` : ''} \\hfill {\\small ${dateStr}} \\\\
 `;
       const bullets = (Array.isArray(lead.bulletPoints) && lead.bulletPoints.length > 0)
@@ -504,20 +517,19 @@ ${summary}
               : (lead.description ? [lead.description] : []));
 
       if (bullets.length > 0) {
-        latex += `\\begin{itemize}[leftmargin=15pt, itemsep=1pt, topsep=1pt]
-`;
+        res += `\\begin{itemize}[leftmargin=15pt, itemsep=1pt, topsep=1pt]\n`;
         bullets.filter(Boolean).forEach((pt) => {
-          latex += `  \\item ${escapeLatex(String(pt))}\n`;
+          res += `  \\item ${escapeLatex(String(pt))}\n`;
         });
-        latex += `\\end{itemize}
-`;
+        res += `\\end{itemize}\n`;
       }
     });
-  }
+    return res;
+  };
 
-  // --- ADDITIONAL INFORMATION ---
-  if (Array.isArray(additionalInfo) && additionalInfo.length > 0) {
-    latex += `
+  const renderAdditionalInfoTex = () => {
+    if (!Array.isArray(additionalInfo) || additionalInfo.length === 0) return '';
+    let res = `
 \\section{Additional Information}
 `;
     additionalInfo.forEach((item) => {
@@ -535,21 +547,58 @@ ${summary}
         : [String(item)];
 
       if (label) {
-        latex += `\\noindent
+        res += `\\noindent
 \\textbf{${label}} \\\\[2pt]
 `;
       }
       if (bullets.length > 0) {
-        latex += `\\begin{itemize}[leftmargin=15pt, itemsep=1pt, topsep=1pt]
-`;
+        res += `\\begin{itemize}[leftmargin=15pt, itemsep=1pt, topsep=1pt]\n`;
         bullets.filter(Boolean).forEach((pt) => {
-          latex += `  \\item ${escapeLatex(String(pt))}\n`;
+          res += `  \\item ${escapeLatex(String(pt))}\n`;
         });
-        latex += `\\end{itemize}
-`;
+        res += `\\end{itemize}\n`;
       }
     });
-  }
+    return res;
+  };
+
+  // --- DYNAMICALLY APPEND ORDERED SECTIONS ---
+  sectionOrder.forEach((secKey) => {
+    switch (secKey) {
+      case 'summary':
+        latex += renderSummaryTex();
+        break;
+      case 'experience':
+      case 'experiences':
+        latex += renderExperienceTex();
+        break;
+      case 'projects':
+        latex += renderProjectsTex();
+        break;
+      case 'education':
+        latex += renderEducationTex();
+        break;
+      case 'certifications':
+        latex += renderCertificationsTex();
+        break;
+      case 'skills':
+        latex += renderSkillsTex();
+        break;
+      case 'leadership':
+      case 'leadership_activities':
+        latex += renderLeadershipTex();
+        break;
+      case 'achievements':
+        latex += renderAchievementsTex();
+        break;
+      case 'additionalInfo':
+      case 'additional_info':
+        latex += renderAdditionalInfoTex();
+        break;
+      default:
+        break;
+    }
+  });
 
   latex += `
 \\end{document}

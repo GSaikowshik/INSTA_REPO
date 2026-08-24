@@ -397,12 +397,14 @@ const TemplateModern = ({ data = {} }) => {
                 );
               })
             ) : (
-              Object.entries(additionalInfo).map(([key, val], index) => (
-                <div key={index} className="mb-1 text-xs text-slate-800">
-                  <span className="font-bold">{key}: </span>
-                  <span className="opacity-80">{Array.isArray(val) ? val.join(', ') : val}</span>
-                </div>
-              ))
+              <ul className="list-disc list-inside text-[10.5px] text-slate-700 space-y-0.5 pl-1 mt-0.5">
+                {Object.entries(additionalInfo).map(([key, val], index) => (
+                  <li key={index} className="text-xs text-slate-800">
+                    <span className="font-bold">{key}: </span>
+                    <span className="opacity-80">{Array.isArray(val) ? val.join(', ') : val}</span>
+                  </li>
+                ))}
+              </ul>
             )}
           </section>
         )}
