@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import Auth from './pages/Auth';
@@ -16,6 +16,21 @@ import InstaRepoDashboardLayout from './components/InstaRepoDashboardLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
+  useEffect(() => {
+    if ('Notification' in window) {
+      Notification.requestPermission();
+      const timer = setInterval(() => {
+        if (Notification.permission === 'granted') {
+          new Notification('InstaRepo', {
+            body: 'Don\'t forget to save your latest profile changes!',
+            icon: '/favicon.png'
+          });
+        }
+      }, 600000);
+      return () => clearInterval(timer);
+    }
+  }, []);
+
   return (
     <div className="overflow-x-hidden min-h-screen bg-slate-50 text-slate-900 font-sans">
       <BrowserRouter>
