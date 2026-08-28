@@ -40,11 +40,12 @@ import {
 const getFullImageUrl = (url) => {
   if (!url) return null;
   // Bypass absolute URLs AND Base64 data strings AND frontend public assets
-  if (url.startsWith('http') || url.startsWith('data:image')) {
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:image') || url.startsWith('blob:')) {
     return url;
   }
   if (url.startsWith('/uploads') || url.startsWith('uploads')) {
-    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const rawBackendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const backendUrl = rawBackendUrl.replace(/\/api\/v1\/?$/, '').replace(/\/+$/, '');
     return `${backendUrl}${url.startsWith('/') ? url : '/' + url}`;
   }
   return url;
@@ -104,6 +105,10 @@ const getInitials = (name) => {
 const AvatarImage = ({ src, name, sizeClass = "w-32 h-32 md:w-40 md:h-40 border-4 border-current/20 shadow-xl", onSelectFile }) => {
   const [hasError, setHasError] = useState(false);
 
+  useEffect(() => {
+    setHasError(false);
+  }, [src]);
+
   const initials = getInitials(name);
   const resolvedUrl = getFullImageUrl(src);
 
@@ -113,6 +118,7 @@ const AvatarImage = ({ src, name, sizeClass = "w-32 h-32 md:w-40 md:h-40 border-
     </div>
   ) : (
     <img 
+      key={resolvedUrl}
       src={resolvedUrl} 
       alt={name || "Candidate Avatar"} 
       onError={() => setHasError(true)}
@@ -374,16 +380,17 @@ const PortfolioGenerator = () => {
         setMasterPayload((prev) => ({
           ...prev,
           data: {
-            ...prev.data,
+            ...(prev.data || {}),
             personal_info: {
-              ...(prev.data?.personal_info || {}),
+              ...((prev.data && prev.data.personal_info) || {}),
               photo_url: uploadedUrl,
+              photoUrl: uploadedUrl,
             }
           }
         }));
         setIsCropModalOpen(false);
         setImageSrc(null);
-        setMessage({ type: 'success', text: 'Avatar cropped & uploaded to PostgreSQL profile!' });
+        setMessage({ type: 'success', text: 'Profile picture updated successfully!' });
       }
     } catch (err) {
       console.error('Crop avatar upload error:', err);
