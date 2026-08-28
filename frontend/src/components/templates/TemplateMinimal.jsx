@@ -177,11 +177,13 @@ const TemplateMinimal = ({ data = {} }) => {
                   })()}
                 </div>
                 {(() => {
-                  const bullets = Array.isArray(proj.highlights) && proj.highlights.length > 0
-                    ? proj.highlights
-                    : (Array.isArray(proj.bullet_points) && proj.bullet_points.length > 0
-                        ? proj.bullet_points
-                        : (proj.description ? (Array.isArray(proj.description) ? proj.description : [proj.description]) : []));
+                  const bullets = (Array.isArray(proj.bulletPoints) && proj.bulletPoints.length > 0)
+                    ? proj.bulletPoints
+                    : (Array.isArray(proj.highlights) && proj.highlights.length > 0
+                        ? proj.highlights
+                        : (Array.isArray(proj.bullet_points) && proj.bullet_points.length > 0
+                            ? proj.bullet_points
+                            : (proj.description ? (Array.isArray(proj.description) ? proj.description : [proj.description]) : [])));
 
                   if (bullets.length === 0) return null;
 
@@ -251,7 +253,14 @@ const TemplateMinimal = ({ data = {} }) => {
                 <div key={idx} className="flex items-start justify-between gap-1 leading-tight">
                   <div className="min-w-0 flex-1">
                     <span className="font-bold text-slate-900 text-[10.5px] block truncate">
-                      {cert.name || cert.title || 'Certification Name'}
+                      {(() => {
+                        const cLink = cert.link || cert.url || cert.credentialUrl || cert.credential_url;
+                        return cLink ? (
+                          <a href={cLink.startsWith('http') ? cLink : `https://${cLink}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                            {cert.name || cert.title || 'Certification Name'}
+                          </a>
+                        ) : (cert.name || cert.title || 'Certification Name');
+                      })()}
                     </span>
                     {cert.issuer && (
                       <span className="text-[10px] text-indigo-700 font-medium block truncate">

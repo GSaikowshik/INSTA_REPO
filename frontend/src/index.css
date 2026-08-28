@@ -7,25 +7,60 @@
   }
 }
 
-/* Strict A4 Print & Vector PDF Sizing Rules */
+/* Strict Single-Page A4 Print & Vector PDF Sizing Rules */
 @page {
-  size: A4;
+  size: A4 portrait;
   margin: 0;
 }
 
 @media print {
-  body {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+  html, body {
+    width: 210mm !important;
+    height: 297mm !important;
+    max-height: 297mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
     background: transparent !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
-  .resume-a4-container { 
+
+  .resume-a4-container,
+  .resume-a4-preview { 
     width: 210mm !important; 
     height: 297mm !important; 
+    max-height: 297mm !important;
     margin: 0 !important; 
+    padding: 0 !important;
     overflow: hidden !important; 
     box-shadow: none !important; 
     border: none !important;
+    transform: scale(0.95) !important;
+    transform-origin: top center !important;
+    page-break-after: avoid !important;
+    page-break-before: avoid !important;
+    break-after: avoid !important;
+  }
+
+  /* Prevent awkward section splitting across pages */
+  section,
+  .section-block,
+  .mb-4,
+  .mb-3,
+  .mb-2,
+  .experience-item,
+  .project-item,
+  .education-item,
+  .certification-item,
+  .leadership-item {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Hide scrollbars, non-print UI, headers and buttons */
+  header, nav, aside, button, .no-print, ::-webkit-scrollbar {
+    display: none !important;
   }
 }
 

@@ -132,7 +132,22 @@ const AtsTemplateLibrary = ({ data = {}, templateId = 'template1' }) => {
                 </div>
                 <span className="text-[10px] font-normal">{proj.date || proj.year || ''}</span>
               </div>
-              <div className="mb-1">{proj.description}</div>
+              <ul className="list-disc pl-4 space-y-0.5 text-gray-700 mb-1.5">
+                {(() => {
+                  const bullets = (Array.isArray(proj.bulletPoints) && proj.bulletPoints.length > 0)
+                    ? proj.bulletPoints
+                    : (Array.isArray(proj.highlights) && proj.highlights.length > 0)
+                      ? proj.highlights
+                      : (Array.isArray(proj.bullet_points) && proj.bullet_points.length > 0)
+                        ? proj.bullet_points
+                        : (Array.isArray(proj.description)
+                            ? proj.description
+                            : (proj.description ? [proj.description] : []));
+                  return bullets.filter(Boolean).map((line, j) => (
+                    <li key={`p-${j}`} className="pl-1">{line}</li>
+                  ));
+                })()}
+              </ul>
               {techList && Array.isArray(techList) && (
                 <div className="text-[9.5px] opacity-80">
                   <span className="font-semibold">Technologies:</span> {techList.join(', ')}
@@ -151,12 +166,21 @@ const AtsTemplateLibrary = ({ data = {}, templateId = 'template1' }) => {
       <div className="mb-4">
         <h2 className={`text-[11px] font-bold uppercase mb-2 ${activeTheme.primaryColor} ${activeTheme.borderColor}`}>Certifications</h2>
         <div className="grid grid-cols-2 gap-2">
-          {certList.map((c, i) => (
-            <div key={i} className="flex flex-col">
-              <span className="font-bold text-[10.5px]">{c.name || c.title}</span>
-              <span className="opacity-75 text-[10px]">{c.issuer}</span>
-            </div>
-          ))}
+          {certList.map((c, i) => {
+            const cLink = c.link || c.url || c.credentialUrl || c.credential_url;
+            return (
+              <div key={i} className="flex flex-col">
+                <span className="font-bold text-[10.5px]">
+                  {cLink ? (
+                    <a href={cLink.startsWith('http') ? cLink : `https://${cLink}`} target="_blank" rel="noopener noreferrer" className="hover:underline text-blue-600">
+                      {c.name || c.title}
+                    </a>
+                  ) : (c.name || c.title)}
+                </span>
+                <span className="opacity-75 text-[10px]">{c.issuer}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
     );

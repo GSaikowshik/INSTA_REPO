@@ -29,7 +29,9 @@ import {
   Bookmark,
   Award,
   Trophy,
-  Camera
+  Camera,
+  Send,
+  Copy
 } from 'lucide-react';
 
 
@@ -152,15 +154,33 @@ const CertificationsSection = ({ data }) => {
         <span>Certifications & Industry Credentials</span>
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {list.map((cert, idx) => (
-          <div key={cert.id || idx} className="space-y-1 py-1">
-            <div className="flex items-center justify-between">
-              <h4 className="text-xs font-bold text-current">{cert.name}</h4>
-              <span className="text-[10px] font-mono opacity-60">{cert.issue_date || cert.date}</span>
+        {list.map((cert, idx) => {
+          const certUrl = cert.link || cert.url || cert.credential_url || cert.credentialUrl;
+          const certName = cert.name || cert.title || 'Certification';
+          return (
+            <div key={cert.id || idx} className="space-y-1 py-1">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold">
+                  {certUrl ? (
+                    <a
+                      href={certUrl.startsWith('http') ? certUrl : `https://${certUrl}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline inline-flex items-center gap-1"
+                    >
+                      <span>{certName}</span>
+                      <ExternalLink className="w-3 h-3 opacity-75 inline" />
+                    </a>
+                  ) : (
+                    <span className="text-current">{certName}</span>
+                  )}
+                </h4>
+                <span className="text-[10px] font-mono opacity-60">{cert.issue_date || cert.date}</span>
+              </div>
+              <p className="text-xs opacity-75 font-medium">{cert.issuer || cert.organization}</p>
             </div>
-            <p className="text-xs opacity-75 font-medium">{cert.issuer}</p>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -223,6 +243,10 @@ const PortfolioGenerator = () => {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [isSaved, setIsSaved] = useState(false);
+  const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
+  const [isSendingContact, setIsSendingContact] = useState(false);
+  const [contactFeedback, setContactFeedback] = useState(null);
+  const [copiedContactEmail, setCopiedContactEmail] = useState(false);
 
   const [imageSrc, setImageSrc] = useState(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -281,7 +305,19 @@ const PortfolioGenerator = () => {
               education: parsed.education || [],
               skills: parsed.skills || [],
               projects: parsed.projects || [],
-              certifications: parsed.certifications || [],
+              certifications: (parsed.certifications || []).map(c => {
+                const link = c.link || c.url || c.credential_url || c.credentialUrl || '';
+                return {
+                  ...c,
+                  name: c.name || c.title || 'Certification',
+                  title: c.name || c.title || 'Certification',
+                  issuer: c.issuer || c.organization || '',
+                  link,
+                  url: link,
+                  credential_url: link,
+                  credentialUrl: link,
+                };
+              }),
               achievements: parsed.achievements || [],
               leadership: parsed.leadership || parsed.leadership_activities || [],
               additionalInfo: parsed.additional_info || parsed.additionalInfo || [],
@@ -411,6 +447,87 @@ const PortfolioGenerator = () => {
     }
   };
 
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+    const data = masterPayload.data || {};
+    const personal = data.personal_info || {};
+    const targetEmail = (personal.email || '').trim();
+
+    if (!targetEmail) {
+      setContactFeedback({ type: 'error', text: 'No recipient email address is configured for this portfolio.' });
+      return;
+    }
+
+    const name = contactForm.name.trim();
+    const email = contactForm.email.trim();
+    const message = contactForm.message.trim();
+
+    setIsSendingContact(true);
+    setContactFeedback({ type: 'info', text: 'Sending your message...' });
+
+    try {
+      // 1. Direct AJAX Delivery via FormSubmit
+      const response = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(targetEmail)}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          name: name || 'Portfolio Visitor',
+          email: email,
+          message: message,
+          _subject: `New Portfolio Message from ${name || email}`,
+          _template: 'table',
+          _captcha: 'false'
+        })
+      });
+
+      const resData = await response.json().catch(() => ({}));
+
+      if (response.ok && (resData.success === 'true' || resData.success === true || resData.message)) {
+        setContactFeedback({
+          type: 'success',
+          text: `Message sent successfully to ${targetEmail}! You can expect a response soon.`
+        });
+        setContactForm({ name: '', email: '', message: '' });
+      } else {
+        // Fallback: Open Gmail Web Compose
+        const subject = encodeURIComponent(`Portfolio Inquiry from ${name || 'Visitor'}`);
+        const body = encodeURIComponent(`Hello,\n\n${message}\n\n---\nSender Name: ${name}\nSender Email: ${email}`);
+        const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${targetEmail}&su=${subject}&body=${body}`;
+        window.open(gmailUrl, '_blank');
+        setContactFeedback({
+          type: 'success',
+          text: `Opened Gmail Web composer with your message for ${targetEmail}.`
+        });
+      }
+    } catch (err) {
+      console.warn('FormSubmit network error, opening Gmail fallback:', err);
+      const subject = encodeURIComponent(`Portfolio Inquiry from ${name || 'Visitor'}`);
+      const body = encodeURIComponent(`Hello,\n\n${message}\n\n---\nSender Name: ${name}\nSender Email: ${email}`);
+      const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${targetEmail}&su=${subject}&body=${body}`;
+      window.open(gmailUrl, '_blank');
+      setContactFeedback({
+        type: 'info',
+        text: `Opened Gmail Web composer in a new tab for ${targetEmail}.`
+      });
+    } finally {
+      setIsSendingContact(false);
+    }
+  };
+
+  const handleCopyContactEmail = (e) => {
+    e.preventDefault();
+    const data = masterPayload.data || {};
+    const personal = data.personal_info || {};
+    if (!personal.email) return;
+
+    navigator.clipboard.writeText(personal.email);
+    setCopiedContactEmail(true);
+    setTimeout(() => setCopiedContactEmail(false), 2500);
+  };
+
   const handleExport = () => {
     const data = masterPayload.data || {};
     const personal = data.personal_info || {};
@@ -452,9 +569,11 @@ const PortfolioGenerator = () => {
         ${name !== 'Developer' ? `<h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight">${name}</h1>` : ''}
         ${personal.title ? `<p class="text-sm font-semibold uppercase tracking-widest opacity-80 mt-1">${personal.title}</p>` : ''}
         ${summary ? `<p class="text-xs opacity-85 leading-relaxed pt-3 max-w-2xl">${summary}</p>` : ''}
-        <div class="flex items-center gap-4 text-xs opacity-75 pt-2">
+        <div class="flex flex-wrap items-center gap-4 text-xs opacity-75 pt-2">
           ${personal.email ? `<span>${personal.email}</span>` : ''}
           ${personal.location ? `<span>• ${personal.location}</span>` : ''}
+          ${personal.github_url || personal.github ? `<a href="${(personal.github_url || personal.github).startsWith('http') ? (personal.github_url || personal.github) : 'https://' + (personal.github_url || personal.github)}" target="_blank" rel="noopener noreferrer" class="font-semibold underline">GitHub ↗</a>` : ''}
+          ${personal.linkedin_url || personal.linkedin ? `<a href="${(personal.linkedin_url || personal.linkedin).startsWith('http') ? (personal.linkedin_url || personal.linkedin) : 'https://' + (personal.linkedin_url || personal.linkedin)}" target="_blank" rel="noopener noreferrer" class="font-semibold underline">LinkedIn ↗</a>` : ''}
         </div>
       </div>
       <div class="order-1 sm:order-2 self-center sm:self-start mb-6 sm:mb-0">
@@ -544,15 +663,21 @@ const PortfolioGenerator = () => {
     <div class="pb-8 border-b border-current/15 space-y-4">
       <h3 class="text-xs font-bold uppercase tracking-widest opacity-70">Certifications & Industry Credentials</h3>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        ${certifications.map(cert => `
+        ${certifications.map(cert => {
+          const certUrl = cert.link || cert.url || cert.credential_url || cert.credentialUrl;
+          const certName = cert.name || cert.title || 'Certification';
+          const certLinkHtml = certUrl 
+            ? `<a href="${certUrl.startsWith('http') ? certUrl : 'https://' + certUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">${certName} ↗</a>` 
+            : certName;
+          return `
           <div class="space-y-1 py-1">
             <div class="flex items-center justify-between">
-              <h4 class="text-xs font-bold">${cert.name || cert.title}</h4>
+              <h4 class="text-xs font-bold">${certLinkHtml}</h4>
               <span class="text-[10px] font-mono opacity-60">${cert.issue_date || cert.date || ''}</span>
             </div>
             <p class="text-xs opacity-75 font-medium">${cert.issuer || cert.organization || ''}</p>
           </div>
-        `).join('')}
+        `}).join('')}
       </div>
     </div>
     ` : ''}
@@ -589,6 +714,43 @@ const PortfolioGenerator = () => {
       </div>
     </div>
     ` : ''}
+
+    <!-- Contact Me Section -->
+    <div class="pb-12 space-y-6">
+      <div class="space-y-1.5">
+        <h3 class="text-xs font-bold uppercase tracking-widest opacity-70">Get In Touch</h3>
+        <p class="text-xs opacity-75 leading-relaxed">
+          Currently open for new opportunities, collaborations, and engineering roles. Send me a message and I'll get back to you!
+        </p>
+      </div>
+
+      <div class="${currentTheme.cardStyle} max-w-xl">
+        <form onsubmit="event.preventDefault(); const n=(this.name.value||'').trim(); const e=(this.email.value||'').trim(); const m=(this.message.value||'').trim(); const sub=encodeURIComponent('Portfolio Inquiry from ' + (n || 'Visitor')); const body=encodeURIComponent('Hello,\\n\\n' + m + '\\n\\n---\\nSender Name: ' + n + '\\nSender Email: ' + e); const dest='${personal.email || ''}'; if (!dest) { alert('No recipient email configured.'); return; } window.location.href='mailto:' + dest + '?subject=' + sub + '&body=' + body;" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div class="space-y-1">
+              <label class="text-[11px] font-bold opacity-80 block">Your Name</label>
+              <input type="text" name="name" required placeholder="e.g. Alex Morgan" class="w-full bg-black/5 border border-current/20 rounded-md px-3 py-2 text-xs text-current outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:opacity-50" />
+            </div>
+            <div class="space-y-1">
+              <label class="text-[11px] font-bold opacity-80 block">Your Email</label>
+              <input type="email" name="email" required placeholder="alex@company.com" class="w-full bg-black/5 border border-current/20 rounded-md px-3 py-2 text-xs text-current outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:opacity-50" />
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-[11px] font-bold opacity-80 block">Message</label>
+            <textarea name="message" rows="4" required placeholder="Hi! I came across your portfolio and would love to discuss..." class="w-full bg-black/5 border border-current/20 rounded-md px-3 py-2 text-xs text-current outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-y placeholder:opacity-50"></textarea>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+            <button type="submit" class="${currentTheme.accentChip} font-bold px-4 py-2 text-xs rounded-md cursor-pointer shadow-sm hover:opacity-90">
+              Send Message
+            </button>
+            ${personal.email ? `<a href="mailto:${personal.email}" class="text-xs font-semibold opacity-75 hover:opacity-100 hover:underline">Or email directly: ${personal.email}</a>` : ''}
+          </div>
+        </form>
+      </div>
+    </div>
 
   </div>
 </body>
@@ -863,9 +1025,31 @@ const PortfolioGenerator = () => {
               {personal.full_name && <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight">{personal.full_name}</h1>}
               {personal.title && <p className="text-sm font-semibold uppercase tracking-widest opacity-80 mt-1">{personal.title}</p>}
               {summary && <p className="text-xs opacity-85 leading-relaxed pt-3 max-w-2xl">{summary}</p>}
-              <div className="flex items-center gap-4 text-xs opacity-75 pt-2">
+              <div className="flex flex-wrap items-center gap-4 text-xs opacity-75 pt-2">
                 {personal.email && <span>{personal.email}</span>}
                 {personal.location && <span>• {personal.location}</span>}
+                {(personal.github_url || personal.github) && (
+                  <a
+                    href={(personal.github_url || personal.github).startsWith('http') ? (personal.github_url || personal.github) : `https://${personal.github_url || personal.github}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 font-semibold hover:opacity-80 underline"
+                  >
+                    <span>GitHub</span>
+                    <ExternalLink className="w-3 h-3 opacity-75 inline" />
+                  </a>
+                )}
+                {(personal.linkedin_url || personal.linkedin) && (
+                  <a
+                    href={(personal.linkedin_url || personal.linkedin).startsWith('http') ? (personal.linkedin_url || personal.linkedin) : `https://${personal.linkedin_url || personal.linkedin}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 font-semibold hover:opacity-80 underline"
+                  >
+                    <span>LinkedIn</span>
+                    <ExternalLink className="w-3 h-3 opacity-75 inline" />
+                  </a>
+                )}
               </div>
             </div>
             <div className="order-1 sm:order-2 self-center sm:self-start mb-6 sm:mb-0">
@@ -1024,6 +1208,130 @@ const PortfolioGenerator = () => {
               </div>
             </div>
           )}
+
+          {/* 9. Contact Me Section */}
+          <div className="pb-12 space-y-6">
+            <div className="space-y-1.5">
+              <h3 className="text-xs font-bold uppercase tracking-widest opacity-70 flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5 text-blue-500" />
+                <span>Get In Touch</span>
+              </h3>
+              <p className="text-xs opacity-75 leading-relaxed">
+                Currently open for new opportunities, collaborations, and engineering roles. Send me a message and I'll get back to you!
+              </p>
+            </div>
+
+            <div className={`${currentTheme.cardStyle} max-w-xl`}>
+              <form onSubmit={handleContactSubmit} className="space-y-4">
+                {contactFeedback && (
+                  <div className={`p-3 rounded-md text-xs font-medium flex items-start gap-2.5 ${
+                    contactFeedback.type === 'success' 
+                      ? 'bg-emerald-50 border border-emerald-200 text-emerald-800' 
+                      : contactFeedback.type === 'error'
+                      ? 'bg-rose-50 border border-rose-200 text-rose-800'
+                      : 'bg-blue-50 border border-blue-200 text-blue-800'
+                  }`}>
+                    {contactFeedback.type === 'success' ? (
+                      <Check className="w-4 h-4 shrink-0 text-emerald-600 mt-0.5" />
+                    ) : contactFeedback.type === 'error' ? (
+                      <Mail className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
+                    ) : (
+                      <Loader2 className="w-4 h-4 shrink-0 text-blue-600 animate-spin mt-0.5" />
+                    )}
+                    <span className="leading-relaxed">{contactFeedback.text}</span>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold opacity-80 block">Your Name</label>
+                    <input 
+                      type="text" 
+                      name="name" 
+                      value={contactForm.name}
+                      onChange={(e) => setContactForm(prev => ({ ...prev, name: e.target.value }))}
+                      required 
+                      placeholder="e.g. Alex Morgan"
+                      className="w-full bg-black/5 dark:bg-white/5 border border-current/20 rounded-md px-3 py-2 text-xs text-current outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:opacity-50"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold opacity-80 block">Your Email</label>
+                    <input 
+                      type="email" 
+                      name="email" 
+                      value={contactForm.email}
+                      onChange={(e) => setContactForm(prev => ({ ...prev, email: e.target.value }))}
+                      required 
+                      placeholder="alex@company.com"
+                      className="w-full bg-black/5 dark:bg-white/5 border border-current/20 rounded-md px-3 py-2 text-xs text-current outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:opacity-50"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold opacity-80 block">Message</label>
+                  <textarea 
+                    name="message" 
+                    value={contactForm.message}
+                    onChange={(e) => setContactForm(prev => ({ ...prev, message: e.target.value }))}
+                    rows={4} 
+                    required 
+                    placeholder="Hi! I came across your portfolio and would love to discuss..."
+                    className="w-full bg-black/5 dark:bg-white/5 border border-current/20 rounded-md px-3 py-2 text-xs text-current outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-y placeholder:opacity-50"
+                  />
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+                  <div className="flex items-center gap-2">
+                    <button 
+                      type="submit"
+                      disabled={isSendingContact}
+                      className={`${currentTheme.accentChip} font-bold px-4 py-2 text-xs rounded-md flex items-center gap-2 cursor-pointer shadow-sm hover:opacity-90 transition-opacity disabled:opacity-50`}
+                    >
+                      {isSendingContact ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Send className="w-3.5 h-3.5" />
+                      )}
+                      <span>{isSendingContact ? "Sending..." : "Send Message"}</span>
+                    </button>
+
+                    {personal.email && (
+                      <a
+                        href={`https://mail.google.com/mail/?view=cm&fs=1&to=${personal.email}&su=${encodeURIComponent(`Portfolio Inquiry from ${contactForm.name || 'Visitor'}`)}&body=${encodeURIComponent(`Hello,\n\n${contactForm.message}\n\n---\nSender: ${contactForm.name}\nEmail: ${contactForm.email}`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs font-medium opacity-75 hover:opacity-100 hover:underline px-2.5 py-1.5 rounded border border-current/20 flex items-center gap-1.5"
+                        title="Open directly in Gmail in browser tab"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        <span>Send via Gmail</span>
+                      </a>
+                    )}
+                  </div>
+
+                  {personal.email && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleCopyContactEmail}
+                        className="text-xs font-semibold opacity-75 hover:opacity-100 hover:underline flex items-center gap-1.5 cursor-pointer bg-transparent border-none p-0"
+                        title="Copy email to clipboard"
+                      >
+                        {copiedContactEmail ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-500" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5 opacity-70" />
+                        )}
+                        <span>{copiedContactEmail ? "Copied Email!" : personal.email}</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </form>
+            </div>
+          </div>
 
         </div>
       </div>

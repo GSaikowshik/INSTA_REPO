@@ -151,8 +151,18 @@ const DefaultAtsTemplate = ({ data = {} }) => {
               <span className="text-[9.5px] font-normal text-gray-600">{proj.date || proj.year || ''}</span>
             </div>
             <ul className="list-disc pl-5 mt-0.5 space-y-0.5">
-              {proj.highlights?.map((h, j) => <li key={j}>{h}</li>)}
-              {proj.description && !proj.highlights && <li>{proj.description}</li>}
+              {(() => {
+                const bullets = (Array.isArray(proj.bulletPoints) && proj.bulletPoints.length > 0)
+                  ? proj.bulletPoints
+                  : (Array.isArray(proj.highlights) && proj.highlights.length > 0)
+                    ? proj.highlights
+                    : (Array.isArray(proj.bullet_points) && proj.bullet_points.length > 0)
+                      ? proj.bullet_points
+                      : (Array.isArray(proj.description)
+                          ? proj.description
+                          : (proj.description ? [proj.description] : []));
+                return bullets.filter(Boolean).map((h, j) => <li key={j}>{h}</li>);
+              })()}
             </ul>
           </div>
         ))}
@@ -166,11 +176,20 @@ const DefaultAtsTemplate = ({ data = {} }) => {
       <div className="mb-3">
         <h2 className="text-xs font-bold uppercase border-b border-black pb-0.5 mb-1.5 text-black">Certification</h2>
         <ul style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.25rem' }} className="list-disc pl-4 mt-0.5 text-black">
-          {certList.map((c, i) => (
-             <li key={i} className="mb-0.5">
-               <span className="font-bold">{c.name || c.title}</span> {c.issuer ? `(${c.issuer})` : ''}
-             </li>
-          ))}
+          {certList.map((c, i) => {
+            const cLink = c.link || c.url || c.credentialUrl || c.credential_url;
+            return (
+              <li key={i} className="mb-0.5">
+                <span className="font-bold">
+                  {cLink ? (
+                    <a href={cLink.startsWith('http') ? cLink : `https://${cLink}`} target="_blank" rel="noopener noreferrer" className="hover:underline text-blue-700">
+                      {c.name || c.title}
+                    </a>
+                  ) : (c.name || c.title)}
+                </span> {c.issuer ? `(${c.issuer})` : ''}
+              </li>
+            );
+          })}
         </ul>
       </div>
     );

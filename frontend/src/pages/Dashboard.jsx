@@ -135,7 +135,19 @@ const Dashboard = () => {
                     description: bullets,
                   };
                 }),
-                certifications: content.certifications || [],
+                certifications: (content.certifications || []).map(c => {
+                  const link = c.credential_url || c.link || c.url || c.credentialUrl || '';
+                  return {
+                    ...c,
+                    name: c.name || c.title || '',
+                    title: c.name || c.title || '',
+                    issuer: c.issuer || c.organization || '',
+                    credential_url: link,
+                    link,
+                    url: link,
+                    credentialUrl: link,
+                  };
+                }),
                 achievements: (content.achievements || []).map(ach => {
                   const title = typeof ach === 'string' ? ach : (ach.title || ach.name || '');
                   const rawBullets = (typeof ach === 'object' && ach !== null)
@@ -219,7 +231,19 @@ const Dashboard = () => {
               description: bullets,
             };
           }),
-          certifications: parsedData.certifications || [],
+          certifications: (parsedData.certifications || []).map(c => {
+            const link = c.credential_url || c.link || c.url || c.credentialUrl || '';
+            return {
+              ...c,
+              name: c.name || c.title || '',
+              title: c.name || c.title || '',
+              issuer: c.issuer || c.organization || '',
+              credential_url: link,
+              link,
+              url: link,
+              credentialUrl: link,
+            };
+          }),
           achievements: (parsedData.achievements || []).map(ach => {
             const title = typeof ach === 'string' ? ach : (ach.title || ach.name || '');
             const rawBullets = (typeof ach === 'object' && ach !== null)
@@ -337,7 +361,19 @@ const Dashboard = () => {
               description: bullets,
             };
           }),
-          certifications: parsedData.certifications || [],
+          certifications: (parsedData.certifications || []).map(c => {
+            const link = c.credential_url || c.link || c.url || c.credentialUrl || '';
+            return {
+              ...c,
+              name: c.name || c.title || '',
+              title: c.name || c.title || '',
+              issuer: c.issuer || c.organization || '',
+              credential_url: link,
+              link,
+              url: link,
+              credentialUrl: link,
+            };
+          }),
           achievements: (parsedData.achievements || []).map(ach => {
             const title = typeof ach === 'string' ? ach : (ach.title || ach.name || '');
             const rawBullets = (typeof ach === 'object' && ach !== null)
@@ -557,14 +593,18 @@ const Dashboard = () => {
     setProfileData((prev) => {
       const list = [...(prev.projects || [])];
       const proj = { ...list[projIndex] };
-      const rawBullets = Array.isArray(proj.highlights) && proj.highlights.length > 0
-        ? proj.highlights
-        : (Array.isArray(proj.bullet_points) && proj.bullet_points.length > 0
-            ? proj.bullet_points
-            : (proj.description ? (Array.isArray(proj.description) ? proj.description : proj.description.split('\n')) : []));
+      const rawBullets = (Array.isArray(proj.bulletPoints) && proj.bulletPoints.length > 0)
+        ? proj.bulletPoints
+        : ((Array.isArray(proj.highlights) && proj.highlights.length > 0)
+            ? proj.highlights
+            : (Array.isArray(proj.bullet_points) && proj.bullet_points.length > 0
+                ? proj.bullet_points
+                : (proj.description ? (Array.isArray(proj.description) ? proj.description : proj.description.split('\n')) : [])));
       const bullets = [...rawBullets, ''];
+      proj.bulletPoints = bullets;
       proj.highlights = bullets;
       proj.bullet_points = bullets;
+      proj.description = bullets;
       list[projIndex] = proj;
       return { ...prev, projects: list };
     });
@@ -574,14 +614,18 @@ const Dashboard = () => {
     setProfileData((prev) => {
       const list = [...(prev.projects || [])];
       const proj = { ...list[projIndex] };
-      const rawBullets = Array.isArray(proj.highlights) && proj.highlights.length > 0
-        ? proj.highlights
-        : (Array.isArray(proj.bullet_points) && proj.bullet_points.length > 0
-            ? proj.bullet_points
-            : (proj.description ? (Array.isArray(proj.description) ? proj.description : proj.description.split('\n')) : []));
+      const rawBullets = (Array.isArray(proj.bulletPoints) && proj.bulletPoints.length > 0)
+        ? proj.bulletPoints
+        : ((Array.isArray(proj.highlights) && proj.highlights.length > 0)
+            ? proj.highlights
+            : (Array.isArray(proj.bullet_points) && proj.bullet_points.length > 0
+                ? proj.bullet_points
+                : (proj.description ? (Array.isArray(proj.description) ? proj.description : proj.description.split('\n')) : [])));
       const bullets = rawBullets.map((item, idx) => (idx === bulletIndex ? value : item));
+      proj.bulletPoints = bullets;
       proj.highlights = bullets;
       proj.bullet_points = bullets;
+      proj.description = bullets;
       list[projIndex] = proj;
       return { ...prev, projects: list };
     });
@@ -591,14 +635,18 @@ const Dashboard = () => {
     setProfileData((prev) => {
       const list = [...(prev.projects || [])];
       const proj = { ...list[projIndex] };
-      const rawBullets = Array.isArray(proj.highlights) && proj.highlights.length > 0
-        ? proj.highlights
-        : (Array.isArray(proj.bullet_points) && proj.bullet_points.length > 0
-            ? proj.bullet_points
-            : (proj.description ? (Array.isArray(proj.description) ? proj.description : proj.description.split('\n')) : []));
+      const rawBullets = (Array.isArray(proj.bulletPoints) && proj.bulletPoints.length > 0)
+        ? proj.bulletPoints
+        : ((Array.isArray(proj.highlights) && proj.highlights.length > 0)
+            ? proj.highlights
+            : (Array.isArray(proj.bullet_points) && proj.bullet_points.length > 0
+                ? proj.bullet_points
+                : (proj.description ? (Array.isArray(proj.description) ? proj.description : proj.description.split('\n')) : [])));
       const bullets = rawBullets.filter((_, idx) => idx !== bulletIndex);
+      proj.bulletPoints = bullets;
       proj.highlights = bullets;
       proj.bullet_points = bullets;
+      proj.description = bullets;
       list[projIndex] = proj;
       return { ...prev, projects: list };
     });
@@ -1355,7 +1403,10 @@ const Dashboard = () => {
                   onClick={() =>
                     addItem('projects', {
                       title: 'Project Title',
-                      description: 'Project description',
+                      bulletPoints: [''],
+                      highlights: [''],
+                      bullet_points: [''],
+                      description: [''],
                       technologies: [],
                       repo_url: '',
                       live_url: '',
@@ -1554,8 +1605,14 @@ const Dashboard = () => {
                   <input
                     type="text"
                     placeholder="Credential URL (for verification)"
-                    value={cert.credential_url || ''}
-                    onChange={(e) => updateItem('certifications', idx, 'credential_url', e.target.value)}
+                    value={cert.credential_url || cert.link || cert.url || cert.credentialUrl || ''}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      updateItem('certifications', idx, 'credential_url', val);
+                      updateItem('certifications', idx, 'link', val);
+                      updateItem('certifications', idx, 'url', val);
+                      updateItem('certifications', idx, 'credentialUrl', val);
+                    }}
                     className="w-full bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-700 rounded px-2.5 py-1 text-xs text-gray-900 outline-none"
                   />
                 </div>

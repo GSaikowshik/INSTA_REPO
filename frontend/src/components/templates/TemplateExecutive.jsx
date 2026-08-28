@@ -161,11 +161,13 @@ const TemplateExecutive = ({ data = {} }) => {
                   })()}
                 </div>
                 {(() => {
-                  const bullets = Array.isArray(proj.highlights) && proj.highlights.length > 0
-                    ? proj.highlights
-                    : (Array.isArray(proj.bullet_points) && proj.bullet_points.length > 0
-                        ? proj.bullet_points
-                        : (proj.description ? (Array.isArray(proj.description) ? proj.description : [proj.description]) : []));
+                  const bullets = (Array.isArray(proj.bulletPoints) && proj.bulletPoints.length > 0)
+                    ? proj.bulletPoints
+                    : (Array.isArray(proj.highlights) && proj.highlights.length > 0
+                        ? proj.highlights
+                        : (Array.isArray(proj.bullet_points) && proj.bullet_points.length > 0
+                            ? proj.bullet_points
+                            : (proj.description ? (Array.isArray(proj.description) ? proj.description : [proj.description]) : [])));
 
                   if (bullets.length === 0) return null;
 
@@ -245,7 +247,16 @@ const TemplateExecutive = ({ data = {} }) => {
           <div className="grid grid-cols-2 gap-x-4 gap-y-1">
             {certifications.map((cert, idx) => (
               <div key={idx} className="text-[10.5px]">
-                <span className="font-bold text-slate-900">{cert.name || cert.title}</span>
+                <span className="font-bold text-slate-900">
+                  {(() => {
+                    const cLink = cert.link || cert.url || cert.credentialUrl || cert.credential_url;
+                    return cLink ? (
+                      <a href={cLink.startsWith('http') ? cLink : `https://${cLink}`} target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:underline">
+                        {cert.name || cert.title}
+                      </a>
+                    ) : (cert.name || cert.title);
+                  })()}
+                </span>
                 {cert.issuer && <span className="italic text-slate-700"> — {cert.issuer}</span>}
               </div>
             ))}

@@ -57,8 +57,45 @@ const TemplateVision = ({ parsedData }) => {
     content: () => resumeRef.current,
     documentTitle: `${parsed_data?.personal_info?.full_name || 'Resume'}`,
     pageStyle: `
-      @page { size: A4; margin: 0; }
-      @media print { body { -webkit-print-color-adjust: exact; } }
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
+      @media print {
+        html, body {
+          width: 210mm !important;
+          height: 297mm !important;
+          max-height: 297mm !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: hidden !important;
+          background: transparent !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        .resume-a4-container, .w-\\[210mm\\] {
+          width: 210mm !important;
+          height: 297mm !important;
+          max-height: 297mm !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: hidden !important;
+          box-shadow: none !important;
+          border: none !important;
+          transform: scale(0.95);
+          transform-origin: top center;
+          page-break-after: avoid !important;
+          page-break-before: avoid !important;
+          break-after: avoid !important;
+        }
+        section, .mb-4, .mb-3, .mb-3.5, .mb-2, .mb-2.5 {
+          page-break-inside: avoid !important;
+          break-inside: avoid !important;
+        }
+        ::-webkit-scrollbar, .no-print {
+          display: none !important;
+        }
+      }
     `,
   });
 
@@ -221,7 +258,7 @@ const TemplateVision = ({ parsedData }) => {
           >
             <div 
               ref={resumeRef} 
-              className="w-[210mm] min-h-[297mm] bg-white shadow-sm border border-gray-200 shrink-0 break-words text-black overflow-hidden"
+              className="resume-a4-container w-[210mm] min-h-[297mm] bg-white shadow-sm border border-gray-200 shrink-0 break-words text-black overflow-hidden"
             >
               {selectedAtsId === 'template11' ? (
                 <SignatureTemplate data={parsed_data} />

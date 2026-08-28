@@ -121,7 +121,16 @@ const TemplateModern = ({ data = {} }) => {
                 const issueDate = cert.issue_date || cert.date || '';
                 return (
                   <div key={idx} className="text-[10px] leading-tight">
-                    <div className="font-bold text-white">{cert.name || cert.title}</div>
+                    <div className="font-bold text-white">
+                      {(() => {
+                        const cLink = cert.link || cert.url || cert.credentialUrl || cert.credential_url;
+                        return cLink ? (
+                          <a href={cLink.startsWith('http') ? cLink : `https://${cLink}`} target="_blank" rel="noopener noreferrer" className="text-indigo-300 hover:underline">
+                            {cert.name || cert.title}
+                          </a>
+                        ) : (cert.name || cert.title);
+                      })()}
+                    </div>
                     {cert.issuer && <div className="text-slate-400 text-[9.5px]">{cert.issuer}</div>}
                     {issueDate && <div className="text-slate-400 text-[9px]">{issueDate}</div>}
                   </div>
@@ -225,11 +234,13 @@ const TemplateModern = ({ data = {} }) => {
                     })()}
                   </div>
                   {(() => {
-                    const bullets = Array.isArray(proj.highlights) && proj.highlights.length > 0
-                      ? proj.highlights
-                      : (Array.isArray(proj.bullet_points) && proj.bullet_points.length > 0
-                          ? proj.bullet_points
-                          : (proj.description ? (Array.isArray(proj.description) ? proj.description : [proj.description]) : []));
+                    const bullets = (Array.isArray(proj.bulletPoints) && proj.bulletPoints.length > 0)
+                      ? proj.bulletPoints
+                      : (Array.isArray(proj.highlights) && proj.highlights.length > 0
+                          ? proj.highlights
+                          : (Array.isArray(proj.bullet_points) && proj.bullet_points.length > 0
+                              ? proj.bullet_points
+                              : (proj.description ? (Array.isArray(proj.description) ? proj.description : [proj.description]) : [])));
 
                     if (bullets.length === 0) return null;
 

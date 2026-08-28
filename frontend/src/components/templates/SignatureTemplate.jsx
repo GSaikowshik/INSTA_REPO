@@ -99,7 +99,22 @@ const SignatureTemplate = ({ data = {} }) => {
                 </div>
                 <span className="text-[9.5px] text-gray-600 font-normal">{proj.date || proj.year || ''}</span>
               </div>
-              <div className="mb-1">{proj.description}</div>
+              <ul className="list-disc pl-4 space-y-0.5 text-gray-700 mb-1.5">
+                {(() => {
+                  const bullets = (Array.isArray(proj.bulletPoints) && proj.bulletPoints.length > 0)
+                    ? proj.bulletPoints
+                    : (Array.isArray(proj.highlights) && proj.highlights.length > 0)
+                      ? proj.highlights
+                      : (Array.isArray(proj.bullet_points) && proj.bullet_points.length > 0)
+                        ? proj.bullet_points
+                        : (Array.isArray(proj.description)
+                            ? proj.description
+                            : (proj.description ? [proj.description] : []));
+                  return bullets.filter(Boolean).map((line, j) => (
+                    <li key={`p-${j}`} className="pl-1">{line}</li>
+                  ));
+                })()}
+              </ul>
               {(proj.techStack || proj.technologies) && (
                 <div className="text-[9.5px] opacity-80">
                   <span className="font-semibold">Technologies:</span> {Array.isArray(proj.techStack || proj.technologies) ? (proj.techStack || proj.technologies).join(', ') : (proj.techStack || proj.technologies)}
